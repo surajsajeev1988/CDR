@@ -1352,7 +1352,8 @@ function bindGrid(p){
       const gc=inp.closest(".cell")||inp.closest(".gsubf");if(gc)gc.classList.toggle("flag",isFlag(g,inp.value));
       const uf=inp.closest(".ufield");if(uf)uf.classList.toggle("hasval",inp.value!=="");
       if(g==="gflex"||g==="gext")refreshGrom(p,tp);
-      updatePills();updateRosterDot();scheduleSave();};});
+      updatePills();updateRosterDot();scheduleSave();};
+    inp.onkeydown=e=>gridNav(e,inp);});
   document.querySelectorAll('#tpBody input[data-gc="t1nv"]').forEach(cb=>{
     cb.onchange=()=>{const tp=cb.dataset.tp;
       p.data[tp].t1nv=cb.checked;
@@ -1383,16 +1384,38 @@ function rerenderGrid(p){
   if(b){b.innerHTML=tpBody(p,activeTP);bindGrid(p);}
   updatePills();updateRosterDot();
 }
+/* spreadsheet-style arrow navigation: segmental grid → global row → T1 slope → SVA */
+function navMatrix(){
+  const rows=[];
+  LEVELS.forEach(l=>{
+    const r=["static","flex","ext"].map(m=>document.querySelector(`#tpBody input[data-meas="${m}"][data-lvl="${l}"]`)).filter(Boolean);
+    if(r.length)rows.push(r);
+  });
+  const g=["galign","gflex","gext"].map(k=>document.querySelector(`#tpBody input[data-g="${k}"]`)).filter(Boolean);
+  if(g.length)rows.push(g);
+  ["t1slope","c7slope","sva"].forEach(k=>{
+    const e=document.querySelector(`#tpBody input[data-g="${k}"]`);
+    if(e&&!e.disabled)rows.push([e]);
+  });
+  return rows;
+}
 function gridNav(e,inp){
-  const order=["static","flex","ext"];
-  const meas=inp.dataset.meas,lvl=inp.dataset.lvl;
-  const col=order.indexOf(meas),row=LEVELS.indexOf(lvl);
-  if(col<0||row<0)return;
-  const at=(m,l)=>document.querySelector('#tpBody input[data-meas="'+m+'"][data-lvl="'+l+'"]');
-  const go=el=>{if(el){e.preventDefault();el.focus();try{el.select();}catch(_){}}};
-  if(e.key==="ArrowUp"){go(at(meas,LEVELS[row-1]));}
-  else if(e.key==="ArrowDown"){go(at(meas,LEVELS[row+1]));}
-  else if(e.key==="Enter"){go(at(meas,LEVELS[row+1])||at(order[col+1],LEVELS[0]));}  // down, then wrap to top of next column
+  const k=e.key;
+  if(k!=="ArrowUp"&&k!=="ArrowDown"&&k!=="ArrowLeft"&&k!=="ArrowRight"&&k!=="Enter")return;
+  // left/right jump cells only while the field is empty — in a filled field they edit the number
+  if((k==="ArrowLeft"||k==="ArrowRight")&&inp.value!=="")return;
+  const rows=navMatrix();
+  let ri=-1,ci=0;
+  rows.forEach((r,i)=>{const j=r.indexOf(inp);if(j>=0){ri=i;ci=j;}});
+  if(ri<0)return;
+  const clamp=r=>Math.min(ci,r.length-1);
+  let t=null;
+  if(k==="ArrowUp")t=rows[ri-1]?rows[ri-1][clamp(rows[ri-1])]:null;
+  else if(k==="ArrowDown"||k==="Enter")t=rows[ri+1]?rows[ri+1][clamp(rows[ri+1])]:null;
+  else if(k==="ArrowLeft")t=rows[ri][ci-1]||(rows[ri-1]?rows[ri-1][rows[ri-1].length-1]:null);
+  else t=rows[ri][ci+1]||(rows[ri+1]?rows[ri+1][0]:null);
+  if(k==="ArrowUp"||k==="ArrowDown"||k==="Enter")e.preventDefault(); // never let ↑/↓ spin the number value
+  if(t){e.preventDefault();t.focus();try{t.select();}catch(_){}}
 }
 function bindNotes(p){document.getElementById("f_notes").oninput=e=>{p.notes=e.target.value;scheduleSave();};}
 
