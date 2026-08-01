@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"Reminder (project CLAUDE.md): end this response by writing a self-contained styled HTML rendering of your final answer to a temp file and sending it to the user — use SendUserFile with display \\\"render\\\" when available, otherwise save it as chat-render.html in the repo root and mention the path.\"}}'"
+          }
+        ]
+      }
+    ]
+  }
+}
