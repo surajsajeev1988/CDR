@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cervical Disc Replacement Radiographic Study</title>
+<style>
+  :root{
+    --bg:#0e1216; --panel:#151b21; --panel2:#1b232b; --raised:#212c35;
+    --border:#2a353f; --border2:#374550;
+    --text:#e8eef4; --muted:#8a99a7; --faint:#5d6b78;
+    --cyan:#4cc9e6; --cyan-dim:#1d3d47;
+    --amber:#f0a93b; --amber-dim:#3a2c12;
+    --green:#46c98b; --green-dim:#163026; --red:#e8645f;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%}
+  button{font-family:inherit;cursor:pointer}
+  input,select{font-family:inherit}
+
+  /* ---- top bar ---- */
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
+    padding:8px 12px;background:linear-gradient(180deg,#11171d,#0e1216);
+    border-bottom:1px solid var(--border)}
+  .brand h1{margin:0;font-size:14px;font-weight:600;letter-spacing:.01em;color:var(--text);white-space:nowrap}
+  .brand h1 .dot{color:var(--cyan);margin-right:7px}
+  .nav{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .nav .counter{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:54px;text-align:center}
+  .iconbtn{width:34px;height:34px;border:1px solid var(--border2);background:var(--panel2);
+    color:var(--text);border-radius:8px;font-size:18px;display:grid;place-items:center;transition:.12s}
+  .iconbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+  .iconbtn:disabled{opacity:.3;cursor:not-allowed}
+  .btn{border:1px solid var(--border2);background:var(--panel2);color:var(--text);
+    border-radius:8px;padding:8px 13px;font-size:12px;font-weight:500;transition:.12s}
+  .btn:hover{border-color:var(--cyan);color:var(--cyan)}
+  .btn.primary{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:600}
+  .btn.primary:hover{filter:brightness(1.08);color:#06222b}
+
+  /* ---- layout ---- */
+  .shell{display:grid;grid-template-columns:76px 1fr;min-height:calc(100vh - 51px)}
+  @media(min-width:680px){.shell{grid-template-columns:152px 1fr}}
+  .roster{border-right:1px solid var(--border);background:var(--panel);
+    padding:8px 5px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;
+    max-height:calc(100vh - 51px);position:sticky;top:51px}
+  .roster h2{font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);margin:2px 4px 6px;font-weight:600}
+  .rosteritem{display:flex;flex-direction:column;gap:1px;padding:6px 6px;border-radius:7px;
+    border:1px solid transparent;transition:.1s;min-width:0}
+  .rosteritem:hover{background:var(--panel2)}
+  .rosteritem.active{background:var(--cyan-dim);border-color:#2f5a66}
+  .ri-top{display:flex;align-items:center;gap:5px;min-width:0}
+  .rosteritem .serial{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--faint);
+    flex:0 0 auto;letter-spacing:0}
+  .rosteritem.active .serial{color:var(--cyan)}
+  .rosteritem .pid{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.02em;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .rosteritem .pmeta{color:var(--muted);font-size:10.5px;font-family:var(--mono);
+    padding-left:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:var(--faint)}
+  .dot.part{background:var(--amber)} .dot.full{background:var(--green)}
+  .dot.red{background:var(--red)} .dot.blue{background:var(--cyan)}
+  .dot.green{background:var(--green);box-shadow:0 0 6px rgba(70,201,139,.7)}
+  .roster .empty{color:var(--faint);font-size:11px;padding:10px 6px;text-align:center;line-height:1.5}
+
+  .main{padding:14px 14px 120px;overflow-y:auto}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 15px;margin-bottom:14px}
+  .card > .label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--cyan);font-weight:600;margin-bottom:12px}
+
+  /* ---- demographics ---- */
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:13px 15px;align-items:start}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field label{font-size:10px;color:var(--muted);letter-spacing:.03em;font-weight:500;text-transform:uppercase}
+  .field .hint{font-size:10px;color:var(--faint);text-transform:none;letter-spacing:0}
+  input[type=text],input[type=number]{
+    background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+    border-radius:8px;padding:9px 10px;font-size:15px;transition:.12s;width:100%}
+  input[type=number]{font-family:var(--mono);text-align:right}
+  input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+  input.caps{text-transform:uppercase}
+
+  /* ---- identity block: Name · IC · Age · Sex on row 1, Op date · Implant on row 2 ---- */
+  .idblock{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 6px;align-items:end;margin-bottom:7px}
+  .idblock .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .idblock .f label{font-size:9.5px;color:var(--muted);letter-spacing:.02em;font-weight:600;
+    text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+  .idblock .f .hint{font-size:8.5px;color:var(--faint);text-transform:none;letter-spacing:0;font-weight:500}
+  .idblock input[type=text],.idblock input[type=number]{padding:8px 7px;font-size:15px;width:100%}
+  .idblock .f.age input{text-align:center}
+  .idblock .sexwrap{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .idblock .sexwrap .tg{padding:8px 2px;font-size:14px;text-align:center}
+  .idblock .f.date{grid-column:span 2}
+  .idblock .f.imp{grid-column:span 2}
+  .idblock .f.imp .isel{padding:9px 26px 9px 10px;font-size:14px;width:100%}
+  .idblock .f.imp #f_impother{margin-top:5px;width:100%}
+  .isel{width:100%;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;
+    color:var(--text);font-size:14px;padding:10px 30px 10px 11px;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%237b8a99' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 11px center}
+  .isel:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+  .isel option{background:#1b232b;color:var(--text)}
+
+  .tg-row{display:flex;flex-wrap:wrap;gap:7px}
+  .tg{font-size:13px;padding:9px 15px;border-radius:8px;border:1px solid var(--border2);
+    background:var(--panel2);color:var(--muted);transition:.1s;font-weight:500}
+  .tg:hover{border-color:var(--border2);color:var(--text)}
+  .tg.on{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:600}
+  [data-fused="yes"].on{background:var(--amber);border-color:var(--amber);color:#2a1c06}
+
+  .chip{font-family:var(--mono);font-size:13px;padding:8px 12px;border-radius:7px;
+    border:1px solid var(--border2);background:var(--panel2);color:var(--muted);transition:.1s}
+  .chip:hover{color:var(--text)}
+  .chip.cdr{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:600}
+  .chip.acdf{background:#bb7d42;border-color:#bb7d42;color:#2a1808;font-weight:600}
+  .chip.acdf:hover{filter:brightness(1.07)}
+  .lvl-legend{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:10.5px;
+    color:var(--faint);font-family:var(--sans);letter-spacing:.02em}
+  .lvl-legend .lk{font-size:12px;line-height:1}
+  .lvl-legend .lk.cdr{color:var(--cyan)} .lvl-legend .lk.acdf{color:#bb7d42}
+  .lvl-hint{margin-top:8px;font-size:11px;color:#c98f5a;font-family:var(--sans);line-height:1.4}
+  .levelcount{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:8px}
+  .levelcount b{color:var(--cyan);font-weight:700}
+  .levelcount .acdfc b{color:#c98f5a}
+  .hidden{display:none}
+
+  /* ---- timepoint pills with completeness glow ---- */
+  .tps{display:flex;gap:6px;margin-bottom:9px}
+  .pill{flex:1;min-width:0;position:relative;padding:9px 4px;border-radius:10px;font-size:13px;font-weight:700;
+    border:1px solid var(--border2);background:var(--panel2);color:var(--muted);transition:.18s;
+    display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.02em}
+  .pill:hover{color:var(--text)}
+  .pill .pc{font-family:var(--mono);font-size:11px;opacity:.85}
+  .pill.complete{color:#cfeefb;border-color:var(--cyan);
+    background:linear-gradient(180deg,rgba(76,201,230,.20),var(--cyan-dim));
+    box-shadow:0 0 0 1px var(--cyan) inset,0 0 17px -2px rgba(76,201,230,.85)}
+  .pill.incomplete{color:#f6cdcb;border-color:var(--red);
+    background:linear-gradient(180deg,rgba(232,100,95,.16),rgba(232,100,95,.05));
+    box-shadow:0 0 0 1px var(--red) inset,0 0 17px -2px rgba(232,100,95,.78)}
+  .pill.active{transform:translateY(-1px)}
+  .pill.active::after{content:"";position:absolute;left:8px;right:8px;bottom:-6px;height:3px;
+    border-radius:3px;background:currentColor;opacity:.9}
+  .legend{font-size:10.5px;color:var(--faint);margin-bottom:15px;font-family:var(--mono)}
+  .legend b.bl{color:var(--cyan)} .legend b.rd{color:var(--red)}
+
+  /* ---- measurement grid ---- */
+  .grid-wrap{display:flex;flex-direction:column;gap:14px}
+  .mgrid{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .mgrid .ghead,.mrow{display:grid;grid-template-columns:46px 1fr 1fr 1fr 1fr}
+  .mgrid .ghead{background:var(--panel2);border-bottom:1px solid var(--border)}
+  .mgrid .ghead div{padding:8px 5px;font-size:8.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);font-weight:700;text-align:center}
+  .mgrid .ghead div:first-child{color:var(--faint)}
+  .mrow{border-bottom:1px solid var(--border)}
+  .mrow:last-child{border-bottom:none}
+  .mrow .lvl{padding:0 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:11px;font-weight:600;color:var(--faint);
+    background:var(--panel);border-right:1px solid var(--border);line-height:1.05;text-align:center}
+  .mrow .lvl.cdr{color:var(--cyan)} .mrow .lvl.fused{color:var(--amber)}
+  .lvl .tag{font-size:7.5px;background:var(--amber-dim);color:var(--amber);
+    padding:1px 3px;border-radius:3px;margin-top:2px;letter-spacing:.04em}
+  .lvl .lvname{font-size:11.5px;font-weight:700;line-height:1.05}
+  .lvl .tpt{font-size:7.5px;letter-spacing:.09em;color:var(--faint);
+    background:var(--panel2);border:1px solid var(--border);border-radius:3px;
+    padding:1px 3px;margin-top:3px;font-weight:700}
+  .cell{position:relative;border-right:1px solid var(--border)}
+  .cell input{background:transparent;border:none;text-align:center;font-family:var(--mono);
+    font-size:13px;padding:12px 2px;width:100%;color:var(--text)}
+  .cell input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--cyan);background:var(--cyan-dim)}
+  .cell.unitcell input{text-align:right;padding-right:11px}
+  .cell .cunit{position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:9px;
+    color:var(--faint);pointer-events:none;display:none;font-family:var(--mono)}
+  .cell.unitcell.hasval .cunit{display:block}
+  .cell.flag input{color:var(--amber)}
+  .cell.flag::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--amber)}
+  /* required-but-empty: red reminder while a timepoint is in progress */
+  .cell.need{box-shadow:inset 0 0 0 1.5px rgba(232,100,95,.7);background:rgba(232,100,95,.07)}
+  .gsubf.need{border-color:var(--red);box-shadow:0 0 0 1px rgba(232,100,95,.45)}
+  .hobtns.need{box-shadow:inset 0 0 0 1.5px rgba(232,100,95,.5);border-radius:8px}
+  /* read-only computed ROM cell */
+  .romcell{position:relative;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);
+    background:rgba(70,201,139,.07)}
+  .romcell.legacy{color:var(--muted);font-weight:600}
+  .romcell.flag{color:var(--amber);background:rgba(240,169,59,.09)}
+  .romcell .rom-empty{color:var(--faint);font-weight:400}
+  .romcell .rtag{position:absolute;top:3px;right:4px;font-size:8px;color:var(--faint);
+    border:1px solid var(--border2);border-radius:3px;padding:0 2px;font-weight:600}
+
+  /* ---- global summary grid (mirrors measurement grid) ---- */
+  .gsec{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel)}
+  .gsec .gtitle{display:flex;align-items:center;gap:9px;padding:9px 12px;flex-wrap:wrap;
+    background:linear-gradient(180deg,var(--panel2),var(--panel));border-bottom:1px solid var(--border)}
+  .gsec .gtitle b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+  .gsec .gtitle .gtp{font-size:10px;color:var(--faint);font-family:var(--mono);
+    border:1px solid var(--border2);border-radius:5px;padding:1px 7px;letter-spacing:.04em}
+  .gsec .mgrid{border:none;border-radius:0}
+  .ggrid .ghead,.ggrid .grow{display:grid}
+  .ggrid.g4 .ghead,.ggrid.g4 .grow{grid-template-columns:46px 1fr 1fr 1fr 1fr}
+  .ggrid .grow .glvl{display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:10px;font-weight:700;color:var(--faint);
+    background:var(--panel);letter-spacing:.02em}
+  .ggrid.g1 .ghead,.ggrid.g1 .grow{grid-template-columns:1fr}
+  /* ASD adjacency layout */
+  .ggrid.gasd .ghead,.ggrid.gasd .grow{grid-template-columns:46px 1fr 120px}
+  .ggrid .grow .glvl.alvl{font-size:10.5px;color:var(--cyan)}
+  .ggrid .grow .apos{display:flex;align-items:center;gap:7px;padding:0 12px;
+    font-size:11px;color:var(--muted);font-family:var(--sans)}
+  .ggrid .grow .apos .ar{font-family:var(--mono);font-weight:800;font-size:13px;color:var(--cyan)}
+  .ggrid .grow .apos .ref{font-family:var(--mono);color:var(--faint)}
+  .grow.asd-skip .glvl.alvl{color:var(--faint)}
+  .grow.asd-skip .apos,.grow.asd-skip .apos .ar{color:var(--faint)}
+  .cell.na{display:flex;align-items:center;justify-content:center;font-size:9px;
+    color:var(--faint);font-family:var(--mono);letter-spacing:.03em}
+  .asd-msg{padding:14px;font-size:11.5px;color:var(--faint);line-height:1.55;font-family:var(--sans)}
+  .cell select{background:transparent;border:none;color:var(--text);font-family:var(--mono);
+    font-size:12.5px;text-align:center;text-align-last:center;width:100%;padding:11px 18px 11px 8px;
+    cursor:pointer;-webkit-appearance:none;appearance:none}
+  .cell select:focus{outline:none;box-shadow:inset 0 0 0 2px var(--cyan);background:var(--cyan-dim)}
+  .cell select option{background:#1b232b;color:var(--text)}
+  .cell.klcell{position:relative}
+  .cell.klcell::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);
+    font-size:9px;color:var(--faint);pointer-events:none}
+  .gsec .gtitle .gclass{font-size:9.5px;color:var(--faint);font-family:var(--sans);letter-spacing:.02em}
+  /* global neutral-alignment sub-fields: T1 slope, C2–C7 SVA — stacked horizontal rows */
+  .gsub{display:flex;flex-direction:column;gap:9px;padding:11px 12px;border-top:1px solid var(--border)}
+  .gsubf{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:var(--panel2);
+    border:1px solid var(--border2);border-radius:9px;padding:8px 11px}
+  .gsubf.flag{border-color:var(--amber)}
+  .gsubf.disabled{opacity:.5}
+  .gsubf > label{font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;margin:0;flex:0 0 auto;min-width:82px}
+  .gsubf .fallback{color:var(--cyan);font-size:8px;border:1px solid var(--cyan-dim);border-radius:3px;padding:0 3px;margin-left:4px;letter-spacing:.04em}
+  .gsubf .ufield{flex:0 0 auto;width:104px}
+  .gsubf input[type=number]{background:var(--panel);border:1px solid var(--border2);width:100%}
+  .gsubf .t1nv{display:flex;align-items:center;gap:6px;margin:0 0 0 auto;font-size:11px;color:var(--muted);
+    text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;flex:0 0 auto}
+  .gsubf .t1nv input{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer;margin:0}
+  /* heterotopic ossification (McAfee) per CDR level */
+  .hospacer{flex:1}
+  .hotgl{font-size:9.5px;font-family:var(--mono);border:1px solid var(--border2);background:var(--panel2);
+    color:var(--faint);border-radius:6px;padding:2px 8px;letter-spacing:.02em}
+  .hotgl.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+  .hogrid{display:flex;flex-direction:column}
+  .horow{display:grid;grid-template-columns:46px 1fr;align-items:center;border-bottom:1px solid var(--border)}
+  .horow:last-child{border-bottom:none}
+  .holvl{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--cyan);text-align:center;
+    padding:9px 3px;border-right:1px solid var(--border);background:var(--panel);align-self:stretch;display:flex;align-items:center;justify-content:center}
+  .hobtns{display:flex;gap:6px;padding:8px 10px;flex-wrap:wrap}
+  .hobtn{min-width:38px;font-family:var(--mono);font-size:13px;font-weight:700;padding:7px 4px;border-radius:7px;
+    border:1px solid var(--border2);background:var(--panel2);color:var(--muted);transition:.1s}
+  .hobtn:hover{color:var(--text)}
+  .hobtn.on{background:var(--cyan);border-color:var(--cyan);color:#06222b}
+  .ggrid .ghead{background:var(--panel2);border-bottom:1px solid var(--border)}
+  .ggrid .ghead div{padding:7px 4px;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;text-align:center}
+  .ggrid .grow > *{border-right:1px solid var(--border)}
+  .ggrid .grow > *:last-child{border-right:none}
+  .ggrid .grow .cell input{text-align:center}
+  .gromcell{position:relative;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:17px;font-weight:700;color:var(--green);
+    background:linear-gradient(180deg,rgba(70,201,139,.14),var(--green-dim))}
+  .gromcell.flag{color:var(--amber);background:rgba(240,169,59,.10)}
+  .gromcell.legacy{color:var(--muted)}
+  .gsec .gcap{font-size:9.5px;color:var(--faint);padding:7px 12px;border-top:1px solid var(--border);
+    font-family:var(--mono);letter-spacing:.01em}
+
+  textarea{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+    border-radius:9px;padding:10px;font-family:var(--sans);font-size:14px;resize:vertical;min-height:54px}
+  textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+
+  /* ---- bottom bar ---- */
+  .actionbar{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;align-items:center;
+    gap:6px;padding:8px 9px;background:linear-gradient(0deg,#11171d,#0e1216f0);
+    border-top:1px solid var(--border);backdrop-filter:blur(6px);flex-wrap:nowrap;overflow-x:auto}
+  .actionbar::-webkit-scrollbar{height:0}
+  .actionbar > *{flex:0 0 auto}
+  .actionbar .btn{padding:7px 9px;font-size:11.5px;white-space:nowrap}
+  .actionbar .iconbtn{width:30px;height:30px;font-size:16px}
+  .savestate{font-size:11px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .savestate .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);transition:background .2s,box-shadow .2s}
+  .savestate.dirty .sdot{background:var(--amber);box-shadow:0 0 7px var(--amber)}
+  .savestate.error{color:var(--red);font-weight:700}
+  .savestate.error .sdot{background:var(--red);box-shadow:0 0 7px var(--red)}
+  .savegrp{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .savegrp .pcount{position:relative;padding-left:8px;font-size:11px}
+  .savegrp .pcount::before{content:"·";position:absolute;left:1px;color:var(--faint)}
+  .spacer{margin-left:auto}
+  .toast{position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--raised);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;
+    font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .blank{display:grid;place-items:center;min-height:55vh;text-align:center;color:var(--faint)}
+  .blank h3{color:var(--muted);font-weight:500;margin:0 0 6px}
+  .file-hidden{display:none}
+
+  /* ---- view switcher ---- */
+  .viewbar{position:sticky;top:51px;z-index:25;display:flex;gap:4px;padding:7px 12px;
+    background:linear-gradient(180deg,#10161c,#0e1216);border-bottom:1px solid var(--border)}
+  .seg{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;
+    padding:8px 4px;border-radius:8px;border:1px solid var(--border2);background:var(--panel2);
+    color:var(--muted);font-size:11.5px;font-weight:600;letter-spacing:.01em;transition:.12s}
+  .seg:hover{color:var(--text);border-color:var(--border2)}
+  .seg.on{background:var(--cyan-dim);border-color:#2f5a66;color:var(--cyan)}
+  .seg .si{font-size:12px;opacity:.85}
+  .shell.full{grid-template-columns:1fr}
+  .shell.full .roster{display:none}
+  .topbar .nav.hide{display:none}
+
+  /* ---- dashboard ---- */
+  .dash{max-width:760px;margin:0 auto}
+  .dash .sech{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+    font-weight:600;margin:2px 0 11px}
+  .metricgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+  .metric{background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:12px 13px}
+  .metric .mv{font-family:var(--mono);font-size:23px;font-weight:700;color:var(--text);line-height:1.1}
+  .metric .mv small{font-size:12px;color:var(--muted);font-weight:500;margin-left:2px}
+  .metric .ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
+  .chartcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 14px 11px;margin-bottom:14px}
+  .chartcard .ct{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px}
+  .chartcard .cs{font-size:10.5px;color:var(--faint);margin-bottom:10px}
+  .chartcard svg{display:block;width:100%;height:auto;overflow:visible}
+  .lgnd{display:flex;flex-wrap:wrap;gap:11px;margin-top:9px;font-size:10.5px;color:var(--muted)}
+  .lgnd span{display:inline-flex;align-items:center;gap:5px}
+  .lgnd i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .caxt{fill:var(--faint);font-size:9px;font-family:var(--mono)}
+  .cvalt{fill:var(--muted);font-size:8.5px;font-family:var(--mono)}
+  .cgl{stroke:var(--border);stroke-width:1}
+  .cbl{stroke:var(--border2);stroke-width:1}
+
+  /* ---- reliability ---- */
+  .rely{max-width:760px;margin:0 auto}
+  .panel-note{background:var(--panel2);border:1px solid var(--border);border-radius:11px;
+    padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px}
+  .panel-note b{color:var(--text);font-weight:600}
+  .rctl{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:14px}
+  .rctl .rf{display:flex;flex-direction:column;gap:5px}
+  .rctl .rf label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  .rctl input[type=number]{width:76px}
+  .stat-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+  .stat-tbl th,.stat-tbl td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+  .stat-tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600}
+  .stat-tbl td.num{font-family:var(--mono);text-align:right;color:var(--text);font-weight:600}
+  .stat-tbl td.np{font-family:var(--mono);text-align:right;color:var(--muted);font-size:11px}
+  .stat-tbl .ghead td{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);
+    font-weight:700;padding-top:13px;border-bottom:1px solid var(--border2)}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.02em}
+  .badge.exc{background:var(--green-dim);color:var(--green)}
+  .badge.good{background:var(--cyan-dim);color:var(--cyan)}
+  .badge.mod{background:var(--amber-dim);color:var(--amber)}
+  .badge.poor{background:rgba(232,100,95,.14);color:var(--red)}
+  .badge.na{background:var(--panel2);color:var(--faint)}
+  .subsetlist{display:flex;flex-direction:column;gap:7px;margin-bottom:6px}
+  .ssitem{border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden}
+  .ssitem .ssh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+  .ssitem .ssh:hover{background:var(--panel2)}
+  .ssitem .ssid{font-family:var(--mono);font-weight:600;font-size:13px;min-width:46px}
+  .ssitem .ssm{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .ssitem .ssr{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .rdot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .rdot.done{background:var(--green);box-shadow:0 0 6px var(--green)}
+  .ssbody{padding:0 12px 12px;border-top:1px solid var(--border);display:none}
+  .ssitem.open .ssbody{display:block}
+  .ssitem.open .ssh .chev{transform:rotate(90deg)}
+  .chev{color:var(--faint);transition:.15s;font-size:13px}
+  .r2grid{display:grid;grid-template-columns:54px 1fr 1fr 1fr 1fr;gap:5px;align-items:center;margin-top:11px}
+  .r2grid .r2h{font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;text-align:center;padding-bottom:2px}
+  .r2grid .r2lv{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .r2grid input{background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+    border-radius:7px;padding:7px 6px;font-size:14px;font-family:var(--mono);text-align:right;width:100%}
+  .r2grid input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-dim)}
+  .r2grid .r2rom{font-family:var(--mono);font-size:13px;text-align:right;color:var(--green);padding-right:4px}
+  .r2sub{font-size:9px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin:14px 0 3px}
+  .r2tphint{font-size:10.5px;color:var(--faint);margin:2px 0 8px;line-height:1.4}
+  .r2tphint b{font-weight:700}
+  .r2flex{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .r2f{display:flex;flex-direction:column;gap:4px;width:104px}
+  .r2f label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .r2f input{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:7px;
+    padding:7px 8px;font-size:14px;font-family:var(--mono);text-align:right;width:100%}
+  .r2f input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-dim)}
+  .r2sel{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:7px;
+    padding:7px 8px;font-size:13px;width:100%}
+  .r2row{display:flex;align-items:center;gap:9px;margin:7px 0}
+  .r2row .r2lab{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:62px}
+  .interp{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px;
+    padding:11px 13px;background:var(--panel2);border:1px solid var(--border);border-radius:10px}
+  .interp b{color:var(--text)}
+
+  /* ---- lock + delete ---- */
+  .cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .cardhead .label{margin-bottom:0}
+  .pserial{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--cyan);
+    background:var(--cyan-dim);border:1px solid #2f5a66;border-radius:5px;padding:1px 6px;margin-left:7px;letter-spacing:.02em}
+  .chead-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .btn.danger{border-color:#5a3030;color:var(--red);background:transparent}
+  .btn.danger:hover{border-color:var(--red);color:var(--red);background:rgba(232,100,95,.08)}
+  .btn.danger.sm{padding:6px 11px;font-size:12px}
+  .lockwrap{display:flex;align-items:center}
+  .lockbtn{display:inline-flex;align-items:center;gap:7px}
+  .lockbtn span{font-size:13px}
+  .lockbtn.locked{border-color:var(--amber);color:var(--amber);background:var(--amber-dim);font-weight:600}
+  .lockbtn.locked:hover{filter:brightness(1.1);color:var(--amber)}
+  .lockbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(240,169,59,.10);
+    border:1px solid var(--amber-dim);color:var(--amber);border-radius:11px;padding:11px 13px;
+    margin-bottom:14px;font-size:12.5px;font-weight:600}
+  .lockbanner .btn{margin-left:auto;color:var(--amber);border-color:var(--amber)}
+  .lockbanner .btn:hover{background:rgba(240,169,59,.14)}
+  .main.locked input:disabled,.main.locked select:disabled,.main.locked textarea:disabled{
+    opacity:.7;cursor:not-allowed;-webkit-text-fill-color:var(--text);color:var(--text)}
+  .main.locked button:disabled{opacity:.45;cursor:not-allowed}
+  .main.locked .pill{opacity:1;cursor:pointer}
+
+  /* ---- unit suffix inside T1 / SVA / C7 fields ---- */
+  .ufield{position:relative}
+  .ufield input[type=number]{text-align:right;padding-right:28px}
+  .ufield .usuf{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;
+    color:var(--faint);pointer-events:none;display:none;font-family:var(--mono)}
+  .ufield.hasval .usuf{display:block}
+
+  /* ---- hybrid construct badge ---- */
+  .hybadge{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--amber);
+    background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;padding:3px 9px;white-space:nowrap}
+
+  /* ---- Excel / export preview ---- */
+  .xls{max-width:100%}
+  .xlsbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .xlsbar .ct{font-size:13px;font-weight:600;color:var(--text)}
+  .xlsbar .cs{font-size:11px;color:var(--faint);margin-top:2px;max-width:540px}
+  .xlsbtns{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .fsbar{background:var(--panel2);border:1px solid var(--border2);border-radius:11px;padding:11px 13px;margin-bottom:13px}
+  .fsrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+  .fsrow b{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+  .fsstat{font-size:11.5px;font-family:var(--mono)}
+  .fsstat.on{color:var(--green)} .fsstat.idle{color:var(--amber)} .fsstat.off{color:var(--faint)}
+  .fsstat.err{color:var(--red)}
+  .fsmini-sync{display:inline-block;color:var(--amber);font-size:13px}
+  .fsmini-warn{display:inline-block;color:var(--amber);font-size:13px}
+  .fsmini-err{display:inline-block;color:var(--red);font-size:13px}
+  .cldform{display:flex;gap:7px;flex-wrap:wrap}
+  .cldform input{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--border2);color:var(--text);
+    border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:11.5px}
+  .cldform input#cldTok{flex:0 0 130px;min-width:110px}
+  .fsbtns{display:flex;gap:7px;flex-wrap:wrap}
+  .fsmini{display:inline-flex;align-items:center}
+  .fsmini-on{display:inline-block;color:var(--green);font-size:13px;text-shadow:0 0 6px rgba(70,201,139,.6)}
+  @keyframes fsPulse{0%{transform:scale(1)}30%{transform:scale(1.5);text-shadow:0 0 13px rgba(70,201,139,1)}100%{transform:scale(1);text-shadow:0 0 6px rgba(70,201,139,.6)}}
+  .fsmini-on.pulse{animation:fsPulse .5s ease-out}
+  @media (prefers-reduced-motion:reduce){.fsmini-on.pulse{animation:none}}
+  .linkremind{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 16px;background:var(--amber-dim);border-bottom:1px solid rgba(240,169,59,.45)}
+  .linkremind .lrico{color:var(--amber);font-size:16px;line-height:1}
+  .linkremind .lrmsg{flex:1;min-width:210px;font-size:12.5px;line-height:1.45;color:var(--text)}
+  .linkremind .lrmsg b{color:var(--amber);font-weight:700}
+  .linkremind code{font-family:var(--mono);font-size:11.5px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;color:var(--text)}
+  .linkremind .lrbtns{display:flex;gap:7px;flex-shrink:0}
+  .xlswrap{overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:calc(100vh - 230px)}
+  .xlstbl{border-collapse:collapse;font-family:var(--mono);font-size:11px;white-space:nowrap}
+  .xlstbl th,.xlstbl td{border:1px solid var(--border);padding:2px 4px;text-align:right}
+  .xlstbl thead th{position:sticky;top:0;background:var(--panel2);color:var(--muted);z-index:2;
+    font-size:7.5px;text-transform:uppercase;letter-spacing:0;text-align:center;font-weight:700;
+    white-space:normal;line-height:1.05;vertical-align:bottom}
+  .xlstbl tbody tr:nth-child(even){background:rgba(255,255,255,.022)}
+  .xlstbl tbody tr:hover{background:var(--cyan-dim)}
+  .xlstbl tbody td:first-child,.xlstbl thead th:first-child{position:sticky;left:0;background:var(--panel);
+    text-align:center;color:var(--faint);z-index:1}
+  .xlstbl thead th:first-child{z-index:3}
+  .xlstbl tbody td.miss{color:var(--faint)}
+
+  /* ---- interaction polish: keyboard focus rings + tactile press ---- */
+  .btn:focus-visible,.iconbtn:focus-visible,.seg:focus-visible,.pill:focus-visible,.chip:focus-visible,
+  .tg:focus-visible,.hobtn:focus-visible,.hotgl:focus-visible,.lockbtn:focus-visible{
+    outline:2px solid var(--cyan);outline-offset:2px}
+  .btn:active,.iconbtn:active,.seg:active,.chip:active,.tg:active,.hobtn:active{transform:translateY(1px)}
+
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><h1><span class="dot">◆</span>CDR Study</h1></div>
+  <div class="nav" id="entryNav">
+    <button class="iconbtn" id="prevBtn" title="Previous">‹</button>
+    <span class="counter" id="counter">— / —</span>
+    <button class="iconbtn" id="nextBtn" title="Next">›</button>
+    <button class="btn primary" id="newBtn">+ New</button>
+  </div>
+</div>
+
+<div class="linkremind" id="linkRemind" style="display:none"></div>
+
+<div class="viewbar">
+  <button class="seg on" data-view="entry"><span class="si">✎</span>Data</button>
+  <button class="seg" data-view="dash"><span class="si">▤</span>Analysis</button>
+  <button class="seg" data-view="rely"><span class="si">◷</span>Reliability</button>
+  <button class="seg" data-view="excel"><span class="si">▦</span>Export</button>
+</div>
+
+<div class="shell" id="shell">
+  <aside class="roster"><h2>Patients</h2><div id="rosterList"></div></aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div class="actionbar">
+  <button class="iconbtn" id="undoBtn" title="Undo" disabled>↶</button>
+  <button class="iconbtn" id="redoBtn" title="Redo" disabled>↷</button>
+  <div class="savegrp">
+    <div class="savestate" id="saveState"><span class="sdot"></span><span id="saveText">Saved</span></div>
+    <span class="counter pcount" id="totalCount" style="color:var(--muted)"></span>
+    <span class="fsmini" id="fsMini"></span><span class="fsmini" id="cloudMini"></span>
+  </div>
+  <div class="lockwrap" id="lockWrap"></div>
+  <div class="spacer"></div>
+  <input type="file" id="fileInput" class="file-hidden" accept=".json">
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const LEVELS=["C2/3","C3/4","C4/5","C5/6","C6/7","C7/T1"];
+const TPS=[
+  {key:"PreOp",label:"Pre-op",short:"PO"},{key:"2w",label:"2 wk",short:"2W"},{key:"6m",label:"6 mo",short:"6M"},
+  {key:"1y",label:"1 yr",short:"1Y"},{key:"2y",label:"2 yr",short:"2Y"}];
+const IMPLANTS=["ProDisc","Mobi-C","Prestige"];
+const STORE="cdr_study_v3";
+const OLD="cdr_study_v2";
+const SEED_VERSION=2;   // bump when the sample generator changes -> outdated sample data auto-refreshes
+const RESET_VERSION=3;  // bump to force a one-time wipe to an empty study (demo data removed)
+const RANGE={static:[-30,40],flex:[-30,25],ext:[-15,40],galign:[-40,60],gflex:[-60,40],gext:[-20,70],asd:[0,4],t1slope:[-20,60],sva:[-30,90],c7slope:[-20,60]};
+const ROM_FLAG={min:-2,max:30};   // segmental ROM sanity
+const GROM_FLAG={min:0,max:90};   // global ROM sanity
+// McAfee HO grading (token + description); HO is a post-op finding only
+const HO_GRADES=[["0","None"],["I","HO present, not within the disc space"],["II","HO in the disc space; motion preserved"],["III","Bridging ossification; motion still present"],["IV","Complete bridging / ankylosis; no motion"]];
+function isPostop(tk){return tk!=="PreOp";}
+
+let state={patients:[],current:-1,requireHO:true};
+let activeTP="PreOp";
+let view="entry";
+let dirty=false;
+let saveFailed=false;
+
+/* ---- model ---- */
+function blankTP(){
+  const o={static:{},flex:{},ext:{},romLegacy:{},galign:"",gflex:"",gext:"",gromLegacy:"",asd:{},asdLegacy:"",ho:{},t1slope:"",t1nv:false,sva:"",c7slope:""};
+  LEVELS.forEach(l=>{o.static[l]="";o.flex[l]="";o.ext[l]="";o.romLegacy[l]="";});
+  return o;
+}
+function blankPatient(){
+  const d={}; TPS.forEach(t=>d[t.key]=blankTP());
+  return {initials:"",ic4:"",opdate:"",sex:"",age:"",levels:[],implant:"ProDisc",
+          fused:null,fusedLevels:[],isize:{},data:d,notes:"",locked:false};
+}
+function migrate(p){
+  if(p.initials===undefined)p.initials="";
+  if(p.locked===undefined)p.locked=false;
+  if(p.ic4===undefined)p.ic4=p.id||p.ic||"";
+  if(p.opdate===undefined)p.opdate="";
+  if(p.fused===undefined)p.fused=null;
+  if(!p.fusedLevels)p.fusedLevels=[];
+  if(p.implant===undefined||p.implant===null)p.implant="";
+  if(!p.levels)p.levels=[];
+  if(!p.isize||typeof p.isize!=="object")p.isize={};
+  if(!p.data)p.data={};
+  TPS.forEach(t=>{
+    let d=p.data[t.key];
+    if(!d){p.data[t.key]=blankTP();return;}
+    ["static","flex","ext","romLegacy"].forEach(k=>{if(!d[k])d[k]={};});
+    LEVELS.forEach(l=>{
+      ["static","flex","ext","romLegacy"].forEach(k=>{if(d[k][l]===undefined)d[k][l]="";});
+      // old model stored ROM directly under 'segrom' -> keep as importable fallback
+      if(d.segrom&&d.segrom[l]!==undefined&&d.segrom[l]!==""&&d.romLegacy[l]==="")d.romLegacy[l]=d.segrom[l];
+    });
+    if(d.galign===undefined)d.galign="";
+    if(d.gflex===undefined)d.gflex="";
+    if(d.gext===undefined)d.gext="";
+    if(d.gromLegacy===undefined)d.gromLegacy=(d.grom!==undefined&&d.grom!=="")?d.grom:"";
+    if(typeof d.asd==="string"){d.asdLegacy=d.asd;d.asd={};}
+    if(d.asd===undefined||d.asd===null||typeof d.asd!=="object")d.asd={};
+    if(d.asdLegacy===undefined)d.asdLegacy="";
+    if(d.ho===undefined||d.ho===null||typeof d.ho!=="object")d.ho={};
+    if(d.t1slope===undefined)d.t1slope="";
+    if(d.t1nv===undefined)d.t1nv=false;
+    if(d.sva===undefined)d.sva="";
+    if(d.c7slope===undefined)d.c7slope="";
+    delete d.segrom; delete d.grom;
+  });
+  return p;
+}
+
+/* ---- sample data (deterministic generator, ~97 fully-complete fake patients) ---- */
+function buildSampleData(){
+  const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";let s=20260614;
+  const rnd=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const ri=(a,b)=>Math.floor(rnd()*(b-a+1))+a,rf=(a,b,d=1)=>+(rnd()*(b-a)+a).toFixed(d),pick=a=>a[Math.floor(rnd()*a.length)],chance=q=>rnd()<q;
+  const wpick=pairs=>{let r=rnd(),acc=0;for(const pr of pairs){acc+=pr[1];if(r<acc)return pr[0];}return pairs[pairs.length-1][0];};
+  const HO=["0","I","II","III","IV"];
+  const levelPatterns=[["C5/6"],["C5/6"],["C5/6"],["C6/7"],["C6/7"],["C4/5"],["C5/6","C6/7"],["C4/5","C5/6"],["C6/7","C7/T1"],["C4/5","C5/6","C6/7"],["C3/4","C4/5"]];
+  const patients=[];
+  for(let i=0;i<97;i++){
+    const levels=pick(levelPatterns).slice();
+    let fused=false,fusedLevels=[];
+    if(levels.length>=2&&chance(0.28)){fused=true;fusedLevels=[pick(levels)];}
+    const cdr=levels.filter(l=>!fusedLevels.includes(l));
+    const isize={};cdr.forEach(l=>{const li=LEVELS.indexOf(l);const _ih=Math.min(8,5+(li>=3?1:0)+ri(0,1));isize[l]={h:String(_ih),disc:String(Math.max(3,_ih-ri(0,3)))};});
+    const idxs=levels.map(l=>LEVELS.indexOf(l)).sort((a,b)=>a-b);
+    const upper=idxs[0]-1>=0?LEVELS[idxs[0]-1]:null,lower=idxs[idxs.length-1]+1<LEVELS.length?LEVELS[idxs[idxs.length-1]+1]:null;
+    const romScale={"C2/3":0.7,"C3/4":0.9,"C4/5":1.0,"C5/6":1.1,"C6/7":0.95,"C7/T1":0.6};
+    const base={};LEVELS.forEach(l=>{const st=rf(-2,6),sc=romScale[l]||1;if(fusedLevels.includes(l))base[l]={st,fl:+(st-rf(0.5,1.5)).toFixed(1),ex:+(st+rf(0.5,1.5)).toFixed(1)};else base[l]={st,fl:+(st-rf(4,9)*sc).toFixed(1),ex:+(st+rf(3,8)*sc).toFixed(1)};});
+    const gAl=rf(6,24),gFl=+(gAl-rf(15,28)).toFixed(1),gEx=+(gAl+rf(12,24)).toFixed(1),svaB=rf(10,32),t1B=rf(18,34);
+    const asdInfo={};[upper,lower].forEach(al=>{if(al){const b0=chance(0.7)?0:1,mx=Math.max(b0,wpick([[0,.25],[1,.3],[2,.25],[3,.15],[4,.05]]));asdInfo[al]={b0,mx};}});
+    const hoInfo={};cdr.forEach(l=>{hoInfo[l]=wpick([[0,.35],[1,.3],[2,.2],[3,.1],[4,.05]]);});
+    const data={};
+    // Trajectory across Pre · 2w · 6m · 1y · 2y — a "successful CDR" arc:
+    // operated-level motion dips just after surgery, then recovers slightly above
+    // baseline; whole-cervical motion follows more gently; SVA improves (falls);
+    // T1 slope stays ~stable; cervical lordosis is gently restored.
+    const romF =[1.00,0.85,1.06,1.12,1.15]; // operated-level flexion–extension motion
+    const gRomF=[1.00,0.90,1.04,1.07,1.09]; // global C2–C7 motion
+    const svaOff=[0,-1.4,-3.2,-4.4,-5.2];   // SVA shift (mm) — negative = improving
+    const t1Off =[0,0.1,0.3,0.4,0.5];       // T1 slope drift (°) — ~stable
+    const lordOff=[0,1.0,2.2,2.8,3.2];      // cervical lordosis gain (°)
+    TPS.forEach((t,ti)=>{
+      const d=blankTP();
+      const mF=romF[ti],gF=gRomF[ti];
+      LEVELS.forEach(l=>{const isF=fusedLevels.includes(l);const jj=isF?0.4:0.9;const st=base[l].st;
+        d.static[l]=(st+rf(-1.0,1.0)).toFixed(1);
+        if(isF){d.flex[l]=(base[l].fl+rf(-jj,jj)).toFixed(1);d.ext[l]=(base[l].ex+rf(-jj,jj)).toFixed(1);}
+        else{const fAmp=st-base[l].fl,eAmp=base[l].ex-st;const comp=(fused&&(l===upper||l===lower))?(1+0.08*ti):1;d.flex[l]=(st-fAmp*mF*comp+rf(-jj,jj)).toFixed(1);d.ext[l]=(st+eAmp*mF*comp+rf(-jj,jj)).toFixed(1);}});
+      const gAlt=gAl+lordOff[ti],gfAmp=gAl-gFl,geAmp=gEx-gAl;
+      d.galign=(gAlt+rf(-1.5,1.5)).toFixed(1);d.gflex=(gAlt-gfAmp*gF+rf(-2,2)).toFixed(1);d.gext=(gAlt+geAmp*gF+rf(-2,2)).toFixed(1);
+      d.sva=Math.max(3,svaB+svaOff[ti]+rf(-1.5,1.5)).toFixed(1);
+      if(chance(0.08)){d.t1nv=true;d.c7slope=(t1B-rf(1,4)).toFixed(1);}else{d.t1slope=(t1B+t1Off[ti]+rf(-1.2,1.2)).toFixed(1);}
+      [upper,lower].forEach(al=>{if(al&&asdInfo[al]){const inf=asdInfo[al];const g=Math.round(inf.b0+(inf.mx-inf.b0)*ti/4);d.asd[al]=String(Math.max(0,Math.min(4,g)));}});
+      if(ti>=1){cdr.forEach(l=>{const idx=Math.round(hoInfo[l]*(ti-1)/3);d.ho[l]=HO[Math.max(0,Math.min(4,idx))];});}
+      data[t.key]=d;
+    });
+    let inits="";const n=ri(2,3);for(let k=0;k<n;k++)inits+=A[ri(0,25)];
+    const ic=""+ri(0,9)+ri(0,9)+ri(0,9)+A[ri(0,25)];
+    const dd=String(ri(1,28)).padStart(2,"0"),mm=String(ri(1,12)).padStart(2,"0"),yy=String(ri(18,24)).padStart(2,"0");
+    patients.push({initials:inits,ic4:ic,opdate:dd+mm+yy,sex:chance(0.55)?"M":"F",age:String(ri(34,73)),levels,implant:chance(0.92)?wpick([["ProDisc",.5],["Mobi-C",.3],["Prestige",.2]]):pick(["Bryan","Discover","Secure-C","M6-C","Baguera-C"]),fused,fusedLevels,isize,data,notes:"",locked:false});
+  }
+  return patients;
+}
+
+/* ---- ROM ---- */
+function romOf(d,l){
+  const f=d.flex[l],e=d.ext[l];
+  const hasF=(f!==""&&f!=null),hasE=(e!==""&&e!=null);
+  if(hasF&&hasE){const fn=parseFloat(f),en=parseFloat(e);
+    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(1),src:"calc"};}
+  if(d.romLegacy&&d.romLegacy[l]!==""&&d.romLegacy[l]!=null){
+    const v=parseFloat(d.romLegacy[l]);return{val:isNaN(v)?d.romLegacy[l]:v,src:"legacy"};}
+  return{val:"",src:"none"};
+}
+function gromOf(d){
+  const f=d.gflex,e=d.gext;
+  if(f!==""&&e!==""){const fn=parseFloat(f),en=parseFloat(e);
+    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(1),src:"calc"};}
+  if(d.gromLegacy!==""&&d.gromLegacy!=null){const v=parseFloat(d.gromLegacy);
+    return{val:isNaN(v)?d.gromLegacy:v,src:"legacy"};}
+  return{val:"",src:"none"};
+}
+
+/* ---- persistence ---- */
+function persist(){
+  let ok=true;
+  try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){ok=false;}
+  if(ok)setSaved();else markSaveError();
+  if(!applyingHistory)pushHistory();
+  if(fileLinked)fileSave();
+  if(cloud.on&&!cloudSuppress)cloudSchedule();
+}
+
+/* ---- undo / redo: in-memory history of the patient data (resets on reload; data itself persists) ---- */
+let histCurrent=null, undoStack=[], redoStack=[], applyingHistory=false;
+function snapState(){return JSON.stringify(state.patients);}
+function pushHistory(){
+  const s=snapState();
+  if(s===histCurrent)return;
+  if(histCurrent!==null){undoStack.push(histCurrent); if(undoStack.length>40)undoStack.shift();}
+  histCurrent=s; redoStack=[]; updateUndoBtns();
+}
+function applySnap(s){
+  applyingHistory=true;
+  try{
+    state.patients=JSON.parse(s);
+    if(state.current>=state.patients.length)state.current=state.patients.length-1;
+    if(state.current<0&&state.patients.length)state.current=0;
+    persist();
+  }finally{applyingHistory=false;}
+  renderAll();
+}
+function undo(){ if(!undoStack.length)return; redoStack.push(histCurrent); histCurrent=undoStack.pop(); applySnap(histCurrent); updateUndoBtns(); toast("Undo"); }
+function redo(){ if(!redoStack.length)return; undoStack.push(histCurrent); histCurrent=redoStack.pop(); applySnap(histCurrent); updateUndoBtns(); toast("Redo"); }
+function updateUndoBtns(){ const u=document.getElementById("undoBtn"),r=document.getElementById("redoBtn"); if(u)u.disabled=!undoStack.length; if(r)r.disabled=!redoStack.length; }
+function restore(){
+  let loaded=false;
+  try{
+    let s=localStorage.getItem(STORE);
+    if(!s){ // one-time migration from old key
+      const old=localStorage.getItem(OLD);
+      if(old){try{localStorage.setItem(OLD+"_backup",old);}catch(e){} s=old;}
+    }
+    if(s){state=JSON.parse(s);if(!state.patients)state.patients=[];
+      state.patients=state.patients.map(migrate);loaded=true;}
+  }catch(e){}
+  if(!state||typeof state!=="object")state={};
+  if(!Array.isArray(state.patients))state.patients=[];
+  if(state.requireHO===undefined)state.requireHO=true;
+  // one-time purge: clear the built-in demo cohort so the study starts empty, and never re-seed
+  if(state.resetGen!==RESET_VERSION){
+    if(loaded&&state.patients.length){try{localStorage.setItem(STORE+"_preseed",JSON.stringify(state));}catch(e){}} // keep a recovery copy of whatever was there
+    state.patients=[];
+    state.current=-1;
+    state.resetGen=RESET_VERSION;
+    try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}
+  }
+  if(typeof state.current!=="number")state.current=-1;
+  if(state.current>=state.patients.length)state.current=state.patients.length-1;
+  if(state.current<0&&state.patients.length)state.current=0;
+}
+function markDirty(){dirty=true;const e=document.getElementById("saveState");
+  e.classList.add("dirty");document.getElementById("saveText").textContent="Saving…";}
+function setSaved(){dirty=false;saveFailed=false;const e=document.getElementById("saveState");
+  e.classList.remove("dirty","error");document.getElementById("saveText").textContent="Saved";}
+// localStorage write failed (quota exceeded / private mode): never show a false "Saved"
+function markSaveError(){
+  const firstTime=!saveFailed;
+  saveFailed=true;dirty=true;
+  const e=document.getElementById("saveState");
+  if(e){e.classList.add("dirty","error");const t=document.getElementById("saveText");if(t)t.textContent="Not saved";}
+  if(firstTime)toast(fileLinked
+    ? "⚠ Browser storage is full — but your linked file is still being saved to disk."
+    : "⚠ Couldn’t save to this browser (storage full / private mode). Link a file in Export to keep your data safe.");
+}
+let saveTimer=null;
+function scheduleSave(){markDirty();clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{persist();renderRoster();},400);}
+
+/* ---- completeness ---- */
+function isFused(p,l){return p.fused&&p.fusedLevels.includes(l);}
+// adjacent segments = level immediately above topmost operated, and below bottommost operated
+function adjacentLevels(p){
+  if(!p||!p.levels||!p.levels.length)return{upper:null,lower:null,top:null,bot:null};
+  const idxs=p.levels.map(l=>LEVELS.indexOf(l)).filter(i=>i>=0).sort((a,b)=>a-b);
+  const ti=idxs[0],bi=idxs[idxs.length-1];
+  return{
+    top:LEVELS[ti],bot:LEVELS[bi],
+    upper:ti-1>=0?LEVELS[ti-1]:null,
+    lower:bi+1<LEVELS.length?LEVELS[bi+1]:null
+  };
+}
+function asdVal(d,l){return (d.asd&&d.asd[l]!=null)?d.asd[l]:"";}
+function hoVal(d,l){return (d.ho&&d.ho[l]!=null)?d.ho[l]:"";}
+function anyEntered(p,tk){const d=p.data[tk];let a=false;
+  LEVELS.forEach(l=>{if(d.static[l]!==""||d.flex[l]!==""||d.ext[l]!=="")a=true;});
+  if(d.galign!==""||d.gflex!==""||d.gext!==""||d.t1slope!==""||d.sva!==""||d.c7slope!=="")a=true;
+  if(d.asd&&Object.keys(d.asd).some(k=>d.asd[k]!==""&&d.asd[k]!=null))a=true;
+  if(d.ho&&Object.keys(d.ho).some(k=>d.ho[k]!==""&&d.ho[k]!=null))a=true;
+  if(d.asdLegacy&&d.asdLegacy!=="")a=true;
+  return a;}
+function tpStatus(p,tk){
+  const d=p.data[tk];
+  if(!anyEntered(p,tk))return"empty";
+  if(!p.levels.length)return"part";           // not "complete" until levels are chosen
+  let need=0,have=0;
+  p.levels.forEach(l=>{
+    need++; if(d.static[l]!=="")have++;        // Static: every operated level
+    if(!isFused(p,l)){                         // Flex/Ext: CDR (non-fused) levels only
+      need++; if(d.flex[l]!=="")have++;
+      need++; if(d.ext[l]!=="")have++;
+    }
+  });
+  ["galign","gflex","gext"].forEach(g=>{need++; if(d[g]!=="")have++;});
+  need++; if(d.sva!=="")have++;                          // C2–C7 SVA: required every timepoint
+  if(!d.t1nv){need++; if(d.t1slope!=="")have++;}         // T1 slope: required unless 'T1 not visible'
+  const adj=adjacentLevels(p);                  // ASD: each adjacent segment that exists
+  [adj.upper,adj.lower].forEach(al=>{if(al){need++; if(asdVal(d,al)!=="")have++;}});
+  if(state.requireHO!==false && isPostop(tk)){          // HO: each CDR level at post-op timepoints
+    p.levels.forEach(l=>{if(!isFused(p,l)){need++; if(hoVal(d,l)!=="")have++;}});
+  }
+  return have>=need?"full":"part";
+}
+function patientStatus(p){
+  if(!p)return"empty";let full=0,any=false;
+  TPS.forEach(t=>{const s=tpStatus(p,t.key);if(s!=="empty")any=true;if(s==="full")full++;});
+  if(!any)return"empty";return full===TPS.length?"full":"part";
+}
+
+/* roster status dot: red incomplete · blue complete · green locked (confirmed) */
+function rosterDot(p){if(p&&p.locked)return "green";return patientStatus(p)==="full"?"blue":"red";}
+function isHybrid(p){return !!(p&&p.fused&&p.fusedLevels&&p.fusedLevels.filter(l=>p.levels.includes(l)).length);}
+
+/* ---- roster ---- */
+function renderRoster(){
+  const el=document.getElementById("rosterList");
+  if(!state.patients.length){el.innerHTML='<div class="empty">No patients yet.<br>Tap “+ New”.</div>';return;}
+  el.innerHTML="";
+  state.patients.forEach((p,i)=>{
+    const meta=[esc(p.age||""),p.sex].filter(Boolean).join(" / ");
+    const div=document.createElement("div");
+    div.className="rosteritem"+(i===state.current?" active":"");
+    div.innerHTML=`<div class="ri-top"><span class="dot ${rosterDot(p)}"></span>
+      <span class="serial">${i+1}</span>
+      <span class="pid">${esc(p.initials)||"····"}</span></div>
+      <div class="pmeta">${meta||"&nbsp;"}</div>`;
+    div.onclick=()=>{state.current=i;activeTP="PreOp";persist();renderAll();};
+    el.appendChild(div);
+  });
+}
+// update only the active row (used on per-keystroke demographic edits) — avoids rebuilding the whole roster
+function refreshActiveRosterItem(){
+  if(state.current<0)return;const p=state.patients[state.current];
+  const item=document.querySelector(".rosteritem.active");if(!item)return;
+  const pid=item.querySelector(".pid");if(pid)pid.textContent=p.initials||"····";
+  const pm=item.querySelector(".pmeta");if(pm)pm.textContent=[p.age||"",p.sex].filter(Boolean).join(" / ")||"\u00a0";
+  const dot=item.querySelector(".dot");if(dot)dot.className="dot "+rosterDot(p);
+}
+function renderCounters(){
+  const n=state.patients.length;
+  document.getElementById("counter").textContent=n?`${state.current+1} / ${n}`:"— / —";
+  document.getElementById("totalCount").textContent=n?`${n} patient${n>1?"s":""}`:"";
+  document.getElementById("prevBtn").disabled=state.current<=0;
+  document.getElementById("nextBtn").disabled=state.current>=n-1;
+}
+function renderAll(){
+  renderCounters();
+  const shell=document.getElementById("shell"), nav=document.getElementById("entryNav");
+  document.querySelectorAll(".seg").forEach(b=>b.classList.toggle("on",b.dataset.view===view));
+  const full=(view!=="entry");
+  shell.classList.toggle("full",full);
+  nav.classList.toggle("hide",full);
+  if(view==="entry"){renderRoster();renderMain();}
+  else if(view==="dash"){renderDashboard();}
+  else if(view==="rely"){renderReliability();}
+  else if(view==="excel"){renderExcel();}
+  renderLockBar();
+}
+
+/* ---- main ---- */
+function renderMain(){
+  const m=document.getElementById("main");
+  if(state.current<0||!state.patients[state.current]){
+    m.innerHTML=`<div class="blank"><div><h3>No patient selected</h3>
+      Tap “+ New” to begin entering measurements.</div></div>`;return;}
+  const p=state.patients[state.current];
+  const banner=p.locked?`<div class="lockbanner"><span>🔒 This record is locked — its data can’t be changed.</span>
+    <button class="btn" id="unlockInline" data-nolock>Unlock to edit</button></div>`:"";
+  m.innerHTML=banner+demoCard(p)+measureCard(p)+notesCard(p);
+  bindDemo(p);bindPills(p);bindGrid(p);bindNotes(p);
+  const ui=document.getElementById("unlockInline");if(ui)ui.onclick=toggleLock;
+  const gb=document.getElementById("measGuideBtn");if(gb)gb.onclick=showGuide;
+  applyLock(p);
+}
+
+/* ---- per-patient lock + delete ---- */
+function applyLock(p){
+  const m=document.getElementById("main");if(!m)return;
+  m.classList.toggle("locked",!!p.locked);
+  if(!p.locked)return;
+  m.querySelectorAll("input,select,textarea,button").forEach(c=>{
+    if(c.classList.contains("pill"))return;       // keep timepoint navigation usable
+    if(c.hasAttribute("data-nolock"))return;      // keep Delete / inline Unlock usable
+    c.disabled=true;});
+}
+function lockBody(){                                // re-disable fields after a timepoint re-render
+  document.querySelectorAll("#tpBody input,#tpBody select,#tpBody button,#tpBody textarea").forEach(c=>c.disabled=true);
+}
+function renderLockBar(){
+  const w=document.getElementById("lockWrap");if(!w)return;
+  const ok=view==="entry"&&state.current>=0&&state.patients[state.current];
+  if(!ok){w.innerHTML="";return;}
+  const p=state.patients[state.current];
+  w.innerHTML=p.locked
+    ? `<button class="btn lockbtn locked" id="lockToggle"><span>🔒</span>Saved &amp; locked — Unlock to edit</button>`
+    : `<button class="btn lockbtn" id="lockToggle"><span>🔓</span>Save</button>`;
+  document.getElementById("lockToggle").onclick=toggleLock;
+}
+function toggleLock(){
+  const p=state.patients[state.current];if(!p)return;
+  if(p.locked){
+    if(confirm("This record is locked.\n\nUnlock it to make changes?")){
+      p.locked=false;persist();renderAll();toast("Record unlocked — you can edit");}
+  }else{
+    if(confirm(`Save ${p.initials||"this patient"}?\n\nThe record will be locked read-only (your entries are already auto-saved). You’ll be asked to unlock before any further change.`)){
+      p.locked=true;persist();renderAll();toast("Saved & locked");}
+  }
+}
+function deletePatient(){
+  const di=state.current,p=state.patients[di];if(!p)return;
+  const name=p.initials||"this patient";
+  if(!confirm(`Delete ${name}?\n\nThis permanently removes the patient and all their measurements.`))return;
+  if(!confirm(`Are you absolutely sure?\n\nThis cannot be undone.`))return;
+  state.patients.splice(di,1);
+  // keep reliability subset/reads aligned to the shifted indices
+  if(state.reliability&&Array.isArray(state.reliability.subset)){
+    state.reliability.subset=state.reliability.subset.filter(i=>i!==di).map(i=>i>di?i-1:i);
+    const nr={};Object.keys(state.reliability.reads||{}).forEach(k=>{const i=+k;if(i===di)return;nr[i>di?i-1:i]=state.reliability.reads[k];});
+    state.reliability.reads=nr;}
+  if(state.current>=state.patients.length)state.current=state.patients.length-1;
+  activeTP="PreOp";persist();renderAll();toast(`Deleted ${name}`);
+}
+
+function demoCard(p){
+  const known=IMPLANTS.includes(p.implant);
+  const showOther=!known&&p.implant!==""&&p.implant!=null;
+  return `<div class="card">
+    <div class="cardhead"><span class="label">Patient <span class="pserial">#${state.current+1}</span></span>
+      <div class="chead-r">
+        <span class="hybadge hidden" id="hyBadge">⚇ Hybrid construct</span>
+        <button class="btn danger sm" id="deleteBtn" data-nolock title="Delete this patient">🗑 Delete</button></div></div>
+
+    <div class="idblock">
+      <div class="f name"><label>Name</label>
+        <input type="text" id="f_initials" class="caps" maxlength="6" value="${esc(p.initials)}" placeholder="ABC" autocomplete="off"></div>
+      <div class="f ic"><label>IC</label>
+        <input type="text" id="f_ic4" class="caps" maxlength="4" value="${esc(p.ic4)}" placeholder="123A" autocomplete="off"></div>
+      <div class="f age"><label>Age</label>
+        <input type="number" id="f_age" value="${esc(p.age)}" placeholder="—"></div>
+      <div class="f sex"><label>Sex</label>
+        <div class="sexwrap">
+          <button class="tg ${p.sex==="M"?"on":""}" data-sex="M">M</button>
+          <button class="tg ${p.sex==="F"?"on":""}" data-sex="F">F</button></div></div>
+      <div class="f date"><label>Op date <span class="hint">DD/MM/YY</span></label>
+        <input type="text" id="f_opdate" maxlength="8" inputmode="numeric"
+          value="${esc(fmtDate(p.opdate))}" placeholder="DD/MM/YY" autocomplete="off"></div>
+      <div class="f imp"><label>Implant</label>
+        ${implantSelect(p)}
+        <input type="text" id="f_impother" class="${showOther?"":"hidden"}"
+          value="${showOther?esc(p.implant):""}" placeholder="device / model"></div>
+    </div>
+
+    <div class="field" style="margin-top:16px"><label>Operated level(s)</label>
+      <div class="tg-row" id="f_levels">${levelChips(p)}</div>
+      <div class="lvl-legend"><span class="lk cdr">●</span> CDR &nbsp; <span class="lk acdf">●</span> ACDF (fused)</div>
+      <div class="levelcount" id="lvlcount"></div>
+      <div class="field" style="margin-top:12px"><label>Any levels fused (ACDF)?</label>
+        <div class="tg-row">
+          <button class="tg ${p.fused===false?"on":""}" data-fused="no">No</button>
+          <button class="tg ${p.fused===true?"on":""}" data-fused="yes">Yes</button></div>
+        <div class="lvl-hint ${p.fused?"":"hidden"}" id="fusedHint">↑ Tap an operated (blue) level again to mark it fused — it turns brown.</div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:16px" id="f_isize">${isizeBlock(p)}</div>
+  </div>`;
+}
+function levelChips(p){
+  return LEVELS.map(l=>{const acdf=p.fusedLevels.includes(l);const cdr=p.levels.includes(l)&&!acdf;
+    return `<button class="chip ${acdf?"acdf":(cdr?"cdr":"")}" data-lvl="${l}">${l}</button>`;}).join("");
+}
+function implantSelect(p){
+  const known=IMPLANTS.includes(p.implant);
+  const isOther=!known&&p.implant!==""&&p.implant!=null;
+  const cur=known?p.implant:(isOther?"__other":"");
+  let o="";
+  if(cur==="")o+=`<option value="" selected disabled>Select…</option>`;
+  IMPLANTS.forEach(im=>o+=`<option value="${im}" ${cur===im?"selected":""}>${im}</option>`);
+  o+=`<option value="__other" ${cur==="__other"?"selected":""}>Other…</option>`;
+  return `<select id="f_imp_sel" class="isel">${o}</select>`;
+}
+function fmtDate(raw){
+  const d=String(raw||"").replace(/[^0-9]/g,"").slice(0,6);
+  let out=d.slice(0,2);
+  if(d.length>2)out+="/"+d.slice(2,4);
+  if(d.length>4)out+="/"+d.slice(4,6);
+  return out;
+}
+function opEcho(v){
+  v=(v||"").replace(/[^0-9]/g,"");
+  if(v.length<6)return {text:"",bad:false};
+  const dd=+v.slice(0,2),mm=+v.slice(2,4),yy=+v.slice(4,6);
+  const mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if(!(mm>=1&&mm<=12&&dd>=1&&dd<=31))return {text:"\u26a0 check date",bad:true};
+  return {text:`${dd} ${mon[mm-1]} 20${String(yy).padStart(2,"0")}`,bad:false};
+}
+function renderLevelCount(p){
+  const el=document.getElementById("lvlcount");if(!el)return;
+  const total=p.levels.length;
+  const acdf=p.fusedLevels.filter(l=>p.levels.includes(l)).length;
+  const cdr=total-acdf;
+  let s=`Levels operated: <b>${total}</b>`;
+  if(p.fused&&total)s+=`  ·  CDR <b>${cdr}</b> / <span class="acdfc">ACDF <b>${acdf}</b></span>`;
+  el.innerHTML=s;
+  const hb=document.getElementById("hyBadge");if(hb)hb.classList.toggle("hidden",!isHybrid(p));
+}
+function reRenderLevels(p){
+  const box=document.getElementById("f_levels");if(!box)return;
+  box.innerHTML=levelChips(p);
+  bindLevels(p);
+}
+function cycleLevel(p,l){
+  const inLevels=p.levels.includes(l),inFused=p.fusedLevels.includes(l);
+  if(!inLevels){p.levels.push(l);}                                  // off → CDR
+  else if(!inFused){
+    if(p.fused)p.fusedLevels.push(l);                              // CDR → ACDF (only when fused mode on)
+    else p.levels=p.levels.filter(x=>x!==l);                       // CDR → off
+  }else{                                                            // ACDF → off
+    p.fusedLevels=p.fusedLevels.filter(x=>x!==l);
+    p.levels=p.levels.filter(x=>x!==l);
+  }
+  p.levels.sort((a,b)=>LEVELS.indexOf(a)-LEVELS.indexOf(b));
+  p.fusedLevels.sort((a,b)=>LEVELS.indexOf(a)-LEVELS.indexOf(b));
+}
+function bindLevels(p){
+  document.querySelectorAll("#f_levels [data-lvl]").forEach(c=>c.onclick=()=>{
+    cycleLevel(p,c.dataset.lvl);
+    reRenderLevels(p);renderLevelCount(p);rerenderGrid(p);renderISize(p);scheduleSave();
+  });
+}
+
+function isizeBlock(p){
+  const cdr=p.levels.filter(l=>!p.fusedLevels.includes(l));
+  if(!cdr.length)return `<label>Implant + pre-op disc height (mm)</label><div class="lvl-hint">Add an operated (CDR) level above to record implant height and pre-op disc height.</div>`;
+  const dis=p.locked?" disabled":"";
+  const row=l=>{if(!p.isize||typeof p.isize!=="object")p.isize={};if(!p.isize[l]||typeof p.isize[l]!=="object")p.isize[l]={};const s=p.isize[l];if(s.h===undefined||s.h==="")s.h="5";
+    return `<div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:6px;align-items:center;margin-top:6px">`+
+      `<span style="font-weight:600;color:var(--cyan);white-space:nowrap">${l}</span>`+
+      `<input type="number" step="0.5" inputmode="decimal" data-isz="disc" data-lvl="${l}" value="${esc(s.disc||"")}" placeholder="disc" style="width:100%;min-width:0;box-sizing:border-box;text-align:center"${dis}>`+
+      `<input type="number" step="0.5" inputmode="decimal" data-isz="h" data-lvl="${l}" value="${esc(s.h||"5")}" placeholder="implant" style="width:100%;min-width:0;box-sizing:border-box;text-align:center"${dis}></div>`;};
+  return `<label>Implant + pre-op disc height (mm), per operated level</label>`+
+    `<div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:6px;margin-top:3px;font-size:11px;color:var(--faint)"><span></span><span style="text-align:center">Disc H (pre-op)</span><span style="text-align:center">Implant H</span></div>`+
+    cdr.map(row).join("");
+}
+function bindISize(p){
+  document.querySelectorAll('#f_isize input[data-isz]').forEach(inp=>{
+    inp.oninput=()=>{const{isz,lvl}=inp.dataset;
+      if(!p.isize||typeof p.isize!=="object")p.isize={};
+      if(!p.isize[lvl]||typeof p.isize[lvl]!=="object")p.isize[lvl]={};
+      p.isize[lvl][isz]=inp.value;scheduleSave();};});
+}
+function renderISize(p){const box=document.getElementById("f_isize");if(box){box.innerHTML=isizeBlock(p);bindISize(p);}}
+const MEAS_GUIDE = `
+<div style="font-size:13px;line-height:1.55;color:#c7d2da">
+  <div style="background:rgba(76,201,230,.08);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;padding:8px 11px;margin-bottom:12px">
+    <b style="color:var(--cyan)">How this tool expects values</b><br>
+    Lateral films, patient facing the viewer's right. <b>Segmental &amp; global ROM: Flexion &minus;, Extension +</b> (ROM = Ext &minus; Flex, auto). <b>C2&ndash;C7 lordosis is entered as positive (+).</b> Use a true horizontal / true vertical reference for T1 slope and SVA.
+  </div>
+
+  <b style="color:var(--cyan)">Segmental ROM (per level)</b><br>
+  Cobb angle across the disc on the flexion film and on the extension film; enter both (Flex &minus;, Ext +). ROM is computed for you.<br><br>
+
+  <b style="color:var(--cyan)">C2&ndash;C7 alignment / lordosis (the "Static" value)</b><br>
+  Neutral lateral. This tool uses the <b>Cobb method between C2 and C7</b> (inferior-endplate lines), lordosis positive.<br>
+  <span style="opacity:.85">The SRS manual standard is the <b>Harrison posterior tangent</b> method &mdash; lines of best fit along the posterior walls of C2 and C7, avoiding corner osteophytes. See the note at the bottom.</span><br><br>
+
+  <b style="color:var(--cyan)">T1 slope</b><br>
+  Angle between the T1 superior-endplate line and a true horizontal line. Tick "T1 not visible" if the endplate can't be seen.<br><br>
+
+  <b style="color:var(--cyan)">C2&ndash;C7 SVA</b><br>
+  Horizontal distance between a true-vertical plumb line from the centre of the C2 body and a vertical line from the postero-superior corner of C7.<br><br>
+
+  <b style="color:var(--cyan)">Adjacent-segment degeneration &mdash; Kellgren&ndash;Lawrence 0&ndash;4</b><br>
+  Graded at the segment above and below the operated level(s) on disc-space narrowing, osteophytes and endplate sclerosis (0 none &rarr; 4 severe).<br><br>
+
+  <b style="color:var(--cyan)">Heterotopic ossification &mdash; McAfee 0&ndash;IV (post-op)</b><br>
+  0 none &middot; I outside the disc space &middot; II in the disc, motion preserved &middot; III bridging, motion present &middot; IV ankylosis, no motion. III vs IV is decided on the flexion&ndash;extension films.<br><br>
+
+  <b style="color:var(--cyan)">Implant &amp; pre-op disc height (mm)</b><br>
+  Pre-op disc height on the pre-op lateral; implant height from the device. Oversizing = implant &minus; pre-op disc; &ge; 2 mm is linked to adjacent degeneration / subsidence.<br><br>
+
+  <div style="background:rgba(240,169,59,.1);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:8px 11px;margin-top:6px">
+    <b style="color:var(--amber)">Note on the SRS manual conventions</b><br>
+    Your uploaded manual uses <b>Lordosis &minus;, Kyphosis +</b> and the <b>Harrison posterior tangent</b> method for C2&ndash;C7. This tool currently uses <b>lordosis +</b> and the <b>Cobb</b> method. Both are valid &mdash; just measure every patient the same way. If you'd rather the tool follow the manual's conventions, say so and it can be switched.
+  </div>
+
+  <div style="opacity:.65;font-size:11px;margin-top:10px">Adapted from the Spine Deformity Study Group / SRS Radiographic Measurement Manual. Global spinopelvic parameters (PI, PT, SS, thoracic/lumbar, hip/knee) are in the full glossary but outside this cervical tool.</div>
+</div>`;
+function showGuide(){
+  const ex=document.getElementById("measGuideOv"); if(ex){ex.remove();return;}
+  const ov=document.createElement("div"); ov.id="measGuideOv";
+  ov.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(6,12,20,.74);display:flex;align-items:flex-start;justify-content:center;padding:22px 12px;overflow:auto";
+  ov.innerHTML=`<div style="max-width:680px;width:100%;background:#0f1720;border:1px solid rgba(76,201,230,.3);border-radius:12px;padding:16px 18px 20px;box-shadow:0 12px 44px rgba(0,0,0,.55)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:700;font-size:16px;color:var(--cyan)">Measurement guide</div><button class="btn" id="measGuideClose" style="padding:4px 13px">Close</button></div>${MEAS_GUIDE}</div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener("click",e=>{if(e.target===ov)ov.remove();});
+  const c=document.getElementById("measGuideClose"); if(c)c.onclick=()=>ov.remove();
+}
+function measureCard(p){
+  const pills=TPS.map(t=>{const s=tpStatus(p,t.key);const full=(s==="full");
+    return `<button class="pill ${full?"complete":"incomplete"} ${t.key===activeTP?"active":""}" data-tp="${t.key}">${t.short}</button>`;}).join("");
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="label">Radiographic measurements</div><button class="btn" id="measGuideBtn" style="padding:3px 11px;font-size:12px;white-space:nowrap">📖 Guide</button></div>
+    <div class="tps">${pills}</div>
+    <div class="legend"><b class="bl">▣</b> complete &nbsp; <b class="rd">▣</b> incomplete &nbsp;|&nbsp; Flexion −, Extension +, &nbsp;ROM = Ext − Flex (auto)</div>
+    <div id="tpBody">${tpBody(p,activeTP)}</div></div>`;
+}
+function tpBody(p,tk){
+  const d=p.data[tk];
+  const rows=LEVELS.map(l=>rowHTML(p,tk,l)).join("");
+  const grom=gromOf(d);
+  const gFlag=(grom.src!=="none"&&typeof grom.val==="number")&&(grom.val<GROM_FLAG.min||grom.val>GROM_FLAG.max);
+  const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
+  return `<div class="grid-wrap">
+    <div class="gsec">
+      <div class="gtitle"><b>Segmental</b><span class="gtp">${tpLbl}</span></div>
+      <div class="mgrid">
+        <div class="ghead"><div>Lvl</div><div>Static °</div><div>Flex °</div><div>Ext °</div><div>ROM °</div></div>
+        ${rows}</div>
+    </div>
+    <div class="gsec">
+      <div class="gtitle"><b>Global C2–C7</b><span class="gtp">${tpLbl}</span></div>
+      <div class="ggrid g4">
+        <div class="ghead">
+          <div></div>
+          <div title="Static (neutral) C2–C7 alignment, lordosis +">Static °</div>
+          <div title="Global flexion">Flex °</div>
+          <div title="Global extension">Ext °</div>
+          <div>ROM °</div>
+        </div>
+        <div class="grow">
+          <div class="glvl">C2–C7</div>
+          ${gcellHTML(tk,"galign")}
+          ${gcellHTML(tk,"gflex")}
+          ${gcellHTML(tk,"gext")}
+          <div class="gromcell ${grom.src==='legacy'?'legacy':''} ${gFlag?'flag':''}" data-tp="${tk}">
+            <span class="gromval">${grom.val===""?'—':grom.val}</span></div>
+        </div>
+      </div>
+      ${globalSub(p,tk)}
+    <div class="gcap">Static, T1 slope &amp; SVA = neutral-alignment measures · Flex / Ext dynamic · ROM = Ext − Flex (auto)</div>
+    </div>
+    ${asdSection(p,tk)}${hoSection(p,tk)}</div>`;
+}
+function globalSub(p,tk){
+  const d=p.data[tk];
+  const nv=!!d.t1nv;
+  const t1flag=isFlag("t1slope",d.t1slope),svaflag=isFlag("sva",d.sva),c7flag=isFlag("c7slope",d.c7slope);
+  const has=v=>(v!==""&&v!=null);
+  return `<div class="gsub">
+    <div class="gsubf ${(!nv&&t1flag)?"flag":""} ${nv?"disabled":""}">
+      <label>T1 slope</label>
+      <div class="ufield ${(!nv&&has(d.t1slope))?"hasval":""}">
+        <input type="number" step="0.1" value="${esc(d.t1slope)}" data-tp="${tk}" data-g="t1slope" placeholder="—" inputmode="decimal" ${nv?"disabled":""}>
+        <span class="usuf">°</span></div>
+      <label class="t1nv"><input type="checkbox" data-tp="${tk}" data-gc="t1nv" ${nv?"checked":""}> T1 not visible</label>
+    </div>
+    ${nv?`<div class="gsubf ${c7flag?"flag":""}">
+      <label>C7 slope <span class="fallback">fallback</span></label>
+      <div class="ufield ${has(d.c7slope)?"hasval":""}">
+        <input type="number" step="0.1" value="${esc(d.c7slope)}" data-tp="${tk}" data-g="c7slope" placeholder="—" inputmode="decimal">
+        <span class="usuf">°</span></div>
+    </div>`:""}
+    <div class="gsubf ${svaflag?"flag":""}">
+      <label>C2–C7 SVA</label>
+      <div class="ufield ${has(d.sva)?"hasval":""}">
+        <input type="number" step="0.1" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" placeholder="—" inputmode="decimal">
+        <span class="usuf">mm</span></div>
+    </div>
+  </div>`;
+}
+function hoSection(p,tk){
+  if(!isPostop(tk))return "";                            // HO is a post-op finding only
+  const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
+  const d=p.data[tk];
+  const reqOn=state.requireHO!==false;
+  const toggle=`<span class="hospacer"></span><button class="hotgl ${reqOn?"on":""}" id="hoReqToggle" title="Toggle whether HO is required for the completeness glow">${reqOn?"required ✓":"optional"}</button>`;
+  const cdr=p.levels.filter(l=>!isFused(p,l));
+  let body;
+  if(!p.levels.length){
+    body=`<div class="asd-msg">Select the operated level(s) first — HO is graded at each arthroplasty (CDR) level.</div>`;
+  } else if(!cdr.length){
+    body=`<div class="asd-msg">No CDR (arthroplasty) levels in this construct — HO applies to motion-preserving levels only, so there is nothing to grade here.</div>`;
+  } else {
+    const rows=cdr.map(l=>hoRow(tk,l,hoVal(d,l))).join("");
+    body=`<div class="hogrid">${rows}</div>
+      <div class="gcap">McAfee: 0 none · I outside disc space · II in disc, motion preserved · III bridging, motion present · IV ankylosis, no motion — III vs IV is decided on the flexion–extension films.</div>`;
+  }
+  return `<div class="gsec">
+    <div class="gtitle"><b>Heterotopic ossification — CDR levels</b><span class="gclass">McAfee</span><span class="gtp">${tpLbl}</span>${toggle}</div>
+    ${body}
+  </div>`;
+}
+function hoRow(tk,lvl,val){
+  const v=(val==null?"":String(val));
+  const btns=HO_GRADES.map(g=>`<button class="hobtn ${g[0]===v?"on":""}" data-tp="${tk}" data-ho-level="${lvl}" data-ho="${g[0]}" title="${g[0]} — ${esc(g[1])}">${g[0]}</button>`).join("");
+  return `<div class="horow"><div class="holvl">${lvl}</div><div class="hobtns">${btns}</div></div>`;
+}
+function asdSection(p,tk){
+  const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
+  const d=p.data[tk];
+  const legacyNote=(d.asdLegacy&&d.asdLegacy!=="")
+    ? `<div class="gcap">Earlier overall ASD note: <b style="color:var(--muted)">${esc(d.asdLegacy)}</b> — re-enter it at the correct adjacent level above.</div>`
+    : `<div class="gcap">Kellgren–Lawrence grade · adjacent segments auto-detected from the operated construct</div>`;
+  if(!p.levels.length){
+    return `<div class="gsec">
+      <div class="gtitle"><b>ASD</b><span class="gclass">Kellgren–Lawrence</span><span class="gtp">${tpLbl}</span></div>
+      <div class="asd-msg">Select the operated level(s) first — the adjacent segments (one immediately above and one below the construct) are detected automatically.</div>
+    </div>`;
+  }
+  const adj=adjacentLevels(p);
+  const rowU=adj.upper?asdRow(tk,adj.upper,"up",adj.top,asdVal(d,adj.upper)):asdNoneRow("up",adj.top);
+  const rowL=adj.lower?asdRow(tk,adj.lower,"down",adj.bot,asdVal(d,adj.lower)):asdNoneRow("down",adj.bot);
+  return `<div class="gsec">
+    <div class="gtitle"><b>ASD</b><span class="gclass">Kellgren–Lawrence</span><span class="gtp">${tpLbl}</span></div>
+    <div class="ggrid gasd">
+      <div class="ghead"><div>Lvl</div><div>Adjacency</div><div>Grade</div></div>
+      ${rowU}${rowL}
+    </div>
+    ${legacyNote}
+  </div>`;
+}
+function asdRow(tk,lvl,dir,ref,val){
+  const arrow=dir==="up"?"↑":"↓",word=dir==="up"?"above":"below";
+  return `<div class="grow">
+    <div class="glvl alvl">${lvl}</div>
+    <div class="apos"><span class="ar">${arrow}</span> ${word} <span class="ref">${esc(ref)}</span></div>
+    ${klSelect(tk,lvl,val)}
+  </div>`;
+}
+function klSelect(tk,lvl,val){
+  const base=[["","—"],["0","0 — None"],["1","1 — Doubtful"],["2","2 — Minimal"],["3","3 — Moderate"],["4","4 — Severe"]];
+  const v=(val==null?"":String(val));
+  const opts=base.slice();
+  if(v!==""&&!base.some(o=>o[0]===v))opts.push([v,v+" (legacy)"]);
+  const inner=opts.map(o=>`<option value="${esc(o[0])}" ${o[0]===v?"selected":""}>${o[1]}</option>`).join("");
+  return `<div class="cell klcell"><select data-tp="${tk}" data-asd-level="${lvl}">${inner}</select></div>`;
+}
+function asdNoneRow(dir,ref){
+  const arrow=dir==="up"?"↑":"↓",word=dir==="up"?"above":"below";
+  return `<div class="grow asd-skip">
+    <div class="glvl alvl">—</div>
+    <div class="apos"><span class="ar">${arrow}</span> none ${word} <span class="ref">${esc(ref)}</span></div>
+    <div class="cell na">out of scope</div>
+  </div>`;
+}
+function rowHTML(p,tk,l){
+  const d=p.data[tk];
+  const op=p.levels.includes(l),fu=isFused(p,l);
+  const lvlCls="lvl "+(fu?"fused":(op?"cdr":"none"));
+  const r=romOf(d,l);
+  const romFlag=(r.src!=="none"&&typeof r.val==="number")&&(r.val<ROM_FLAG.min||r.val>ROM_FLAG.max);
+  return `<div class="mrow">
+    <div class="${lvlCls}"><span class="lvname">${l}</span>${fu?'<span class="tag">ACDF</span>':''}<span class="tpt">${(TPS.find(t=>t.key===tk)||{}).short||""}</span></div>
+    ${cellHTML(tk,"static",l,d.static[l])}
+    ${cellHTML(tk,"flex",l,d.flex[l])}
+    ${cellHTML(tk,"ext",l,d.ext[l])}
+    <div class="romcell ${r.src==='legacy'?'legacy':''} ${romFlag?'flag':''}" data-tp="${tk}" data-lvl="${l}">
+      ${r.val===""?'<span class="rom-empty">—</span>':r.val}${r.src==='legacy'?'<span class="rtag" title="imported from previous data">i</span>':''}
+    </div>
+  </div>`;
+}
+function cellHTML(tk,meas,l,val){
+  const has=(val!==""&&val!=null);
+  return `<div class="cell unitcell ${isFlag(meas,val)?"flag":""} ${has?"hasval":""}">
+    <input type="number" step="0.1" value="${esc(val)}" data-tp="${tk}" data-meas="${meas}" data-lvl="${l}" inputmode="decimal"><span class="cunit">°</span></div>`;
+}
+function gcellHTML(tk,key){
+  const d=state.patients[state.current].data[tk];
+  const fl=isFlag(key,d[key]);
+  return `<div class="cell ${fl?"flag":""}">
+    <input type="number" step="0.1" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" placeholder="—" inputmode="decimal"></div>`;
+}
+function notesCard(p){
+  return `<div class="card"><div class="label">Notes</div>
+    <textarea id="f_notes" placeholder="Complications, HO grade, indication, anything noteworthy…">${esc(p.notes)}</textarea></div>`;
+}
+function isFlag(meas,val){if(val===""||val==null)return false;
+  const n=parseFloat(val);if(isNaN(n))return true;const r=RANGE[meas];if(!r)return false;
+  return n<r[0]||n>r[1];}
+
+/* ---- live status updates (no re-render, keeps focus) ---- */
+function updatePills(){
+  if(state.current<0)return;const p=state.patients[state.current];
+  TPS.forEach(t=>{const el=document.querySelector(`.pill[data-tp="${t.key}"]`);if(!el)return;
+    const full=tpStatus(p,t.key)==="full";
+    el.classList.toggle("complete",full);el.classList.toggle("incomplete",!full);
+    const ic=el.querySelector(".pc");if(ic)ic.textContent=full?"✓":"•";});
+  markNeeded(p);
+}
+// Highlight required-but-empty fields in red, but only once a timepoint has been started (not blank, not complete)
+function markNeeded(p){
+  const body=document.getElementById("tpBody");if(!body||!p)return;
+  const tk=activeTP,d=p.data[tk];
+  const clear=()=>body.querySelectorAll(".need").forEach(el=>el.classList.remove("need"));
+  if(tpStatus(p,tk)!=="part"){clear();return;}
+  body.querySelectorAll('input[data-meas]').forEach(inp=>{
+    const{meas,lvl}=inp.dataset;
+    let req=false;
+    if(p.levels.includes(lvl))req=(meas==="static")||((meas==="flex"||meas==="ext")&&!isFused(p,lvl));
+    const c=inp.closest(".cell");if(c)c.classList.toggle("need",req&&d[meas][lvl]==="");
+  });
+  body.querySelectorAll('input[data-g]').forEach(inp=>{
+    const g=inp.dataset.g;
+    let req=(g==="galign"||g==="gflex"||g==="gext"||g==="sva");
+    if(g==="t1slope")req=!d.t1nv;
+    const c=inp.closest(".cell")||inp.closest(".gsubf");
+    if(c)c.classList.toggle("need",req&&d[g]==="");
+  });
+  body.querySelectorAll('select[data-asd-level]').forEach(sel=>{
+    const c=sel.closest(".cell");if(c)c.classList.toggle("need",asdVal(d,sel.dataset.asdLevel)==="");
+  });
+  body.querySelectorAll('.horow').forEach(row=>{
+    const btn=row.querySelector('[data-ho-level]');if(!btn)return;
+    const grp=row.querySelector('.hobtns')||row;
+    grp.classList.toggle("need",(state.requireHO!==false)&&hoVal(d,btn.dataset.hoLevel)==="");
+  });
+}
+function updateRosterDot(){if(state.current<0)return;
+  const el=document.querySelector(".rosteritem.active .dot");
+  if(el)el.className="dot "+rosterDot(state.patients[state.current]);}
+function refreshRom(p,tk,l){
+  const d=p.data[tk],r=romOf(d,l);
+  const el=document.querySelector(`.romcell[data-tp="${tk}"][data-lvl="${l}"]`);if(!el)return;
+  const flag=(r.src!=="none"&&typeof r.val==="number")&&(r.val<ROM_FLAG.min||r.val>ROM_FLAG.max);
+  el.classList.toggle("legacy",r.src==="legacy");el.classList.toggle("flag",!!flag);
+  el.innerHTML=(r.val===""?'<span class="rom-empty">—</span>':r.val)+(r.src==='legacy'?'<span class="rtag" title="imported">i</span>':'');
+}
+function refreshGrom(p,tk){
+  const d=p.data[tk],g=gromOf(d);
+  const el=document.querySelector(`.gromcell[data-tp="${tk}"]`);if(!el)return;
+  const flag=(g.src!=="none"&&typeof g.val==="number")&&(g.val<GROM_FLAG.min||g.val>GROM_FLAG.max);
+  el.classList.toggle("legacy",g.src==="legacy");el.classList.toggle("flag",!!flag);
+  el.querySelector(".gromval").textContent=g.val===""?'—':g.val;
+}
+
+/* ---- bindings ---- */
+function bindDemo(p){
+  const fi=document.getElementById("f_initials");
+  fi.oninput=e=>{const c=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();
+    try{e.target.setSelectionRange(c,c);}catch(_){}
+    p.initials=e.target.value;scheduleSave();refreshActiveRosterItem();};
+  const fic=document.getElementById("f_ic4");
+  fic.oninput=e=>{
+    const raw=e.target.value.toUpperCase();
+    const digits=raw.replace(/[^0-9]/g,"").slice(0,3);
+    const letter=raw.replace(/[^A-Z]/g,"").slice(0,1);
+    const v=digits+letter;
+    e.target.value=v;p.ic4=v;scheduleSave();};
+  document.getElementById("f_age").oninput=e=>{p.age=e.target.value;scheduleSave();refreshActiveRosterItem();};
+  const fop=document.getElementById("f_opdate");
+  fop.oninput=e=>{const digits=e.target.value.replace(/[^0-9]/g,"").slice(0,6);
+    e.target.value=fmtDate(digits);p.opdate=digits;
+    scheduleSave();};
+  document.querySelectorAll("[data-sex]").forEach(b=>b.onclick=()=>{
+    p.sex=b.dataset.sex;document.querySelectorAll("[data-sex]").forEach(x=>x.classList.toggle("on",x.dataset.sex===p.sex));
+    scheduleSave();refreshActiveRosterItem();});
+  const isel=document.getElementById("f_imp_sel");
+  if(isel)isel.onchange=()=>{const v=isel.value,other=document.getElementById("f_impother");
+    if(v==="__other"){other.classList.remove("hidden");p.implant=other.value||"";other.focus();}
+    else{p.implant=v;other.classList.add("hidden");}
+    scheduleSave();};
+  document.getElementById("f_impother").oninput=e=>{p.implant=e.target.value;scheduleSave();};
+  bindLevels(p);
+  bindISize(p);
+  document.querySelectorAll("[data-fused]").forEach(b=>b.onclick=()=>{
+    p.fused=(b.dataset.fused==="yes");
+    document.querySelectorAll("[data-fused]").forEach(x=>x.classList.toggle("on",(x.dataset.fused==="yes")===p.fused));
+    if(!p.fused)p.fusedLevels=[];
+    const fh=document.getElementById("fusedHint");if(fh)fh.classList.toggle("hidden",!p.fused);
+    reRenderLevels(p);renderLevelCount(p);rerenderGrid(p);renderISize(p);scheduleSave();});
+  const del=document.getElementById("deleteBtn");if(del)del.onclick=deletePatient;
+  renderLevelCount(p);
+}
+function bindPills(p){
+  document.querySelectorAll(".pill").forEach(t=>t.onclick=()=>{
+    activeTP=t.dataset.tp;
+    document.getElementById("tpBody").innerHTML=tpBody(p,activeTP);
+    document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("active",x.dataset.tp===activeTP));
+    bindGrid(p);});
+}
+function bindGrid(p){
+  document.querySelectorAll('#tpBody input[data-meas]').forEach(inp=>{
+    inp.oninput=()=>{const{tp,meas,lvl}=inp.dataset;
+      p.data[tp][meas][lvl]=inp.value;
+      const cl=inp.closest(".cell");cl.classList.toggle("flag",isFlag(meas,inp.value));cl.classList.toggle("hasval",inp.value!=="");
+      if(meas==="flex"||meas==="ext")refreshRom(p,tp,lvl);
+      updatePills();updateRosterDot();scheduleSave();};
+    inp.onkeydown=e=>gridNav(e,inp);});
+  document.querySelectorAll('#tpBody input[data-g]').forEach(inp=>{
+    inp.oninput=()=>{const{tp,g}=inp.dataset;
+      p.data[tp][g]=inp.value;
+      const gc=inp.closest(".cell")||inp.closest(".gsubf");if(gc)gc.classList.toggle("flag",isFlag(g,inp.value));
+      const uf=inp.closest(".ufield");if(uf)uf.classList.toggle("hasval",inp.value!=="");
+      if(g==="gflex"||g==="gext")refreshGrom(p,tp);
+      updatePills();updateRosterDot();scheduleSave();};});
+  document.querySelectorAll('#tpBody input[data-gc="t1nv"]').forEach(cb=>{
+    cb.onchange=()=>{const tp=cb.dataset.tp;
+      p.data[tp].t1nv=cb.checked;
+      rerenderGrid(p);scheduleSave();};});       // re-render: disable T1 field, reveal C7 fallback, refresh glow
+  document.querySelectorAll('#tpBody select[data-asd-level]').forEach(sel=>{
+    sel.onchange=()=>{const tp=sel.dataset.tp,lvl=sel.dataset.asdLevel;
+      if(!p.data[tp].asd||typeof p.data[tp].asd!=="object")p.data[tp].asd={};
+      p.data[tp].asd[lvl]=sel.value;
+      updatePills();updateRosterDot();scheduleSave();};});
+  document.querySelectorAll('#tpBody [data-ho-level]').forEach(b=>{
+    b.onclick=()=>{const tp=b.dataset.tp,lvl=b.dataset.hoLevel,g=b.dataset.ho;
+      if(!p.data[tp].ho||typeof p.data[tp].ho!=="object")p.data[tp].ho={};
+      const cur=p.data[tp].ho[lvl];
+      p.data[tp].ho[lvl]=(cur===g?"":g);          // tap the active grade again to clear
+      const now=p.data[tp].ho[lvl];
+      b.parentElement.querySelectorAll('[data-ho-level]').forEach(x=>x.classList.toggle("on",x.dataset.ho===now));
+      updatePills();updateRosterDot();scheduleSave();};});
+  const hoTgl=document.getElementById("hoReqToggle");
+  if(hoTgl)hoTgl.onclick=()=>{state.requireHO=(state.requireHO===false);
+    hoTgl.classList.toggle("on",state.requireHO!==false);
+    hoTgl.textContent=state.requireHO!==false?"required ✓":"optional";
+    updatePills();updateRosterDot();scheduleSave();};
+  markNeeded(p);
+  if(p.locked)lockBody();
+}
+function rerenderGrid(p){
+  const b=document.getElementById("tpBody");
+  if(b){b.innerHTML=tpBody(p,activeTP);bindGrid(p);}
+  updatePills();updateRosterDot();
+}
+function gridNav(e,inp){
+  const order=["static","flex","ext"];
+  const meas=inp.dataset.meas,lvl=inp.dataset.lvl;
+  const col=order.indexOf(meas),row=LEVELS.indexOf(lvl);
+  if(col<0||row<0)return;
+  const at=(m,l)=>document.querySelector('#tpBody input[data-meas="'+m+'"][data-lvl="'+l+'"]');
+  const go=el=>{if(el){e.preventDefault();el.focus();try{el.select();}catch(_){}}};
+  if(e.key==="ArrowUp"){go(at(meas,LEVELS[row-1]));}
+  else if(e.key==="ArrowDown"){go(at(meas,LEVELS[row+1]));}
+  else if(e.key==="Enter"){go(at(meas,LEVELS[row+1])||at(order[col+1],LEVELS[0]));}  // down, then wrap to top of next column
+}
+function bindNotes(p){document.getElementById("f_notes").oninput=e=>{p.notes=e.target.value;scheduleSave();};}
+
+/* ---- nav ---- */
+function newPatient(){const p=blankPatient();state.patients.push(p);
+  state.current=state.patients.length-1;activeTP="PreOp";persist();renderAll();
+  setTimeout(()=>{const e=document.getElementById("f_initials");if(e)e.focus();},40);}
+document.getElementById("newBtn").onclick=newPatient;
+{const ub=document.getElementById("undoBtn");if(ub)ub.onclick=undo;
+ const rb=document.getElementById("redoBtn");if(rb)rb.onclick=redo;}
+document.getElementById("prevBtn").onclick=()=>{if(state.current>0){state.current--;activeTP="PreOp";persist();renderAll();}};
+document.getElementById("nextBtn").onclick=()=>{if(state.current<state.patients.length-1){state.current++;activeTP="PreOp";persist();renderAll();}};
+
+/* ---- export ---- */
+function buildHeader(){
+  const h=["No","Initials","IC_last4","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels"];
+  LEVELS.forEach(l=>{h.push(`Type_${l.replace("/","")}`);});            // CDR / ACDF / blank per level
+  h.push("Implant","ASD_UpperLevel","ASD_LowerLevel");
+  LEVELS.forEach(l=>{const L=l.replace("/","");h.push(`ImplantH_${L}`,`DiscH_preop_${L}`);});
+  TPS.forEach(t=>{
+    const po=isPostop(t.key);
+    LEVELS.forEach(l=>{const L=l.replace("/","");
+      h.push(`Static_${t.key}_${L}`,`Flex_${t.key}_${L}`,`Ext_${t.key}_${L}`,`ROM_${t.key}_${L}`);
+      if(po)h.push(`HO_${t.key}_${L}`);});                              // HO at post-op timepoints only
+    h.push(`GlobalStatic_${t.key}`,`T1slope_${t.key}`,`C2C7_SVA_${t.key}`,`T1_not_visible_${t.key}`,`C7slope_${t.key}`,
+           `GlobalFlex_${t.key}`,`GlobalExt_${t.key}`,`GlobalROM_${t.key}`,`ASDupper_${t.key}`,`ASDlower_${t.key}`);
+  });
+  return h;
+}
+function patientRow(p,idx){
+  const adj=adjacentLevels(p);
+  const r=[idx+1,p.initials,p.ic4,fmtDate(p.opdate),p.sex,p.age,p.levels.length,p.levels.join(" / "),
+    (p.fused?p.fusedLevels.join(" / "):"")];
+  LEVELS.forEach(l=>{r.push(p.levels.includes(l)?(isFused(p,l)?"ACDF":"CDR"):"");});
+  r.push(p.implant,adj.upper||"",adj.lower||"");
+  LEVELS.forEach(l=>{const s=(p.isize&&p.isize[l])||{};r.push(s.h||"",s.disc||"");});
+  TPS.forEach(t=>{const d=p.data[t.key];const po=isPostop(t.key);
+    LEVELS.forEach(l=>{const rm=romOf(d,l);
+      r.push(d.static[l],d.flex[l],d.ext[l],rm.val);
+      if(po){const cdr=p.levels.includes(l)&&!isFused(p,l);r.push(cdr?hoVal(d,l):"");}});
+    const g=gromOf(d);
+    r.push(d.galign,d.t1slope,d.sva,(d.t1nv?"Y":""),d.c7slope,
+           d.gflex,d.gext,g.val,adj.upper?asdVal(d,adj.upper):"",adj.lower?asdVal(d,adj.lower):"");});
+  return r;
+}
+function csvCell(v){v=(v==null?"":String(v));return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function exportCSV(){if(!state.patients.length){toast("No patients to export");return;}
+  const rows=[buildHeader(),...state.patients.map((p,i)=>patientRow(p,i))];
+  download(rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"CDR_data.csv","text/csv");
+  toast(`Exported ${state.patients.length} patient${state.patients.length>1?"s":""}`);}
+function exportJSON(){download(JSON.stringify(state,null,1),"CDR_backup.json","application/json");
+  toast("Backup saved → CDR_backup.json");}
+function loadStateObj(o){
+  if(!o||!o.patients)throw 0;
+  o.patients=o.patients.map(migrate); state=o;
+  if(!Array.isArray(state.patients))state.patients=[];
+  if(state.current==null||state.current>=state.patients.length)state.current=state.patients.length-1;
+  if(state.current<0&&state.patients.length)state.current=0;
+}
+function resetHistoryBaseline(){histCurrent=snapState();undoStack=[];redoStack=[];updateUndoBtns();}
+function importJSON(file){const rd=new FileReader();
+  rd.onload=()=>{try{loadStateObj(JSON.parse(rd.result));resetHistoryBaseline();persist();renderAll();toast(`Imported ${state.patients.length} patients`);}
+    catch(e){toast("Couldn’t read that file");}};
+  rd.readAsText(file);}
+
+/* ============================================================
+   FILE SYNC — auto-save the whole study to a real .json file on
+   disk (Edge/Chrome File System Access API). Backup/Restore stays
+   as the universal fallback when this isn't available.
+   ============================================================ */
+const FS_OK=(typeof window!=="undefined")&&("showSaveFilePicker" in window);
+let fileHandle=null, fileLinked=false, fileName="";
+let remindDismissed=false;
+let fsWriting=false, fsPending=false;
+function fsIdb(method,val){return new Promise(res=>{
+  if(!("indexedDB" in window)){res(null);return;}
+  let rq; try{rq=indexedDB.open("cdr_filesync",1);}catch(e){res(null);return;}
+  rq.onupgradeneeded=()=>{try{rq.result.createObjectStore("h");}catch(e){}};
+  rq.onerror=()=>res(null);
+  rq.onsuccess=()=>{try{const db=rq.result,tx=db.transaction("h","readwrite"),st=tx.objectStore("h");
+    let r; if(method==="get")r=st.get("handle"); else if(method==="set")r=st.put(val,"handle"); else r=st.delete("handle");
+    r.onsuccess=()=>res(r.result); r.onerror=()=>res(null);}catch(e){res(null);}};
+});}
+async function fsHasPerm(h,ask){ if(!h||!h.queryPermission)return !!h; const o={mode:"readwrite"};
+  if((await h.queryPermission(o))==="granted")return true;
+  if(ask&&(await h.requestPermission(o))==="granted")return true; return false; }
+async function fileSave(){
+  if(!fileLinked||!fileHandle)return;
+  if(fsWriting){fsPending=true;return;}
+  fsWriting=true;
+  try{const w=await fileHandle.createWritable(); await w.write(JSON.stringify(state)); await w.close(); pulseFsMini();}
+  catch(e){fileLinked=false; renderFsBar(); toast("Lost the file link — re-link to keep saving to disk");}
+  fsWriting=false;
+  if(fsPending){fsPending=false;fileSave();}
+}
+function pulseFsMini(){const el=document.getElementById("fsMiniGlow");if(!el)return;
+  el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");}
+async function fileLink(){
+  if(!FS_OK){toast("Auto-save to a file needs Edge or Chrome");return;}
+  try{
+    const h=await window.showSaveFilePicker({suggestedName:fileName||"cdr_study.json",
+      types:[{description:"CDR study data",accept:{"application/json":[".json"]}}]});
+    fileHandle=h; fileName=h.name||"cdr_study.json"; fileLinked=true;
+    await fsIdb("set",h); renderFsBar(); await fileSave();
+    toast("Linked — auto-saving to "+fileName);
+  }catch(e){ if(e&&e.name!=="AbortError")toast("Couldn’t link that file"); }
+}
+async function fileOpen(){
+  if(!FS_OK){toast("Opening a file needs Edge or Chrome");return;}
+  try{
+    const arr=await window.showOpenFilePicker({types:[{description:"CDR study data",accept:{"application/json":[".json"]}}]});
+    const h=arr[0]; const file=await h.getFile(); loadStateObj(JSON.parse(await file.text()));
+    fileHandle=h; fileName=h.name; fileLinked=true; await fsIdb("set",h);
+    resetHistoryBaseline(); persist(); renderAll(); renderFsBar();
+    toast("Opened & linked "+fileName);
+  }catch(e){ if(e&&e.name!=="AbortError")toast("Couldn’t open that file"); }
+}
+async function fileReconnect(){
+  if(!fileHandle){fileLink();return;}
+  if(await fsHasPerm(fileHandle,true)){
+    fileLinked=true;
+    try{const file=await fileHandle.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline();}catch(e){}
+    persist(); renderAll(); renderFsBar(); toast("Reconnected — loaded "+fileName);
+  } else toast("Permission denied");
+}
+async function fileTryReconnect(){
+  if(!FS_OK){renderFsBar();return;}
+  const h=await fsIdb("get"); if(!h){renderFsBar();return;}
+  fileHandle=h; fileName=h.name||"cdr_study.json";
+  if(await fsHasPerm(h,false)){ fileLinked=true;
+    try{const file=await h.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline(); renderAll();}catch(e){} }
+  renderFsBar();
+}
+function fileUnlink(){ fileLinked=false; fileHandle=null; fileName=""; fsIdb("del"); renderFsBar(); toast("Unlinked — back to browser storage"); }
+function saveToOneDrive(){
+  if(!FS_OK){toast("Auto-save to a folder needs Edge or Chrome");return;}
+  if(fileLinked){ fileSave(); toast("Saved to "+fileName+" ✓"); return; }
+  if(fileHandle && state.patients.length===0){ fileReconnect(); return; } // empty + remembered -> load, never overwrite
+  fileLink();
+}
+function renderFsBar(){
+  const mini=document.getElementById("fsMini");
+  if(mini)mini.innerHTML=fileLinked?`<span class="fsmini-on" id="fsMiniGlow" title="Auto-saving to ${esc(fileName)}">⛁</span>`:"";
+  const bar=document.getElementById("fsBar"); if(!bar)return;
+  if(!FS_OK){bar.innerHTML=`<div class="fsrow"><b>Auto-save to disk</b><span class="fsstat off">Not available in this browser — use Backup / Restore below. (Works in Edge &amp; Chrome.)</span></div>`; return;}
+  const stat=fileLinked?`<span class="fsstat on">● Linked: ${esc(fileName)} — saving to disk</span>`
+    :fileHandle?`<span class="fsstat idle">○ ${esc(fileName)} remembered — not active</span>`
+    :`<span class="fsstat off">○ Not linked — browser storage only</span>`;
+  const btns=fileLinked?`<button class="btn" id="fsRelink">Change file</button><button class="btn" id="fsUnlink">Unlink</button>`
+    :fileHandle?`<button class="btn primary" id="fsReconnect">Reconnect</button><button class="btn" id="fsLink">Link new file</button><button class="btn" id="fsOpen">Open file</button>`
+    :`<button class="btn primary" id="fsLink">Link file</button><button class="btn" id="fsOpen">Open existing file</button>`;
+  bar.innerHTML=`<div class="fsrow"><b>Auto-save to disk</b>${stat}</div><div class="fsbtns">${btns}</div>`;
+  const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
+  w("fsLink",fileLink);w("fsRelink",fileLink);w("fsOpen",fileOpen);w("fsReconnect",fileReconnect);w("fsUnlink",fileUnlink);
+  renderLinkReminder();
+}
+function renderLinkReminder(){
+  const el=document.getElementById("linkRemind"); if(!el)return;
+  if(!(FS_OK&&!fileLinked&&!remindDismissed)){el.style.display="none";el.innerHTML="";return;}
+  const msg=fileHandle
+    ?`<b>Auto-save is paused.</b> Reconnect <code>${esc(fileName)}</code> to keep saving your work to disk this session.`
+    :`<b>Your data is only in this browser so far.</b> Link a file to keep a permanent copy on disk — it survives clearing the cache and lets you carry the study between PCs.`;
+  const act=fileHandle?`<button class="btn primary" id="lrMain">Reconnect</button>`:`<button class="btn primary" id="lrMain">Link a file</button>`;
+  el.innerHTML=`<span class="lrico">⚠</span><span class="lrmsg">${msg}</span><span class="lrbtns">${act}<button class="btn" id="lrLater">Not now</button></span>`;
+  el.style.display="flex";
+  const m=document.getElementById("lrMain"); if(m)m.onclick=()=>{fileHandle?fileReconnect():fileLink();};
+  const l=document.getElementById("lrLater"); if(l)l.onclick=()=>{remindDismissed=true;renderLinkReminder();};
+}
+document.getElementById("fileInput").onchange=e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value="";};
+
+/* ============================================================
+   CLOUD SYNC — keeps the whole study in a Google Sheet + Drive
+   file via an Apps Script web app. Works from any PC that can
+   reach the internet; nothing is stored on the hospital machine
+   except a cached copy in this browser.
+   ============================================================ */
+const CLOUD_KEY="cdr_cloud_cfg";
+let cloud={url:"",token:"",rev:0,device:"",on:false};
+let cloudSuppress=false, cloudBusy=false, cloudQueued=false, cloudTimer=null;
+let cloudState="off", cloudNote="", cloudAt=null, cloudRowsAt=0, cloudBehind=null;
+
+function cloudCfgLoad(){
+  try{const s=localStorage.getItem(CLOUD_KEY); if(s)cloud=Object.assign(cloud,JSON.parse(s));}catch(e){}
+  if(!cloud.device){
+    cloud.device=(navigator.userAgent.indexOf("Windows")>-1?"PC":"Device")+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+  cloud.on=!!(cloud.url&&cloud.token);
+}
+function cloudCfgSave(){try{localStorage.setItem(CLOUD_KEY,JSON.stringify(cloud));}catch(e){}}
+function cloudSet(st,note){cloudState=st;cloudNote=note||"";renderCloudBar();}
+
+async function cloudCall(action,extra){
+  const body=Object.assign({token:cloud.token,action:action,device:cloud.device},extra||{});
+  let r;
+  try{
+    r=await fetch(cloud.url,{method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(body)});
+  }catch(e){throw new Error("Can't reach the sync URL — check the network or the address.");}
+  const t=await r.text();
+  let j; try{j=JSON.parse(t);}catch(e){throw new Error("That URL didn't return study data. Re-copy the Web app URL.");}
+  if(j.error)throw new Error(j.error);
+  return j;
+}
+
+function cloudSchedule(){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>cloudPush(false,false),2500);}
+
+async function cloudPush(force,withRows){
+  if(!cloud.on)return;
+  if(cloudBusy){cloudQueued=true;return;}
+  cloudBusy=true; cloudSet("syncing");
+  try{
+    const rows=(withRows||Date.now()-cloudRowsAt>120000)&&state.patients.length
+      ? [buildHeader(),...state.patients.map((p,i)=>patientRow(p,i))] : null;
+    const j=await cloudCall("push",{state:state,baseRev:cloud.rev,force:!!force,rows:rows});
+    if(j.conflict){cloudBusy=false;cloudSet("conflict");cloudConflict(j);return;}
+    cloud.rev=j.rev; cloudCfgSave(); cloudBehind=null;
+    if(rows)cloudRowsAt=Date.now();
+    cloudAt=new Date(); cloudSet("ok");
+  }catch(e){cloudSet("err",e.message||"Sync failed");}
+  cloudBusy=false;
+  if(cloudQueued){cloudQueued=false;cloudSchedule();}
+}
+
+function cloudAdopt(j){
+  cloudSuppress=true;
+  try{
+    loadStateObj(j.state); cloud.rev=j.rev; cloudCfgSave(); resetHistoryBaseline();
+    try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}
+  }finally{cloudSuppress=false;}
+  cloudBehind=null; cloudAt=new Date(); renderAll(); cloudSet("ok");
+}
+
+async function cloudPull(quiet){
+  if(!cloud.on)return;
+  cloudSet("syncing");
+  try{
+    const j=await cloudCall("pull",{});
+    if(!j.state||!j.state.patients){cloudSet("ok");if(!quiet)toast("The cloud copy is empty — nothing to load");return;}
+    cloudAdopt(j);
+    toast(`Loaded ${state.patients.length} patient${state.patients.length>1?"s":""} from the cloud`);
+  }catch(e){cloudSet("err",e.message||"Couldn't load");}
+}
+
+function cloudConflict(j){
+  const when=j.updatedAt?new Date(j.updatedAt).toLocaleString():"";
+  const who=j.updatedBy||"another device";
+  const takeCloud=confirm(
+    "The cloud copy has changed since this PC last synced"+(when?" ("+who+", "+when+")":"")+".\n\n"+
+    "OK — load the cloud copy (this PC's unsynced edits are replaced)\n"+
+    "Cancel — keep this PC's data and overwrite the cloud");
+  if(takeCloud){try{cloudAdopt(j);toast("Loaded the cloud copy");}catch(e){cloudSet("err","Couldn't read the cloud copy");}}
+  else cloudPush(true,true);
+}
+
+async function cloudConnect(url,token){
+  url=(url||"").trim(); token=(token||"").trim();
+  if(!url||!token){toast("Paste both the Web app URL and the key");return;}
+  if(!/^https:\/\//.test(url)){toast("The Web app URL must start with https://");return;}
+  const prev={url:cloud.url,token:cloud.token};
+  cloud.url=url; cloud.token=token; cloud.on=true; cloudSet("syncing");
+  try{
+    const m=await cloudCall("meta",{});
+    cloudCfgSave();
+    if(m.rev>0&&!state.patients.length){await cloudPull(true);toast("Connected — loaded the cloud copy");return;}
+    if(m.rev>0&&state.patients.length){
+      cloud.rev=m.rev; cloudCfgSave(); cloudBehind=m; cloudSet("choose");
+      return;
+    }
+    cloud.rev=m.rev||0; cloudCfgSave(); cloudSet("ok"); toast("Connected — sending this PC's data up");
+    cloudPush(true,true);
+  }catch(e){
+    cloud.url=prev.url; cloud.token=prev.token; cloud.on=!!(cloud.url&&cloud.token);
+    cloudSet(cloud.on?"ok":"off"); toast(e.message||"Couldn't connect");
+  }
+}
+
+function cloudDisconnect(){
+  if(!confirm("Stop syncing to the cloud?\n\nThe data already in the Sheet stays there, and this PC keeps its own copy."))return;
+  clearTimeout(cloudTimer);
+  cloud={url:"",token:"",rev:0,device:cloud.device,on:false};
+  cloudCfgSave(); cloudBehind=null; cloudSet("off"); toast("Disconnected — this PC no longer syncs");
+}
+
+async function cloudInit(){
+  cloudCfgLoad();
+  if(!cloud.on){renderCloudBar();return;}
+  cloudSet("syncing");
+  try{
+    const m=await cloudCall("meta",{});
+    if(m.rev>cloud.rev){cloudBehind=m;cloudSet(state.patients.length?"choose":"behind");
+      if(!state.patients.length)await cloudPull(true);}
+    else cloudSet("ok");
+  }catch(e){cloudSet("err",e.message||"Offline");}
+  renderCloudMini();
+}
+
+function renderCloudMini(){
+  const el=document.getElementById("cloudMini"); if(!el)return;
+  if(!cloud.on){el.innerHTML="";return;}
+  const map={ok:["fsmini-on","☁","Synced to the cloud"],syncing:["fsmini-sync","☁","Syncing…"],
+    err:["fsmini-err","☁","Sync problem — open the Export tab"],
+    conflict:["fsmini-err","☁","Needs your decision — open the Export tab"],
+    choose:["fsmini-warn","☁","Cloud has newer data — open the Export tab"],
+    behind:["fsmini-warn","☁","Cloud has newer data"],off:["","",""]};
+  const m=map[cloudState]||map.ok;
+  el.innerHTML=m[1]?`<span class="${m[0]}" title="${esc(m[2])}">${m[1]}</span>`:"";
+}
+
+function renderCloudBar(){
+  renderCloudMini();
+  const bar=document.getElementById("cloudBar"); if(!bar)return;
+  const stamp=cloudAt?cloudAt.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"";
+  let stat,btns;
+  if(!cloud.on){
+    stat=`<span class="fsstat off">○ Not connected — data stays on this PC</span>`;
+    bar.innerHTML=`<div class="fsrow"><b>Cloud sync</b>${stat}</div>`+
+      `<div class="cs" style="margin-bottom:9px;line-height:1.55">Paste the <b>Web app URL</b> and <b>key</b> from your Apps Script deployment. After that every change saves to the Google Sheet automatically, and any PC with the same two values sees the same study.</div>`+
+      `<div class="cldform"><input id="cldUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">`+
+      `<input id="cldTok" type="password" placeholder="key" autocomplete="off"><button class="btn primary" id="cldConnect">Connect</button></div>`;
+    const c=document.getElementById("cldConnect");
+    if(c)c.onclick=()=>cloudConnect(document.getElementById("cldUrl").value,document.getElementById("cldTok").value);
+    return;
+  }
+  if(cloudState==="syncing")      stat=`<span class="fsstat idle">◐ Syncing…</span>`;
+  else if(cloudState==="err")     stat=`<span class="fsstat err">✕ ${esc(cloudNote||"Sync failed")}</span>`;
+  else if(cloudState==="conflict")stat=`<span class="fsstat err">✕ Two devices edited the same study — choose which copy to keep</span>`;
+  else if(cloudState==="choose"||cloudState==="behind"){
+    const w=cloudBehind&&cloudBehind.updatedAt?new Date(cloudBehind.updatedAt).toLocaleString():"";
+    stat=`<span class="fsstat idle">○ The cloud copy is newer${w?" ("+esc(w)+")":""} — load it, or send this PC's data up</span>`;
+  }
+  else stat=`<span class="fsstat on">● Synced${stamp?" "+stamp:""} — ${state.patients.length} patient${state.patients.length===1?"":"s"} in the Sheet</span>`;
+
+  if(cloudState==="choose"||cloudState==="behind")
+    btns=`<button class="btn primary" id="cldPull">Load cloud copy</button><button class="btn" id="cldPush">Send this PC's data up</button><button class="btn" id="cldOff">Disconnect</button>`;
+  else
+    btns=`<button class="btn primary" id="cldPush">Sync now</button><button class="btn" id="cldPull">Load cloud copy</button><button class="btn" id="cldOff">Disconnect</button>`;
+
+  bar.innerHTML=`<div class="fsrow"><b>Cloud sync</b>${stat}</div>`+
+    `<div class="fsbtns">${btns}</div>`+
+    `<div class="cs" style="margin-top:8px;opacity:.8">This PC is <span style="font-family:var(--mono)">${esc(cloud.device)}</span>. “Sync now” also refreshes the readable table in the Sheet.</div>`;
+  const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
+  w("cldPush",()=>cloudPush(cloudState==="choose"||cloudState==="behind",true));
+  w("cldPull",()=>cloudPull(false));
+  w("cldOff",cloudDisconnect);
+}
+
+
+/* ---- utils ---- */
+function esc(s){return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function download(content,name,type){const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
+let toastTimer=null;
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2400);}
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();exportCSV();}});
+window.addEventListener("beforeunload",e=>{
+  if(dirty)persist();
+  if(saveFailed&&!fileLinked){e.preventDefault();e.returnValue="";}   // warn only when data truly isn't saved anywhere
+});
+
+/* ============================================================
+   VIEW SWITCHER
+   ============================================================ */
+document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{view=b.dataset.view;renderAll();});
+
+/* ---- shared analysis helpers ---- */
+const HOTOK=["0","I","II","III","IV"];
+function numv(x){const n=parseFloat(x);return isNaN(n)?null:n;}
+function hoNum(t){const i=HOTOK.indexOf(String(t));return i<0?null:i;}
+function asdNum(v){const n=parseInt(v,10);return(isNaN(n)||n<0||n>4)?null:n;}
+function cdrLevels(p){return (p.levels||[]).filter(l=>!isFused(p,l));}
+const TLAB={PreOp:"Pre","2w":"2w","6m":"6m","1y":"1y","2y":"2y"};
+const CC={cyan:"#4cc9e6",green:"#46c98b",amber:"#f0a93b",red:"#e8645f",orange:"#e8894f"};
+function fmtN(v,d){if(v==null||isNaN(v))return"–";const f=Math.pow(10,d||0);return(Math.round(v*f)/f).toFixed(d||0);}
+function niceMax(v){if(!(v>0))return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;
+  const n=m<=1?1:m<=1.5?1.5:m<=2?2:m<=3?3:m<=4?4:m<=5?5:m<=6?6:m<=8?8:10;return n*e;}
+
+/* ============================================================
+   INLINE SVG CHARTS (no libraries — works fully offline)
+   ============================================================ */
+function barChart(items,opt){
+  opt=opt||{};const W=340,H=opt.H||152,mL=32,mR=10,mT=12,mB=opt.mB||30;
+  const pw=W-mL-mR,ph=H-mT-mB,base=mT+ph;
+  const top=niceMax(Math.max(...items.map(i=>i.value),0.001));
+  const y=v=>mT+ph*(1-v/top);
+  let g="";for(let i=0;i<=3;i++){const gv=top*i/3,yy=y(gv);
+    g+=`<line class="cgl" x1="${mL}" y1="${yy.toFixed(1)}" x2="${W-mR}" y2="${yy.toFixed(1)}"/>`+
+       `<text class="caxt" x="${mL-4}" y="${(yy+3).toFixed(1)}" text-anchor="end">${fmtN(gv,top<10?1:0)}</text>`;}
+  const n=items.length,band=pw/n;let bars="";
+  items.forEach((it,i)=>{const bw=Math.min(band*0.62,40),x=mL+band*i+(band-bw)/2,yv=y(it.value);
+    bars+=`<rect x="${x.toFixed(1)}" y="${yv.toFixed(1)}" width="${bw.toFixed(1)}" height="${(base-yv).toFixed(1)}" rx="2" fill="${opt.color||CC.cyan}"/>`+
+      `<text class="cvalt" x="${(x+bw/2).toFixed(1)}" y="${(yv-3).toFixed(1)}" text-anchor="middle">${fmtN(it.value,1)}</text>`+
+      `<text class="caxt" x="${(x+bw/2).toFixed(1)}" y="${(base+11).toFixed(1)}" text-anchor="middle">${esc(it.label)}</text>`+
+      (it.n!=null?`<text class="cvalt" x="${(x+bw/2).toFixed(1)}" y="${(base+21).toFixed(1)}" text-anchor="middle" style="fill:var(--faint)">n=${it.n}</text>`:"");});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img"><line class="cbl" x1="${mL}" y1="${base}" x2="${W-mR}" y2="${base}"/>${g}${bars}</svg>`;
+}
+function lineChart(series,xl,opt){
+  opt=opt||{};const W=340,H=opt.H||158,mL=32,mR=12,mT=12,mB=24;
+  const pw=W-mL-mR,ph=H-mT-mB,base=mT+ph;
+  let mx=0;series.forEach(s=>s.data.forEach(v=>{if(v!=null&&v>mx)mx=v;}));
+  const top=opt.top||niceMax(mx);const y=v=>mT+ph*(1-v/top);
+  const n=xl.length,X=i=>n>1?mL+pw*i/(n-1):mL+pw/2;
+  let g="";for(let i=0;i<=3;i++){const gv=top*i/3,yy=y(gv);
+    g+=`<line class="cgl" x1="${mL}" y1="${yy.toFixed(1)}" x2="${W-mR}" y2="${yy.toFixed(1)}"/>`+
+       `<text class="caxt" x="${mL-4}" y="${(yy+3).toFixed(1)}" text-anchor="end">${fmtN(gv,top<10?1:0)}</text>`;}
+  let xlab="";xl.forEach((l,i)=>xlab+=`<text class="caxt" x="${X(i).toFixed(1)}" y="${(base+13).toFixed(1)}" text-anchor="middle">${esc(l)}</text>`);
+  let paths="";series.forEach(s=>{let d="",first=true,pts="";
+    s.data.forEach((v,i)=>{if(v==null)return;const xx=X(i),yy=y(v);d+=(first?"M":"L")+xx.toFixed(1)+" "+yy.toFixed(1)+" ";first=false;
+      pts+=`<circle cx="${xx.toFixed(1)}" cy="${yy.toFixed(1)}" r="2.6" fill="${s.color}"/>`;});
+    paths+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${pts}`;
+    if(opt.labelPoints&&series.length===1)s.data.forEach((v,i)=>{if(v==null)return;
+      paths+=`<text class="cvalt" x="${X(i).toFixed(1)}" y="${(y(v)-6).toFixed(1)}" text-anchor="middle">${fmtN(v,opt.dec==null?1:opt.dec)}</text>`;});});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img"><line class="cbl" x1="${mL}" y1="${base}" x2="${W-mR}" y2="${base}"/>${g}${xlab}${paths}</svg>`;
+}
+function stackChart(cols,segs,opt){
+  opt=opt||{};const W=340,H=opt.H||158,mL=22,mR=10,mT=10,mB=24;
+  const pw=W-mL-mR,ph=H-mT-mB,base=mT+ph;
+  let g="";for(let i=0;i<=2;i++){const f=i/2,yy=base-ph*f;
+    g+=`<line class="cgl" x1="${mL}" y1="${yy.toFixed(1)}" x2="${W-mR}" y2="${yy.toFixed(1)}"/>`+
+       `<text class="caxt" x="${mL-4}" y="${(yy+3).toFixed(1)}" text-anchor="end">${Math.round(f*100)}</text>`;}
+  const n=cols.length,band=pw/n;let bars="";
+  cols.forEach((c,i)=>{const bw=Math.min(band*0.6,46),x=mL+band*i+(band-bw)/2;let acc=0;
+    c.parts.forEach((pr,si)=>{if(pr<=0)return;const h=ph*pr,yTop=base-ph*acc-h;
+      bars+=`<rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${segs[si].color}"/>`;
+      if(pr>=0.14)bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${(yTop+h/2+3).toFixed(1)}" text-anchor="middle" style="fill:#0e1216;font-weight:700;font-size:8.5px;font-family:var(--mono)">${Math.round(pr*100)}</text>`;
+      acc+=pr;});
+    bars+=`<text class="caxt" x="${(x+bw/2).toFixed(1)}" y="${(base+13).toFixed(1)}" text-anchor="middle">${esc(c.label)}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img"><line class="cbl" x1="${mL}" y1="${base}" x2="${W-mR}" y2="${base}"/>${g}${bars}</svg>`;
+}
+function legendHTML(items){return `<div class="lgnd">`+items.map(it=>`<span><i style="background:${it.color}"></i>${esc(it.name)}</span>`).join("")+`</div>`;}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function renderDashboard(){
+  const m=document.getElementById("main"),ps=state.patients;
+  if(!ps.length){m.innerHTML=`<div class="dash"><div class="blank"><div><h3>No data</h3>Load or enter patients to see the cohort dashboard.</div></div></div>`;return;}
+  const N=ps.length;
+  const ages=ps.map(p=>numv(p.age)).filter(v=>v!=null);
+  const meanAge=ages.length?ages.reduce((a,b)=>a+b,0)/ages.length:null;
+  const fem=ps.filter(p=>p.sex==="F").length;
+  const hyb=ps.filter(p=>p.fused&&p.fusedLevels&&p.fusedLevels.length).length;
+  const meanLv=ps.reduce((a,p)=>a+((p.levels&&p.levels.length)||0),0)/N;
+  const nCDR=ps.reduce((a,p)=>a+cdrLevels(p).length,0);
+  const nACDF=ps.reduce((a,p)=>a+((p.fusedLevels||[]).length),0);
+  const cards=[{v:N,s:"",l:"Patients"},{v:meanAge==null?"–":fmtN(meanAge,0),s:" y",l:"Mean age"},
+    {v:fmtN(meanLv,1),s:"",l:"Levels / patient"},{v:nCDR,s:"",l:"CDR levels"},{v:nACDF,s:"",l:"ACDF levels"},
+    {v:Math.round(100*hyb/N),s:"%",l:"Hybrid (ACDF)"},{v:Math.round(100*fem/N),s:"%",l:"Female"}];
+  // mean segmental ROM by level @ 2y (operated CDR levels)
+  const romByLvl=LEVELS.map(L=>{const vals=[];ps.forEach(p=>{if(p.levels.includes(L)&&!isFused(p,L)){
+      const v=numv(romOf(p.data["2y"],L).val);if(v!=null)vals.push(v);}});
+    return{label:L,value:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0,n:vals.length};}).filter(o=>o.n>0);
+  // ROM over time: index segmental + global
+  const xl=TPS.map(t=>TLAB[t.key]);
+  const idxROM=TPS.map(t=>{const vals=[];ps.forEach(p=>cdrLevels(p).forEach(L=>{const v=numv(romOf(p.data[t.key],L).val);if(v!=null)vals.push(v);}));
+    return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;});
+  const glbROM=TPS.map(t=>{const vals=[];ps.forEach(p=>{const v=numv(gromOf(p.data[t.key]).val);if(v!=null)vals.push(v);});
+    return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;});
+  // ASD-free proportion over time (adjacent K-L < 2)
+  const asdFree=TPS.map(t=>{let den=0,free=0;ps.forEach(p=>{const adj=adjacentLevels(p);const lv=[adj.upper,adj.lower].filter(Boolean);
+      if(!lv.length)return;const gr=lv.map(L=>asdNum(p.data[t.key].asd[L])).filter(v=>v!=null);if(!gr.length)return;
+      den++;if(Math.max(...gr)<2)free++;});return den?100*free/den:null;});
+  // HO grade distribution over time (post-op; per-patient max across CDR levels)
+  const postTPS=TPS.filter(t=>isPostop(t.key));
+  const hoCols=postTPS.map(t=>{const cnt=[0,0,0,0,0];let tot=0;ps.forEach(p=>{const cl=cdrLevels(p);if(!cl.length)return;
+      const gs=cl.map(L=>hoNum(p.data[t.key].ho[L])).filter(v=>v!=null);if(!gs.length)return;cnt[Math.max(...gs)]++;tot++;});
+    return{label:TLAB[t.key],parts:tot?cnt.map(c=>c/tot):[0,0,0,0,0],tot};});
+  const hoSegs=[{name:"0 None",color:CC.green},{name:"I",color:CC.cyan},{name:"II",color:CC.amber},{name:"III",color:CC.orange},{name:"IV",color:CC.red}];
+
+  // --- added comparisons / analysis ---
+  // CDR vs ACDF index-level ROM over time (idxROM above is the CDR line)
+  const hasACDF=ps.some(p=>(p.fusedLevels||[]).length);
+  const acdfROM=TPS.map(t=>{const v=[];ps.forEach(p=>(p.fusedLevels||[]).forEach(L=>{const x=numv(romOf(p.data[t.key],L).val);if(x!=null)v.push(x);}));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;});
+  // adjacent-segment ROM grouped by index construct: pure CDR vs any ACDF/hybrid (compensatory hypermobility = ASD driver)
+  const isCDRpt=p=>(cdrLevels(p).length>0 && !((p.fusedLevels||[]).length));
+  const isACDFpt=p=>(((p.fusedLevels||[]).length)>0);
+  const adjROMfor=fn=>TPS.map(t=>{const v=[];ps.forEach(p=>{if(!fn(p))return;const adj=adjacentLevels(p);
+      [adj.upper,adj.lower].forEach(L=>{if(!L)return;const x=numv(romOf(p.data[t.key],L).val);if(x!=null)v.push(x);});});
+    return v.length?v.reduce((s,b)=>s+b,0)/v.length:null;});
+  const cdrAdjROM=adjROMfor(isCDRpt),acdfAdjROM=adjROMfor(isACDFpt);
+  const hasAdjBoth=cdrAdjROM.some(v=>v!=null)&&acdfAdjROM.some(v=>v!=null);
+  const nCDRpt=ps.filter(isCDRpt).length,nACDFpt=ps.filter(isACDFpt).length;
+  // index segmental ROM @ 2y stratified by McAfee HO grade
+  const romByHO=[0,1,2,3,4].map(g=>{const v=[];ps.forEach(p=>cdrLevels(p).forEach(L=>{
+      const ho=hoNum(p.data["2y"].ho[L]),r=numv(romOf(p.data["2y"],L).val);
+      if(ho===g&&r!=null)v.push(r);}));
+    return{label:HOTOK[g],value:v.length?v.reduce((a,b)=>a+b,0)/v.length:0,n:v.length};}).filter(o=>o.n>0);
+  // sagittal alignment over time
+  const meanG=(t,key)=>{const v=[];ps.forEach(p=>{const x=numv(p.data[t.key][key]);if(x!=null)v.push(x);});return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+  const t1Mean=TPS.map(t=>meanG(t,"t1slope")),svaMean=TPS.map(t=>meanG(t,"sva"));
+  const hasT1=t1Mean.some(v=>v!=null),hasSVA=svaMean.some(v=>v!=null);
+  // index ROM retained at 2y vs pre-op (cohort summary)
+  const pIdx=idxROM[0],lIdx=idxROM[idxROM.length-1];
+  const romRetain=(pIdx!=null&&lIdx!=null&&pIdx>0)?Math.round(100*lIdx/pIdx):null;
+  // ---- B1: % of operated levels recovered to pre-op ROM or better, by visit ----
+  const baseKey=TPS[0].key;
+  const recPct=TPS.map(t=>{let den=0,rec=0;ps.forEach(p=>cdrLevels(p).forEach(L=>{
+      const b=numv(romOf(p.data[baseKey],L).val),v=numv(romOf(p.data[t.key],L).val);
+      if(b!=null&&v!=null){den++;if(v>=b)rec++;}}));return den?100*rec/den:null;});
+  // ---- B3: mean adjacent-segment ROM across all patients, by visit ----
+  const adjROMall=TPS.map(t=>{const v=[];ps.forEach(p=>{const a=adjacentLevels(p);
+      [a.upper,a.lower].forEach(L=>{if(!L)return;const x=numv(romOf(p.data[t.key],L).val);if(x!=null)v.push(x);});});
+    return v.length?v.reduce((s,b)=>s+b,0)/v.length:null;});
+  // ---- B2: adjacent K-L 2+ over time, split by index function (functionally fused vs mobile @2y) ----
+  const isFusedIdx=p=>cdrLevels(p).some(L=>{const h=hoNum(p.data["2y"].ho[L]),r=numv(romOf(p.data["2y"],L).val);return (h!=null&&h>=3)||(r!=null&&r<2);});
+  const cdrPts2=ps.filter(p=>cdrLevels(p).length>0);
+  const fusedGrp=cdrPts2.filter(isFusedIdx),mobileGrp=cdrPts2.filter(p=>!isFusedIdx(p));
+  const adjDegFor=grp=>TPS.map(t=>{let den=0,deg=0;grp.forEach(p=>{const a=adjacentLevels(p);
+      [a.upper,a.lower].forEach(L=>{if(!L)return;const k=asdNum(p.data[t.key].asd[L]);if(k!=null){den++;if(k>=2)deg++;}});});
+    return den?100*deg/den:null;});
+  const fusedAdjDeg=adjDegFor(fusedGrp),mobileAdjDeg=adjDegFor(mobileGrp);
+  const hasFuncSplit=fusedGrp.length>0&&mobileGrp.length>0&&(fusedAdjDeg.some(v=>v!=null)||mobileAdjDeg.some(v=>v!=null));
+  // ---- B4: motion partitioning — index vs adjacent share of total measured segmental ROM ----
+  const partCols=TPS.map(t=>{let si=0,sa=0;ps.forEach(p=>{
+      cdrLevels(p).forEach(L=>{const x=numv(romOf(p.data[t.key],L).val);if(x!=null)si+=x;});
+      const a=adjacentLevels(p);[a.upper,a.lower].forEach(L=>{if(!L)return;const x=numv(romOf(p.data[t.key],L).val);if(x!=null)sa+=x;});});
+    const tot=si+sa;return{label:TLAB[t.key],parts:tot>0?[si/tot,sa/tot]:[0,0]};});
+  const partSegs=[{name:"Index (operated)",color:CC.cyan},{name:"Adjacent",color:CC.orange}];
+  const hasPart=partCols.some(c=>c.parts[0]+c.parts[1]>0);
+  // ---- B5: de novo adjacent degeneration (healthy at baseline -> K-L 2+ at 2y), by index function ----
+  const deNovoFor=grp=>{let den=0,prog=0;grp.forEach(p=>{const a=adjacentLevels(p);[a.upper,a.lower].forEach(L=>{if(!L)return;
+      const b=asdNum(p.data[baseKey].asd[L]),e=asdNum(p.data["2y"].asd[L]);
+      if(b!=null&&b<2&&e!=null){den++;if(e>=2)prog++;}});});return{den,pct:den?100*prog/den:null};};
+  const dnMobile=deNovoFor(mobileGrp),dnFused=deNovoFor(fusedGrp);
+  const deNovoBars=[];
+  if(dnMobile.pct!=null)deNovoBars.push({label:"Mobile index (n="+dnMobile.den+" segs)",value:dnMobile.pct});
+  if(dnFused.pct!=null)deNovoBars.push({label:"Fused index (n="+dnFused.den+" segs)",value:dnFused.pct});
+  // ---- auto-summaries: short plain-English read-outs under each chart, all data-driven ----
+  const _n=(x,d)=>x==null?"\u2013":fmtN(x,d==null?1:d);
+  const _p=x=>x==null?"\u2013":Math.round(x)+"%";
+  const _at=(a,i)=>(a&&a[i]!=null)?a[i]:null;
+  const _lst=a=>{for(let i=a.length-1;i>=0;i--)if(a[i]!=null)return a[i];return null;};
+  const _dir=(d,u,dn,fl)=>Math.abs(d)<0.05?(fl||"holds steady"):(d>0?(u||"rises"):(dn||"falls"));
+  const summaryBox=t=>t?`<div style="margin-top:10px;padding:9px 11px;background:rgba(76,201,230,.06);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;font-size:12.5px;line-height:1.5;color:#c7d2da"><span style="display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);opacity:.85;margin-bottom:3px;font-weight:700">Auto-summary</span>${t}</div>`:"";
+
+  const sCohort = N ? `This cohort has ${N} patient${N===1?"":"s"} (mean age ${_n(meanAge,0)}, ${Math.round(100*fem/N)}% female), contributing ${nCDR} arthroplasty and ${nACDF} fused level${nACDF===1?"":"s"}; ${Math.round(100*hyb/N)}% are hybrid constructs. Every read-out below recomputes as you enter data, so figures from only a handful of patients will swing \u2014 treat them as direction-finding, not results.` : "";
+
+  let sBy="";
+  if(romByLvl.length){const _tot=romByLvl.reduce((s,o)=>s+o.n,0),_mean=romByLvl.reduce((s,o)=>s+o.value*o.n,0)/_tot;
+    const _mx=romByLvl.reduce((a,b)=>b.value>a.value?b:a),_mn=romByLvl.reduce((a,b)=>b.value<a.value?b:a);
+    sBy=`Across ${_tot} operated level${_tot===1?"":"s"} measured at 2 years, mean segmental ROM is ${_n(_mean)}\u00b0. Motion is highest at ${_mx.label} (${_n(_mx.value)}\u00b0) and lowest at ${_mn.label} (${_n(_mn.value)}\u00b0). Levels sitting low are worth a look for ossification or implant sizing. Still descriptive at this sample size.`;}
+
+  let sMP="";
+  {const _po=_at(idxROM,0),_tw=_at(idxROM,1),_ty=_lst(idxROM),_gpo=_at(glbROM,0),_gty=_lst(glbROM);
+   if(_po!=null&&_ty!=null){const _dg=(_gpo!=null&&_gty!=null)?_gty-_gpo:null;
+    sMP=`Index segmental ROM goes from ${_n(_po)}\u00b0 before surgery to ${_n(_ty)}\u00b0 at the last visit${romRetain!=null?`, about ${romRetain}% of the pre-op arc`:""}.${_tw!=null?` It passes through a 2-week dip near ${_n(_tw)}\u00b0.`:""} Global C2\u2013C7 motion ${_dg==null?"is tracked alongside":_dir(_dg,"rises","falls","holds steady")} (${_n(_gpo)}\u00b0 \u2192 ${_n(_gty)}\u00b0). Holding most of the index arc is the core arthroplasty claim; how that recovery unfolds early is the part worth modelling.`;}}
+
+  let sRec="";
+  {const _po=_at(idxROM,0),_tw=_at(idxROM,1),_ty=_lst(idxROM),_rtw=_at(recPct,1),_r2=(_at(recPct,4)!=null?_at(recPct,4):_lst(recPct));
+   if(_po!=null&&_ty!=null){const _drop=(_tw!=null)?_po-_tw:null,_dpc=(_drop!=null&&_po>0)?Math.round(100*_drop/_po):null;
+    sRec=`Index motion ${_tw!=null?`dips to ${_n(_tw)}\u00b0 at 2 weeks${_drop!=null?`, a fall of ${_n(_drop)}\u00b0${_dpc!=null?` (${_dpc}%)`:""} from baseline`:""}, then `:""}recovers toward ${_n(_ty)}\u00b0 by the last visit. By 2 weeks ${_rtw!=null?_p(_rtw):"\u2013"} of operated levels are back to pre-op ROM, ${_r2!=null?_p(_r2):"\u2013"} by 2 years. This early nadir-and-recovery is the genuine gap in the literature \u2014 published curves start around 2 months \u2014 so if it holds across more patients it is a strong primary endpoint. Confirm the shape with a per-patient random-slope mixed model, not these means.`;}}
+
+  let sPart="";
+  if(hasPart){const _po=partCols[0],_ty=partCols[partCols.length-1];
+   const _aPO=Math.round(100*_po.parts[1]),_aTY=Math.round(100*_ty.parts[1]),_iTY=Math.round(100*_ty.parts[0]),_d=Math.round(100*_ty.parts[1])-Math.round(100*_po.parts[1]);
+   sPart=`At the last visit the operated segments hold ${_iTY}% of total measured segmental motion and the adjacent segments ${_aTY}%. The adjacent share ${Math.abs(_d)<1?"is essentially unchanged from":_d>0?`has risen ${_d} point${_d===1?"":"s"} from`:`has fallen ${Math.abs(_d)} point${Math.abs(_d)===1?"":"s"} from`} ${_aPO}% early on. A rising adjacent share would point to motion redistributing toward the neighbours as the index stiffens. This partitions only the segments actually measured, not the whole C2\u2013C7 arc.`;}
+
+  let sASD="";
+  {const _apo=_at(asdFree,0),_aty=_lst(asdFree);
+   if(_aty!=null){sASD=`${_p(_aty)} of patients are still free of adjacent degeneration (K\u2013L under 2) at the last visit${_apo!=null?`, down from ${_p(_apo)} before surgery`:""}. Whether that decline reflects the surgery or simple natural history is exactly what the functional-fusion charts below are built to probe. Treat the slope cautiously while numbers are small.`;}}
+
+  let sHO="";
+  if(hoCols.length){const _l=hoCols[hoCols.length-1];
+   if(_l.tot){const _any=Math.round(100*(1-_l.parts[0])),_high=Math.round(100*(_l.parts[3]+_l.parts[4]));
+    sHO=`By the last visit ${_any}% of patients show some heterotopic ossification and ${_high}% reach high grade (III\u2013IV), where the segment behaves mechanically like a fusion. ${_high>0?"That high-grade group is the bridge to the functional-fusion analysis below \u2014 those discs lose the very motion meant to protect the neighbour.":"No high-grade bridging yet, so the arthroplasty levels stay genuinely mobile so far."} Grades are the per-patient worst level across ${_l.tot} patients.`;}}
+
+  let sCvA="";
+  if(hasACDF){const _c=_lst(idxROM),_a=_lst(acdfROM);
+   if(_c!=null&&_a!=null){sCvA=`At the last visit arthroplasty levels move ${_n(_c)}\u00b0 versus ${_n(_a)}\u00b0 at fused levels \u2014 a ${_n(Math.abs(_c-_a))}\u00b0 gap, expected by design. Fused levels should sit near zero; values well above that hint at residual motion or measurement noise. The real question is not the gap but whether preserved motion buys fewer adjacent problems, tested in the charts below.`;}}
+
+  let sAdjCvA="";
+  if(hasAdjBoth){const _c=_lst(cdrAdjROM),_a=_lst(acdfAdjROM);
+   if(_c!=null&&_a!=null){sAdjCvA=`Segments next to a fusion average ${_n(_a)}\u00b0 at the last visit versus ${_n(_c)}\u00b0 next to an arthroplasty \u2014 ${_n(Math.abs(_a-_c))}\u00b0 ${_a>=_c?"more":"less"} motion. Extra motion adjacent to a fusion is a recognised driver of adjacent degeneration. With ${nACDFpt} fused/hybrid and ${nCDRpt} pure-CDR patients this is hypothesis-generating, not confirmatory.`;}}
+
+  let sB3="";
+  {const _ipo=_at(idxROM,0),_itw=_at(idxROM,1),_apo=_at(adjROMall,0),_atw=_at(adjROMall,1);
+   if(_itw!=null&&_atw!=null){const _id=(_ipo!=null)?_ipo-_itw:null,_au=(_apo!=null)?_atw-_apo:null,_recip=(_id!=null&&_au!=null&&_id>0&&_au>0);
+    sB3=`At 2 weeks index motion is ${_n(_itw)}\u00b0${_ipo!=null?` (${_id>=0?"down":"up"} ${_n(Math.abs(_id))}\u00b0 from baseline)`:""} while adjacent motion is ${_n(_atw)}\u00b0${_apo!=null?` (${_au>=0?"up":"down"} ${_n(Math.abs(_au))}\u00b0)`:""}. ${_recip?"Adjacent motion rises while the index dips \u2014 the reciprocal you would expect from acute compensation.":"No clear reciprocal spike shows in these means yet."} A compensatory bump that fades as the index recovers would be a novel within-patient signal, and only the 2-week film captures it. Test the coupling per patient before concluding.`;}}
+
+  let sB2="";
+  if(hasFuncSplit){const _f=_lst(fusedAdjDeg),_mo=_lst(mobileAdjDeg);
+   if(_f!=null||_mo!=null){const _cmp=(_f!=null&&_mo!=null)?(_f>_mo?"More degeneration alongside the stiffened discs fits the idea that retained motion is protective.":_f<_mo?"Here the mobile group shows more, which runs against the protective story \u2014 worth watching as n grows.":"The two groups are level so far."):"";
+    sB2=`At the last visit ${_f!=null?_p(_f):"\u2013"} of segments next to a functionally-fused index show K\u2013L grade 2 or higher, versus ${_mo!=null?_p(_mo):"\u2013"} next to a functionally-mobile index (${fusedGrp.length} vs ${mobileGrp.length} patients). ${_cmp} If a separation holds with more patients it reframes the adjacent question around retained function rather than the mere presence of a device. Subgroups are small \u2014 a signal, not proof.`;}}
+
+  let sB5="";
+  if(deNovoBars.length>=2){const _f=dnFused.pct,_mo=dnMobile.pct;
+    const _cmp=(_f!=null&&_mo!=null&&_f!==_mo)?(_f>_mo?"More de novo change alongside fused discs would argue adjacent degeneration is at least partly motion-modifiable, not obligatory.":"Here the mobile side shows more, which would argue against a simple protective story."):"The two are close at current counts.";
+    sB5=`Among neighbours healthy at baseline, ${_f!=null?_p(_f):"\u2013"} developed new degeneration by 2 years next to a functionally-fused index versus ${_mo!=null?_p(_mo):"\u2013"} next to a mobile one (${dnFused.den} vs ${dnMobile.den} segments). ${_cmp} De novo progression is the cleaner endpoint for the obligatory-versus-modifiable question. Counts are small; this points the analysis rather than settling it.`;}
+
+  let sHOrom="";
+  if(romByHO.length>=2){const _lo=romByHO[0],_hi=romByHO[romByHO.length-1];
+   sHOrom=`Mean 2-year segmental ROM is ${_n(_lo.value)}\u00b0 at HO grade ${_lo.label} and ${_n(_hi.value)}\u00b0 at grade ${_hi.label}${_lo.value>_hi.value?`, a ${_n(_lo.value-_hi.value)}\u00b0 fall as the grade rises`:""}. Motion is expected to drop as bone bridges the segment; whether that gradient holds here is worth reading against the bars above. It is the mechanism that would tie ossification to the functional-fusion findings \u2014 more bone, less motion, less protection for the neighbour.`;}
+
+  let sSag="";
+  {const _tpo=_at(t1Mean,0),_tty=_lst(t1Mean),_spo=_at(svaMean,0),_sty=_lst(svaMean),_parts=[];
+   if(_tpo!=null&&_tty!=null)_parts.push(`T1 slope ${_dir(_tty-_tpo,"increases","decreases","holds")} from ${_n(_tpo)}\u00b0 to ${_n(_tty)}\u00b0`);
+   if(_spo!=null&&_sty!=null)_parts.push(`C2\u2013C7 SVA ${_dir(_sty-_spo,"increases","decreases","holds")} from ${_n(_spo)} to ${_n(_sty)} mm`);
+   if(_parts.length)sSag=`${_parts.join(" and ")} over follow-up. Large sagittal shifts can confound motion outcomes, so this is mostly a check. If alignment stays flat, it is unlikely to be driving the ROM story.`;}
+
+
+  // ---- implant size: mean 2y segmental ROM by recorded implant height ----
+  const romBySize=(()=>{const m2={};ps.forEach(p=>cdrLevels(p).forEach(L=>{const h=(p.isize&&p.isize[L])?numv(p.isize[L].h):null,r=numv(romOf(p.data["2y"],L).val);if(h!=null&&r!=null){const k=Math.round(h);(m2[k]=m2[k]||[]).push(r);}}));
+    return Object.keys(m2).map(k=>({label:k+" mm",value:m2[k].reduce((a,b)=>a+b,0)/m2[k].length,n:m2[k].length})).sort((a,b)=>parseFloat(a.label)-parseFloat(b.label));})();
+  let sSize="";
+  if(romBySize.length>=2){const _lo=romBySize[0],_hi=romBySize[romBySize.length-1],_flat=Math.abs(_lo.value-_hi.value)<1.5;
+    sSize=`Across recorded heights, mean 2-year ROM runs ${_n(_lo.value)}° at ${_lo.label} to ${_n(_hi.value)}° at ${_hi.label}. ${_flat?"No clear height-to-motion relationship shows in this sample.":(_hi.value>_lo.value?"Taller implants trend toward more motion here.":"Shorter implants trend toward more motion here.")} The oversizing chart below uses implant minus pre-op disc height to probe the review's 2 mm rule. Exploratory, and sizes are operator-entered.`;}
+  // oversizing (implant height - pre-op disc height) vs adjacent degeneration at 2y
+  const _oversz=p=>cdrLevels(p).some(L=>{const s=(p.isize&&p.isize[L])||{},h=numv(s.h),d=numv(s.disc);return h!=null&&d!=null&&(h-d)>=2;});
+  const _hasSz=p=>cdrLevels(p).some(L=>{const s=(p.isize&&p.isize[L])||{};return numv(s.h)!=null&&numv(s.disc)!=null;});
+  const _szPts=ps.filter(_hasSz),_overGrp=_szPts.filter(_oversz),_matchGrp=_szPts.filter(p=>!_oversz(p));
+  const _adjKL2=grp=>{let den=0,deg=0;grp.forEach(p=>{const a=adjacentLevels(p);[a.upper,a.lower].forEach(L=>{if(!L)return;const k=asdNum(p.data["2y"].asd[L]);if(k!=null){den++;if(k>=2)deg++;}});});return{den,pct:den?100*deg/den:null};};
+  const _ov=_adjKL2(_overGrp),_mt=_adjKL2(_matchGrp);
+  const overBars=[];
+  if(_ov.pct!=null)overBars.push({label:"Oversized 2mm+ (n="+_overGrp.length+")",value:_ov.pct});
+  if(_mt.pct!=null)overBars.push({label:"Matched (n="+_matchGrp.length+")",value:_mt.pct});
+  let sOver="";
+  if(overBars.length>=2){sOver=`At 2 years, ${_p(_ov.pct)} of segments next to an implant oversized by 2 mm or more (vs the pre-op disc) reach K-L grade 2 or higher, against ${_p(_mt.pct)} next to a matched implant (${_overGrp.length} vs ${_matchGrp.length} patients). ${_ov.pct>_mt.pct?"More adjacent degeneration alongside oversized implants fits the review's 2 mm warning.":"No excess adjacent degeneration with oversizing shows in this sample."} Oversizing is implant height minus pre-op disc height per level. Exploratory; small subgroups.`;}
+  m.innerHTML=`<div class="dash">
+    <div class="sech">Analysis overview</div>
+    <div class="metricgrid">${cards.map(c=>`<div class="metric"><div class="mv">${c.v}<small>${c.s}</small></div><div class="ml">${c.l}</div></div>`).join("")}</div>
+
+    ${summaryBox(sCohort)}
+
+    <div class="chartcard"><div class="ct">Segmental ROM by level</div><div class="cs">Mean flexion–extension ROM at 2 years, operated (CDR) levels only</div>
+      ${romByLvl.length?barChart(romByLvl,{color:CC.cyan,unit:"°"}):`<div class="cs">No operated-level ROM recorded.</div>`}</div>
+
+    ${summaryBox(sBy)}
+
+    <div class="chartcard"><div class="ct">Motion preservation over time</div><div class="cs">Mean ROM (°) across follow-up</div>
+      ${lineChart([{name:"Index segmental",color:CC.cyan,data:idxROM},{name:"Global C2–C7",color:CC.amber,data:glbROM}],xl)}
+      ${legendHTML([{name:"Index segmental ROM",color:CC.cyan},{name:"Global C2–C7 ROM",color:CC.amber}])}</div>
+
+    ${summaryBox(sMP)}
+
+    <div class="chartcard"><div class="ct">Early ROM recovery</div><div class="cs">Operated-level motion typically dips at 2 weeks, then recovers. Watch the 2-week nadir. Exploratory.</div>
+      <div class="cs" style="margin:2px 0 3px;color:${CC.cyan}">Mean index segmental ROM (°)</div>
+      ${lineChart([{name:"Index ROM",color:CC.cyan,data:idxROM}],xl,{labelPoints:true,dec:1})}
+      <div class="cs" style="margin:9px 0 3px;color:${CC.green}">% of operated levels recovered to pre-op ROM or better</div>
+      ${lineChart([{name:"% recovered",color:CC.green,data:recPct}],xl,{top:100,labelPoints:true,dec:0})}
+      <div class="cs" style="margin-top:7px;opacity:.85">Note: about 2° is near the measurement floor for segmental Cobb ROM (reported MDC about 2.7°); read sub-2° changes with caution.</div></div>
+
+    ${summaryBox(sRec)}
+
+    <div class="chartcard"><div class="ct">Motion partitioning (C2-C7)</div><div class="cs">Index vs adjacent share of total measured segmental ROM, by visit — does the adjacent share rise as index motion is lost to bone bridging? Exploratory.</div>
+      ${hasPart?stackChart(partCols,partSegs)+legendHTML(partSegs):`<div class="cs">Not enough segmental ROM recorded to partition motion.</div>`}</div>
+
+    ${summaryBox(sPart)}
+
+    <div class="chartcard"><div class="ct">ASD-free proportion</div><div class="cs">Patients with no adjacent-level degeneration (K–L &lt; 2), % over time</div>
+      ${lineChart([{name:"ASD-free",color:CC.green,data:asdFree}],xl,{top:100,unit:"%",labelPoints:true,dec:0})}</div>
+
+    ${summaryBox(sASD)}
+
+    <div class="chartcard"><div class="ct">Heterotopic ossification over time</div><div class="cs">Distribution of per-patient highest McAfee grade (post-op), % of cohort</div>
+      ${stackChart(hoCols,hoSegs)}
+      ${legendHTML(hoSegs)}</div>
+
+    ${summaryBox(sHO)}
+
+    <div class="sech" style="margin-top:18px">Comparisons &amp; analysis</div>
+
+    ${romRetain!=null?`<div class="chartcard" style="display:flex;align-items:center;gap:13px;padding:12px 14px">
+      <div class="mv" style="font-size:26px;font-weight:800;line-height:1;color:${romRetain>=80?CC.green:romRetain>=50?CC.amber:CC.red}">${romRetain}<small>%</small></div>
+      <div class="cs" style="margin:0">of pre-op index ROM still present at 2 yr — motion preserved (cohort mean)</div></div>`:""}
+
+    <div class="chartcard"><div class="ct">CDR vs ACDF — index-level ROM</div><div class="cs">Mean flexion–extension ROM (°) at operated levels over time: arthroplasty vs fused</div>
+      ${hasACDF?lineChart([{name:"CDR",color:CC.cyan,data:idxROM},{name:"ACDF",color:CC.orange,data:acdfROM}],xl)+legendHTML([{name:"CDR (arthroplasty)",color:CC.cyan},{name:"ACDF (fused)",color:CC.orange}]):`<div class="cs">No fused (ACDF) levels in this cohort yet — nothing to compare. Mark levels fused on the Data tab to populate this.</div>`}</div>
+
+    ${summaryBox(sCvA)}
+
+    <div class="chartcard"><div class="ct">Adjacent-segment ROM — CDR vs ACDF</div><div class="cs">Mean flexion–extension ROM (°) at the segments immediately above/below the construct, grouped by index type. Extra motion next to a fusion is a recognised driver of adjacent-segment degeneration.</div>
+      ${hasAdjBoth?lineChart([{name:"CDR-adjacent",color:CC.cyan,data:cdrAdjROM},{name:"ACDF-adjacent",color:CC.orange,data:acdfAdjROM}],xl)+legendHTML([{name:"Adjacent to CDR (n="+nCDRpt+")",color:CC.cyan},{name:"Adjacent to ACDF / hybrid (n="+nACDFpt+")",color:CC.orange}]):`<div class="cs">${nACDFpt?"":"No ACDF / hybrid constructs in this cohort yet — "}need adjacent-level flex/ext in a pure-CDR and an ACDF / hybrid patient to compare.</div>`}</div>
+
+    ${summaryBox(sAdjCvA)}
+
+    <div class="chartcard"><div class="ct">Early adjacent compensation</div><div class="cs">Index vs adjacent segmental ROM (°) over time. If adjacent motion rises as the index dips at 2 weeks, that is acute compensation. Exploratory.</div>
+      ${idxROM.some(v=>v!=null)&&adjROMall.some(v=>v!=null)?lineChart([{name:"Index",color:CC.cyan,data:idxROM},{name:"Adjacent",color:CC.orange,data:adjROMall}],xl)+legendHTML([{name:"Index (operated)",color:CC.cyan},{name:"Adjacent",color:CC.orange}]):`<div class="cs">Need index and adjacent flex/ext ROM to compare.</div>`}</div>
+
+    ${summaryBox(sB3)}
+
+    <div class="chartcard"><div class="ct">Adjacent degeneration by index function</div><div class="cs">Percent of adjacent segments showing degeneration (K-L grade 2 or higher) over time, splitting index discs into functionally mobile vs functionally fused (McAfee III-IV or ROM under 2° at 2 yr). Tests whether retained motion, not just the presence of a device, protects the neighbour. Exploratory; small subgroups, read with care.</div>
+      ${hasFuncSplit?lineChart([{name:"mobile",color:CC.cyan,data:mobileAdjDeg},{name:"fused",color:CC.red,data:fusedAdjDeg}],xl,{top:100})+legendHTML([{name:"Adjacent to functionally-mobile CDR (n="+mobileGrp.length+")",color:CC.cyan},{name:"Adjacent to functionally-fused CDR (n="+fusedGrp.length+")",color:CC.red}]):`<div class="cs">Need both functionally-mobile and functionally-fused index discs (by HO / ROM at 2 yr) with adjacent K-L grades to compare.</div>`}</div>
+
+    ${summaryBox(sB2)}
+
+    <div class="chartcard"><div class="ct">De novo adjacent degeneration</div><div class="cs">Of adjacent segments healthy at baseline (K-L under 2), the percent that newly degenerate (K-L 2 or higher) by 2 yr — split by index function. Is neighbour degeneration obligatory, or modified by retained index motion? Exploratory; small subgroups.</div>
+      ${deNovoBars.length>=2?barChart(deNovoBars,{color:CC.orange,unit:"%"}):`<div class="cs">Need adjacent segments healthy at baseline with 2-yr K-L in both index-function groups.</div>`}</div>
+
+    ${summaryBox(sB5)}
+
+    <div class="chartcard"><div class="ct">Index ROM by ossification grade</div><div class="cs">Mean segmental ROM (°) at 2 yr grouped by McAfee HO grade — does motion fall as bone bridges?</div>
+      ${romByHO.length?barChart(romByHO,{color:CC.orange,unit:"°"}):`<div class="cs">No paired ROM + HO grades recorded at 2 yr yet.</div>`}</div>
+
+    ${summaryBox(sHOrom)}
+
+    <div class="chartcard"><div class="ct">Segmental ROM by implant height</div><div class="cs">Mean 2-yr segmental ROM (°) grouped by recorded implant height - does a taller or shorter implant move differently? Exploratory.</div>
+      ${romBySize.length?barChart(romBySize,{color:CC.cyan,unit:"°"}):`<div class="cs">Record implant heights on the Data tab to see ROM by size.</div>`}</div>
+
+    ${summaryBox(sSize)}
+
+    <div class="chartcard"><div class="ct">Adjacent degeneration by implant oversizing</div><div class="cs">% of adjacent segments at K-L grade 2 or higher (2 yr), for implants oversized by 2 mm or more vs matched to the pre-op disc. Tests the review's oversizing-drives-ASD rule. Exploratory; small subgroups.</div>
+      ${overBars.length>=2?barChart(overBars,{color:CC.orange,unit:"%"}):`<div class="cs">Record implant + pre-op disc heights and adjacent K-L in both groups to compare.</div>`}</div>
+
+    ${summaryBox(sOver)}
+
+    <div class="chartcard"><div class="ct">Sagittal alignment over time</div><div class="cs">Cohort mean T1 slope (°) and C2–C7 SVA (mm) across follow-up</div>
+      ${hasT1?`<div class="cs" style="margin:2px 0 3px;color:${CC.cyan}">T1 slope (°)</div>`+lineChart([{name:"T1 slope",color:CC.cyan,data:t1Mean}],xl,{labelPoints:true,dec:1}):""}
+      ${hasSVA?`<div class="cs" style="margin:9px 0 3px;color:${CC.amber}">C2–C7 SVA (mm)</div>`+lineChart([{name:"SVA",color:CC.amber,data:svaMean}],xl,{labelPoints:true,dec:1}):""}
+      ${(!hasT1&&!hasSVA)?`<div class="cs">No T1 slope or SVA values recorded yet.</div>`:""}</div>
+
+    ${summaryBox(sSag)}
+
+    ${analysisSection(ps)}
+  </div>`;
+}
+
+/* ============================================================
+   EXCEL / EXPORT PREVIEW
+   ============================================================ */
+function renderExcel(){
+  const m=document.getElementById("main"),ps=state.patients;
+  const head=ps.length?buildHeader():[];
+  const rows=ps.map((p,i)=>patientRow(p,i));
+  const thead="<tr>"+head.map(h=>`<th>${esc(h).replace(/([a-z0-9])([A-Z])/g,"$1<wbr>$2").replace(/_/g,"_<wbr>")}</th>`).join("")+"</tr>";
+  const tbody=rows.map(r=>"<tr>"+r.map(c=>{const v=(c==null?"":String(c));return `<td class="${v===""?"miss":""}">${v===""?"·":esc(v)}</td>`;}).join("")+"</tr>").join("");
+  const sub=ps.length
+    ? `${head.length} columns × ${ps.length} ${ps.length>1?"rows":"row"}. Scroll sideways to see every field; this is exactly what “Export CSV” writes.`
+    : `No patients yet — use Restore to load a backup, or add patients in the Data tab.`;
+  const body=ps.length
+    ? `<div class="xlswrap"><table class="xlstbl"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`
+    : `<div class="blank" style="min-height:30vh"><div><h3>No data to preview</h3>Restore a backup or add patients first.</div></div>`;
+  m.innerHTML=`<div class="xls">
+    <div style="background:rgba(76,201,230,.06);border:1px solid rgba(76,201,230,.25);border-radius:10px;padding:13px 14px;margin-bottom:14px"><div class="ct" style="margin-bottom:4px">Save your data — two ways</div><div class="cs" style="margin-bottom:11px">Your work normally lives only in this browser. Keep a real copy with one of these:</div><div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:11px"><button class="btn primary" id="svCloud" style="flex:1;min-width:150px">☁ Save to OneDrive</button><button class="btn" id="svPC" style="flex:1;min-width:150px">⬇ Save a copy to this PC</button></div><div class="cs" style="line-height:1.55"><b style="color:var(--cyan)">☁ Save to OneDrive</b> — pick your OneDrive folder once; the app then saves there automatically on every change, and OneDrive syncs it to the cloud. Use this for everyday work. Next time you open the app it remembers the file — press <b>Reconnect</b> below to load it back.<br><b style="color:var(--cyan)">⬇ Save a copy to this PC</b> — drops a one-time snapshot into your Downloads folder right now. Handy for a quick backup or to move / email.<br><span style="opacity:.82">Note: "OneDrive" is just a folder on your PC that also syncs to the cloud — you choose it in the Save window, so a file there is on your PC <i>and</i> in the cloud. The PC snapshot is a separate one-off copy that does not keep updating.</span></div></div>
+    <div id="cloudBar" class="fsbar"></div>
+    <div id="fsBar" class="fsbar"></div>
+    <div class="xlsbar"><div><div class="ct">Backup, restore &amp; export</div>
+      <div class="cs">${sub}</div></div>
+      <div class="xlsbtns">
+        <button class="btn" id="xlsBackup" title="Save a JSON safety copy of all data to your device">Backup</button>
+        <button class="btn" id="xlsRestore" title="Load a previously saved backup file">Restore</button>
+        <button class="btn primary" id="xlsExport" ${ps.length?"":"disabled"}>Export CSV</button>
+      </div></div>
+    ${body}
+  </div>`;
+  const ex=document.getElementById("xlsExport");if(ex)ex.onclick=exportCSV;
+  const bk=document.getElementById("xlsBackup");if(bk)bk.onclick=exportJSON;
+  const rs=document.getElementById("xlsRestore");if(rs)rs.onclick=()=>document.getElementById("fileInput").click();
+  const sc=document.getElementById("svCloud");if(sc)sc.onclick=saveToOneDrive;
+  const sp=document.getElementById("svPC");if(sp)sp.onclick=exportJSON;
+  renderFsBar(); renderCloudBar();
+}
+
+/* ============================================================
+   RELIABILITY — ICC + weighted kappa (validated)
+   ============================================================ */
+function icc21(rows){
+  const n=rows.length;if(n<2)return null;const k=rows[0].length;
+  let grand=0,Nn=0;rows.forEach(r=>r.forEach(v=>{grand+=v;Nn++;}));grand/=Nn;
+  const rowM=rows.map(r=>r.reduce((a,b)=>a+b,0)/k),colM=[];
+  for(let j=0;j<k;j++){let s=0;for(let i=0;i<n;i++)s+=rows[i][j];colM.push(s/n);}
+  let SSR=0;rowM.forEach(mn=>SSR+=(mn-grand)*(mn-grand));SSR*=k;
+  let SSC=0;colM.forEach(mn=>SSC+=(mn-grand)*(mn-grand));SSC*=n;
+  let SST=0;rows.forEach(r=>r.forEach(v=>SST+=(v-grand)*(v-grand)));
+  const SSE=SST-SSR-SSC,MSR=SSR/(n-1),MSC=SSC/(k-1),MSE=SSE/((n-1)*(k-1));
+  const den=MSR+(k-1)*MSE+(k/n)*(MSC-MSE);
+  return{icc:den===0?NaN:(MSR-MSE)/den,n};
+}
+function weightedKappa(pairs,R){
+  const O=Array.from({length:R},()=>Array(R).fill(0));pairs.forEach(([a,b])=>O[a][b]++);
+  const Nn=pairs.length;if(!Nn)return null;
+  const rs=Array(R).fill(0),cs=Array(R).fill(0);
+  for(let i=0;i<R;i++)for(let j=0;j<R;j++){rs[i]+=O[i][j];cs[j]+=O[i][j];}
+  const w=(i,j)=>1-((i-j)*(i-j))/((R-1)*(R-1));let obs=0,exp=0;
+  for(let i=0;i<R;i++)for(let j=0;j<R;j++){obs+=w(i,j)*O[i][j];exp+=w(i,j)*rs[i]*cs[j]/Nn;}
+  const po=obs/Nn,pe=exp/Nn;return{kappa:(1-pe)===0?NaN:(po-pe)/(1-pe),n:Nn};
+}
+function iccBadge(v){if(v==null||!isFinite(v))return["na","—"];if(v>=0.9)return["exc","Excellent"];if(v>=0.75)return["good","Good"];if(v>=0.5)return["mod","Moderate"];return["poor","Poor"];}
+function kapBadge(v){if(v==null||!isFinite(v))return["na","—"];if(v>=0.81)return["exc","Almost perfect"];if(v>=0.61)return["good","Substantial"];if(v>=0.41)return["mod","Moderate"];if(v>=0.21)return["poor","Fair"];return["poor","Slight"];}
+
+/* ============================================================
+   COHORT ANALYSIS — descriptive stats + t-tests (validated)
+   Exploratory layer only; confirmatory analysis = mixed model in R/Stata.
+   ============================================================ */
+function _betacf(x,a,b){const FPMIN=1e-300,EPS=3e-12,qab=a+b,qap=a+1,qam=a-1;
+  let c=1,d=1-qab*x/qap;if(Math.abs(d)<FPMIN)d=FPMIN;d=1/d;let h=d;
+  for(let m=1;m<=300;m++){const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;const del=d*c;h*=del;
+    if(Math.abs(del-1)<EPS)break;}
+  return h;}
+function _gammaln(z){const g=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let x=z,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;for(let j=0;j<6;j++){x++;ser+=g[j]/x;}
+  return -tmp+Math.log(2.5066282746310005*ser/z);}
+function _ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;
+  const bt=Math.exp(_gammaln(a+b)-_gammaln(a)-_gammaln(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*_betacf(x,a,b)/a:1-bt*_betacf(1-x,b,a)/b;}
+function tCDF(t,df){const x=df/(df+t*t),ib=_ibeta(x,df/2,0.5);return t>=0?1-0.5*ib:0.5*ib;}
+function tTwoTailP(t,df){if(!isFinite(t)||df<=0)return null;return Math.max(0,Math.min(1,2*(1-tCDF(Math.abs(t),df))));}
+function tInv(p,df){let lo=-1e3,hi=1e3;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(tCDF(m,df)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function descr(arr){const v=arr.filter(x=>x!=null&&isFinite(x)),n=v.length;if(!n)return{n:0};
+  const m=v.reduce((a,b)=>a+b,0)/n;let ss=0;v.forEach(x=>ss+=(x-m)*(x-m));
+  const sd=n>1?Math.sqrt(ss/(n-1)):0,se=n>1?sd/Math.sqrt(n):0,tc=n>1?tInv(0.975,n-1):0;
+  return{n,mean:m,sd,se,lo:m-tc*se,hi:m+tc*se};}
+function pairedT(pairs){const d=pairs.filter(p=>p[0]!=null&&p[1]!=null&&isFinite(p[0])&&isFinite(p[1])).map(p=>p[1]-p[0]);
+  const s=descr(d);if(s.n<2||s.se===0)return{n:s.n};const t=s.mean/s.se;
+  return{n:s.n,mean:s.mean,lo:s.lo,hi:s.hi,t,df:s.n-1,p:tTwoTailP(t,s.n-1)};}
+function welchT(a,b){const A=descr(a),B=descr(b);if(A.n<2||B.n<2)return{nA:A.n,nB:B.n};
+  const va=A.se*A.se,vb=B.se*B.se,se=Math.sqrt(va+vb);if(se===0)return{nA:A.n,nB:B.n};
+  const df=(va+vb)*(va+vb)/(va*va/(A.n-1)+vb*vb/(B.n-1)),diff=B.mean-A.mean,t=diff/se;
+  const sp=Math.sqrt(((A.n-1)*A.sd*A.sd+(B.n-1)*B.sd*B.sd)/(A.n+B.n-2)),dC=sp?diff/sp:null,tc=tInv(0.975,df);
+  return{nA:A.n,nB:B.n,meanA:A.mean,meanB:B.mean,diff,lo:diff-tc*se,hi:diff+tc*se,t,df,p:tTwoTailP(t,df),d:dC};}
+function _ms(s){return s.n?`${s.mean.toFixed(1)}±${s.sd.toFixed(1)}`:"–";}
+function _pp(p){if(p==null||!isFinite(p))return"–";return p<0.001?"<0.001":p.toFixed(3);}
+function analysisSection(ps){
+  const isC=p=>(cdrLevels(p).length>0&&!((p.fusedLevels||[]).length)),isA=p=>(((p.fusedLevels||[]).length)>0);
+  const cdrPts=ps.filter(isC),acdfPts=ps.filter(isA),hasA=acdfPts.length>0;
+  const adjV=(p,t)=>{const a=adjacentLevels(p),vs=[a.upper,a.lower].map(L=>L?numv(romOf(p.data[t.key],L).val):null).filter(x=>x!=null);return vs.length?vs.reduce((s,b)=>s+b,0)/vs.length:null;};
+  const outs=[
+    {k:"Adjacent-segment ROM (°)",s:"Motion at the segments next to the construct. For CDR, “better” = stays physiological; rising ROM next to a fusion = compensatory hypermobility.",f:adjV,g:true},
+    {k:"C2–C7 alignment (°)",s:"Global cervical lordosis (Static, + = lordotic). “Better” = lordosis restored or maintained from baseline.",f:(p,t)=>numv(p.data[t.key].galign),g:true},
+    {k:"T1 slope (°)",s:"Largely fixed morphology — expect stability. Read the change against its CI rather than a non-significant p.",f:(p,t)=>p.data[t.key].t1nv?null:numv(p.data[t.key].t1slope),g:true},
+    {k:"C2–C7 SVA (mm)",s:"Sagittal balance. “Better” = decrease toward normal / no deterioration.",f:(p,t)=>numv(p.data[t.key].sva),g:true}
+  ];
+  const pre=TPS[0],last=TPS[TPS.length-1];
+  const summaryBox=t=>t?`<div style="margin-top:10px;padding:9px 11px;background:rgba(76,201,230,.06);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;font-size:12.5px;line-height:1.5;color:#c7d2da"><span style="display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);opacity:.85;margin-bottom:3px;font-weight:700">Auto-summary</span>${t}</div>`:"";
+  let h=`<div class="sech" style="margin-top:18px">Statistical analysis · exploratory</div>
+    <div class="chartcard" style="border-color:rgba(240,169,59,.4);background:rgba(240,169,59,.05)">
+      <div class="cs" style="margin:0;color:var(--amber);line-height:1.5">Descriptive summaries (mean ± SD, 95% CI) with pairwise t-tests — a quick read plus effect sizes. These per-timepoint tests do <b>not</b> model the repeated-measures structure (same patients over time; levels within patients). For the paper, confirm with a linear mixed-effects model (patient as a random effect) on the long-format export, adjusting for baseline, age, sex, level and number of operated levels.</div>
+    </div>`;
+  outs.forEach(o=>{
+    const cols=(o.g&&hasA)?[["CDR",cdrPts],["ACDF",acdfPts]]:[["Cohort",ps]];
+    let tb=`<table class="stat-tbl"><tr><th>Visit</th>`+cols.map(c=>`<th style="text-align:right">${c[0]} · mean±SD (n)</th>`).join("")+`</tr>`;
+    TPS.forEach(t=>{tb+=`<tr><td>${TLAB[t.key]}</td>`+cols.map(c=>{const d=descr(c[1].map(p=>o.f(p,t)));return `<td class="num">${d.n?_ms(d)+` <span style="color:var(--faint);font-weight:400">(${d.n})</span>`:"–"}</td>`;}).join("")+`</tr>`;});
+    tb+=`</table>`;
+    const ch=cols.map(c=>{const r=pairedT(c[1].map(p=>[o.f(p,pre),o.f(p,last)]));
+      return (r.n>=2&&r.mean!=null)?`<div class="cs" style="margin:4px 0 0">${cols.length>1?`<b>${c[0]}</b> `:""}Δ ${pre.short}→${last.short}: <span style="font-family:var(--mono);color:var(--text)">${r.mean>=0?"+":""}${r.mean.toFixed(1)}</span> (95% CI ${r.lo.toFixed(1)} to ${r.hi.toFixed(1)}) · paired t p=${_pp(r.p)} · n=${r.n}</div>`:"";}).join("");
+    let bw="";
+    if(o.g&&hasA){const w=welchT(cdrPts.map(p=>o.f(p,last)),acdfPts.map(p=>o.f(p,last)));
+      if(w.t!=null)bw=`<div class="cs" style="margin:4px 0 0;color:var(--cyan)">CDR vs ACDF at ${last.short} (ACDF − CDR): Δ ${w.diff>=0?"+":""}${w.diff.toFixed(1)} (95% CI ${w.lo.toFixed(1)} to ${w.hi.toFixed(1)}) · Welch t p=${_pp(w.p)}${w.d!=null?` · d=${w.d.toFixed(2)}`:""}</div>`;}
+    const _u=o.k.indexOf("(mm)")>=0?" mm":"°";
+    const _nm=o.k.replace(/\s*\([^)]*\)\s*/g,"").trim();
+    const _parts=[];
+    cols.forEach(c=>{const dp=descr(c[1].map(p=>o.f(p,pre))),dl=descr(c[1].map(p=>o.f(p,last))),pt=pairedT(c[1].map(p=>[o.f(p,pre),o.f(p,last)]));
+      if(pt.n>=2&&pt.mean!=null)_parts.push(`${cols.length>1?`in ${c[0]} it moves`:"across the cohort it moves"} ${dp.n?dp.mean.toFixed(1):"–"}${_u} to ${dl.n?dl.mean.toFixed(1):"–"}${_u} (Δ ${pt.mean>=0?"+":""}${pt.mean.toFixed(1)}${_u}, 95% CI ${pt.lo.toFixed(1)} to ${pt.hi.toFixed(1)}, paired-t p=${_pp(pt.p)}, n=${pt.n})`);});
+    let _between="";
+    if(o.g&&hasA){const w=welchT(cdrPts.map(p=>o.f(p,last)),acdfPts.map(p=>o.f(p,last)));
+      if(w.t!=null)_between=` At ${last.short}, ACDF minus CDR is ${w.diff>=0?"+":""}${w.diff.toFixed(1)}${_u} (95% CI ${w.lo.toFixed(1)} to ${w.hi.toFixed(1)}, Welch p=${_pp(w.p)}${w.d!=null?`, d=${w.d.toFixed(2)}`:""}).`;}
+    const _closer=o.k.indexOf("T1 slope")>=0?"T1 slope is near-fixed morphology, so a small change with a tight CI around zero reads as genuine stability, while a wide CI just means too few films.":o.k.indexOf("SVA")>=0?"For sagittal balance, judge the shift against roughly a 2 cm change rather than the p-value.":o.k.indexOf("alignment")>=0?"Lordosis maintained or restored is the goal; a CI straddling zero means no change is detectable yet.":"Next to a fusion, rising ROM is the compensatory-hypermobility signal; next to an arthroplasty, holding steady is physiological.";
+    const sOut=_parts.length?`${_nm}: ${_parts.join("; ")}.${_between} ${_closer} These are per-visit tests that ignore the repeated-measures structure, so weigh the confidence intervals over the p-values and confirm with the mixed-effects model on the long-format export.`:"";
+    h+=`<div class="chartcard"><div class="ct">${o.k}</div><div class="cs">${o.s}</div>${tb}${ch}${bw}${summaryBox(sOut)}</div>`;
+  });
+  h+=`<div class="chartcard"><div class="interp"><b>Draft methods text — confirmatory analysis</b><br>Each radiographic outcome (adjacent-segment ROM, C2–C7 lordosis, T1 slope, C2–C7 SVA) is analysed with a linear mixed-effects model with fixed effects for time, group (CDR vs ACDF/hybrid) and their interaction and a random intercept per patient (with a random slope for time where supported); adjacent-segment models also include the adjacent level. The time×group interaction tests whether arthroplasty and fusion trajectories diverge. Models adjust for baseline value, age, sex, operated level and number of levels; effects are reported as adjusted mean differences with 95% CIs and related to published minimal clinically important differences. All available timepoints are used under a missing-at-random assumption, with one pre-specified primary outcome and Holm correction across secondary outcomes.</div></div>`;
+  return h;
+}
+
+let r2tp={};
+function blankReads(){const o={};TPS.forEach(t=>o[t.key]=blankTP());return o;}
+function ensureRely(){if(!state.reliability||typeof state.reliability!=="object")state.reliability={size:18,subset:[],reads:{}};
+  const r=state.reliability;if(!Array.isArray(r.subset))r.subset=[];if(!r.reads||typeof r.reads!=="object")r.reads={};if(!r.size)r.size=18;
+  Object.keys(r.reads).forEach(k=>{const rd=r.reads[k];if(rd&&typeof rd==="object"&&!rd.PreOp&&rd.static){const m=blankReads();m["2y"]=rd;r.reads[k]=m;}});
+  return r;}
+function relyEligible(){return state.patients.map((p,i)=>i).filter(i=>patientStatus(state.patients[i])!=="empty");}
+function readsHaveData(r){return Object.keys(r.reads||{}).some(k=>{const rd=r.reads[k];if(!rd||typeof rd!=="object")return false;
+  return TPS.some(t=>{const d=rd[t.key];if(!d)return false;
+    if(LEVELS.some(L=>(d.static[L]||"")!==""||(d.flex[L]||"")!==""||(d.ext[L]||"")!==""))return true;
+    if((d.galign||"")!==""||(d.gflex||"")!==""||(d.gext||"")!==""||(d.sva||"")!==""||(d.t1slope||"")!==""||(d.c7slope||"")!=="")return true;
+    return (Object.keys(d.asd||{}).length>0)||(Object.keys(d.ho||{}).length>0);});});}
+function selectSubset(){const r=ensureRely();
+  if(readsHaveData(r)&&!confirm(`Pick a new random subset?\n\nThis discards the second readings already entered for the current subset (${r.subset.length} patient${r.subset.length>1?"s":""}).`))return;
+  const elig=relyEligible(),k=Math.max(1,Math.min(r.size|0,elig.length));
+  const a=elig.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  r.subset=a.slice(0,k).sort((x,y)=>x-y);r.reads={};persist();renderReliability();
+  toast(`Selected ${r.subset.length} patient${r.subset.length>1?"s":""}`);}
+function simulateReads(){const r=ensureRely();if(!r.subset.length){toast("Select a subset first");return;}
+  const nz=sd=>(Math.random()+Math.random()+Math.random()-1.5)*sd*2;
+  r.subset.forEach(idx=>{const p=state.patients[idx],reads=blankReads();
+    TPS.forEach(t=>{const src=p.data[t.key],d=reads[t.key];
+      LEVELS.forEach(L=>{const st=numv(src.static[L]),fl=numv(src.flex[L]),ex=numv(src.ext[L]);
+        d.static[L]=st==null?"":(st+nz(0.9)).toFixed(1);d.flex[L]=fl==null?"":(fl+nz(0.9)).toFixed(1);d.ext[L]=ex==null?"":(ex+nz(0.9)).toFixed(1);});
+      const ga=numv(src.galign),gf=numv(src.gflex),ge=numv(src.gext),sv=numv(src.sva),t1=numv(src.t1slope),c7=numv(src.c7slope);
+      d.galign=ga==null?"":(ga+nz(1.2)).toFixed(1);d.gflex=gf==null?"":(gf+nz(1.4)).toFixed(1);d.gext=ge==null?"":(ge+nz(1.4)).toFixed(1);
+      d.sva=sv==null?"":(sv+nz(1.6)).toFixed(1);d.t1nv=src.t1nv;
+      if(src.t1nv)d.c7slope=c7==null?"":(c7+nz(1.1)).toFixed(1);else d.t1slope=t1==null?"":(t1+nz(1.1)).toFixed(1);
+      const adj=adjacentLevels(p);[adj.upper,adj.lower].forEach(L=>{if(!L)return;const g=asdNum(src.asd[L]);if(g==null)return;
+        let g2=g;if(Math.random()<0.12)g2=Math.max(0,Math.min(4,g+(Math.random()<0.5?-1:1)));d.asd[L]=String(g2);});
+      cdrLevels(p).forEach(L=>{const g=hoNum(src.ho[L]);if(g==null)return;let g2=g;if(Math.random()<0.12)g2=Math.max(0,Math.min(4,g+(Math.random()<0.5?-1:1)));d.ho[L]=HOTOK[g2];});});
+    r.reads[idx]=reads;});
+  persist();renderReliability();toast(`Simulated second reads for ${r.subset.length} patients`);}
+function r2tpComplete(p,d,tk){if(!d)return false;const o=p.data[tk];
+  for(const L of LEVELS){if(numv(o.static[L])!=null&&numv(d.static[L])==null)return false;
+    if(numv(o.flex[L])!=null&&numv(d.flex[L])==null)return false;if(numv(o.ext[L])!=null&&numv(d.ext[L])==null)return false;}
+  if(numv(o.galign)!=null&&numv(d.galign)==null)return false;if(numv(o.gflex)!=null&&numv(d.gflex)==null)return false;if(numv(o.gext)!=null&&numv(d.gext)==null)return false;
+  if(numv(o.sva)!=null&&numv(d.sva)==null)return false;
+  if(o.t1nv){if(numv(o.c7slope)!=null&&numv(d.c7slope)==null)return false;}else{if(numv(o.t1slope)!=null&&numv(d.t1slope)==null)return false;}
+  const adj=adjacentLevels(p);for(const L of[adj.upper,adj.lower])if(L&&asdNum(o.asd[L])!=null&&asdNum(d.asd[L])==null)return false;
+  for(const L of cdrLevels(p))if(hoNum(o.ho[L])!=null&&hoNum(d.ho[L])==null)return false;return true;}
+function r2complete(p,reads){if(!reads)return false;
+  let any=false;for(const t of TPS){if(tpStatus(p,t.key)==="empty")continue;any=true;if(!r2tpComplete(p,reads[t.key],t.key))return false;}return any;}
+
+function computeReliability(){const r=ensureRely();
+  const A={st:[],rom:[],grom:[],sva:[],t1:[]},O={asd:[],ho:[]};
+  r.subset.forEach(idx=>{const p=state.patients[idx],reads=r.reads[idx];if(!reads)return;
+    TPS.forEach(t=>{const d1=p.data[t.key],d2=reads[t.key];if(!d2)return;
+    LEVELS.forEach(L=>{const a=numv(d1.static[L]),b=numv(d2.static[L]);if(a!=null&&b!=null)A.st.push([a,b]);
+      const r1=numv(romOf(d1,L).val),r2=numv(romOf(d2,L).val);if(r1!=null&&r2!=null)A.rom.push([r1,r2]);});
+    const g1=numv(gromOf(d1).val),g2=numv(gromOf(d2).val);if(g1!=null&&g2!=null)A.grom.push([g1,g2]);
+    const s1=numv(d1.sva),s2=numv(d2.sva);if(s1!=null&&s2!=null)A.sva.push([s1,s2]);
+    if(!d1.t1nv&&!d2.t1nv){const a=numv(d1.t1slope),b=numv(d2.t1slope);if(a!=null&&b!=null)A.t1.push([a,b]);}
+    const adj=adjacentLevels(p);[adj.upper,adj.lower].forEach(L=>{if(!L)return;const a=asdNum(d1.asd[L]),b=asdNum(d2.asd[L]);if(a!=null&&b!=null)O.asd.push([a,b]);});
+    cdrLevels(p).forEach(L=>{const a=hoNum(d1.ho[L]),b=hoNum(d2.ho[L]);if(a!=null&&b!=null)O.ho.push([a,b]);});});});
+  return{
+    cont:[{k:"Static disc angle",pairs:A.st},{k:"Segmental ROM",pairs:A.rom},{k:"Global ROM (C2–C7)",pairs:A.grom},
+      {k:"C2–C7 SVA",pairs:A.sva},{k:"T1 slope",pairs:A.t1}].map(o=>({...o,icc:o.pairs.length>=2?icc21(o.pairs):null})),
+    ord:[{k:"ASD grade (Kellgren–Lawrence)",pairs:O.asd,R:5},{k:"HO grade (McAfee)",pairs:O.ho,R:5}].map(o=>({...o,kappa:o.pairs.length>=2?weightedKappa(o.pairs,o.R):null}))
+  };
+}
+function methodsSentence(R){const r=ensureRely(),k=r.subset.length,pct=state.patients.length?Math.round(100*k/state.patients.length):0;
+  const cont=R.cont.filter(o=>o.icc&&isFinite(o.icc.icc)),ord=R.ord.filter(o=>o.kappa&&isFinite(o.kappa.kappa));
+  if(!cont.length&&!ord.length)return `<div class="interp">Enter or simulate second reads to compute agreement statistics.</div>`;
+  const cTxt=cont.map(o=>`${o.k.toLowerCase()} ${o.icc.icc.toFixed(2)}`).join("; ");
+  const oTxt=ord.map(o=>`${o.k.split(" (")[0].toLowerCase()} ${o.kappa.kappa.toFixed(2)}`).join("; ");
+  let s=`Observer reliability was assessed on a random subset of <b>${k} patients (${pct}% of the cohort)</b>, each re-measured independently and blinded to the first reading. `;
+  if(cont.length)s+=`Intraclass correlation coefficients (two-way random effects, single measures, absolute agreement) were ${cTxt}. `;
+  if(ord.length)s+=`Quadratic-weighted κ for ordinal grades was ${oTxt}.`;
+  return `<div class="interp"><b>Draft methods text</b><br>${s}</div>`;
+}
+function buildStatsHTML(){const R=computeReliability();
+  let t=`<table class="stat-tbl"><tr><th>Measurement</th><th style="text-align:right">ICC / κ</th><th style="text-align:right">Pairs</th><th>Agreement</th></tr>`;
+  t+=`<tr class="ghead"><td colspan="4">Continuous — ICC(2,1), absolute agreement</td></tr>`;
+  R.cont.forEach(o=>{const v=o.icc&&isFinite(o.icc.icc)?o.icc.icc:null,b=iccBadge(v);
+    t+=`<tr><td>${o.k}</td><td class="num">${v==null?"–":v.toFixed(3)}</td><td class="np">${o.pairs.length||"–"}</td><td><span class="badge ${b[0]}">${b[1]}</span></td></tr>`;});
+  t+=`<tr class="ghead"><td colspan="4">Ordinal — quadratic-weighted κ</td></tr>`;
+  R.ord.forEach(o=>{const v=o.kappa&&isFinite(o.kappa.kappa)?o.kappa.kappa:null,b=kapBadge(v);
+    t+=`<tr><td>${o.k}</td><td class="num">${v==null?"–":v.toFixed(3)}</td><td class="np">${o.pairs.length||"–"}</td><td><span class="badge ${b[0]}">${b[1]}</span></td></tr>`;});
+  t+=`</table>`+methodsSentence(R);return t;}
+
+function klR2(idx,L,val,tk){const opts=[["0","0 None"],["1","1 Doubtful"],["2","2 Minimal"],["3","3 Moderate"],["4","4 Severe"]];
+  return `<select class="r2sel" data-r2asd="${idx}" data-tk="${tk}" data-l="${L}"><option value="">—</option>`+opts.map(o=>`<option value="${o[0]}" ${val===o[0]?"selected":""}>${o[1]}</option>`).join("")+`</select>`;}
+function hoR2(idx,L,val,tk){return `<select class="r2sel" data-r2ho="${idx}" data-tk="${tk}" data-l="${L}"><option value="">—</option>`+HOTOK.map(t=>`<option value="${t}" ${val===t?"selected":""}>${t}</option>`).join("")+`</select>`;}
+function r2GridHTML(p,idx){const r=ensureRely();if(!r.reads[idx]||!r.reads[idx].PreOp)r.reads[idx]=blankReads();const reads=r.reads[idx];
+  const firstTk=(TPS.find(t=>tpStatus(p,t.key)!=="empty")||TPS[0]).key,tk=r2tp[idx]||firstTk,d=reads[tk];
+  const pills=TPS.map(t=>{const origHas=tpStatus(p,t.key)!=="empty",done=origHas&&r2tpComplete(p,reads[t.key],t.key);
+    return `<button class="pill ${origHas?(done?"complete":"incomplete"):""} ${t.key===tk?"active":""}" data-r2tp="${idx}" data-tk="${t.key}" ${origHas?"":'style="opacity:.4"'}>${t.short}</button>`;}).join("");
+  let h=`<div class="r2tphint">Re-read every timepoint the first observer recorded · editing <b style="color:var(--cyan)">${(TPS.find(t=>t.key===tk)||{}).label||tk}</b></div><div class="tps">${pills}</div>`+
+    `<div class="r2grid"><div class="r2h">Level</div><div class="r2h">Static</div><div class="r2h">Flex</div><div class="r2h">Ext</div><div class="r2h">ROM</div>`;
+  LEVELS.forEach(L=>{const rom=romOf(d,L);
+    h+=`<div class="r2lv">${L}</div>`+["static","flex","ext"].map(meas=>`<input data-r2="${idx}" data-tk="${tk}" data-m="${meas}" data-l="${L}" inputmode="decimal" value="${esc(d[meas][L])}">`).join("")+
+      `<div class="r2rom" id="r2rom_${idx}_${L.replace("/","")}">${rom.val===""?"–":rom.val}</div>`;});
+  h+=`</div><div class="r2sub">Global C2–C7</div><div class="r2flex">`+
+    [["galign","Static"],["gflex","Flex"],["gext","Ext"]].map(a=>`<div class="r2f"><label>${a[1]}</label><input data-r2="${idx}" data-tk="${tk}" data-g="${a[0]}" inputmode="decimal" value="${esc(d[a[0]])}"></div>`).join("")+
+    `<div class="r2f"><label>ROM</label><input id="r2grom_${idx}" value="${gromOf(d).val===""?"":gromOf(d).val}" readonly style="color:var(--green)"></div></div>`+
+    `<div class="r2flex"><div class="r2f"><label>C2–C7 SVA</label><input data-r2="${idx}" data-tk="${tk}" data-g="sva" inputmode="decimal" value="${esc(d.sva)}"></div>`+
+    (d.t1nv?`<div class="r2f"><label>C7 slope</label><input data-r2="${idx}" data-tk="${tk}" data-g="c7slope" inputmode="decimal" value="${esc(d.c7slope)}"></div>`
+           :`<div class="r2f"><label>T1 slope</label><input data-r2="${idx}" data-tk="${tk}" data-g="t1slope" inputmode="decimal" value="${esc(d.t1slope)}"></div>`)+`</div>`;
+  const adj=adjacentLevels(p),adjL=[adj.upper,adj.lower].filter(Boolean);
+  if(adjL.length){h+=`<div class="r2sub">Adjacent-segment grade (K–L)</div>`;adjL.forEach(L=>h+=`<div class="r2row"><span class="r2lab">${L}</span>${klR2(idx,L,asdVal(d,L),tk)}</div>`);}
+  const cl=cdrLevels(p);
+  if(cl.length){h+=`<div class="r2sub">HO grade (McAfee)</div>`;cl.forEach(L=>h+=`<div class="r2row"><span class="r2lab">${L}</span>${hoR2(idx,L,hoVal(d,L),tk)}</div>`);}
+  return h;}
+function relySave(idx){markDirty();clearTimeout(saveTimer);saveTimer=setTimeout(()=>{persist();updateR2Dot(idx);updateRelyStats();},350);}
+function updateR2Dot(idx){const el=document.getElementById("rdot_"+idx);if(el)el.classList.toggle("done",r2complete(state.patients[idx],ensureRely().reads[idx]));}
+function updateRelyStats(){const el=document.getElementById("relyStats");if(el)el.innerHTML=buildStatsHTML();}
+function bindR2(){
+  document.querySelectorAll("input[data-r2]").forEach(inp=>{inp.oninput=()=>{const idx=+inp.dataset.r2,tk=inp.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];
+    if(inp.dataset.m){d[inp.dataset.m][inp.dataset.l]=inp.value;const L=inp.dataset.l,rc=document.getElementById("r2rom_"+idx+"_"+L.replace("/",""));if(rc){const rv=romOf(d,L).val;rc.textContent=rv===""?"–":rv;}}
+    else if(inp.dataset.g){d[inp.dataset.g]=inp.value;if(inp.dataset.g==="gflex"||inp.dataset.g==="gext"){const gc=document.getElementById("r2grom_"+idx);if(gc){const gv=gromOf(d).val;gc.value=gv===""?"":gv;}}}
+    relySave(idx);};});
+  document.querySelectorAll("select[data-r2asd]").forEach(s=>{s.onchange=()=>{const idx=+s.dataset.r2asd,tk=s.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];if(s.value==="")delete d.asd[s.dataset.l];else d.asd[s.dataset.l]=s.value;relySave(idx);};});
+  document.querySelectorAll("select[data-r2ho]").forEach(s=>{s.onchange=()=>{const idx=+s.dataset.r2ho,tk=s.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];if(s.value==="")delete d.ho[s.dataset.l];else d.ho[s.dataset.l]=s.value;relySave(idx);};});
+  document.querySelectorAll("[data-r2tp]").forEach(b=>{b.onclick=()=>{const idx=+b.dataset.r2tp;r2tp[idx]=b.dataset.tk;
+    const card=b.closest(".ssitem"),body=card?card.querySelector(".ssbody"):null;if(body){body.innerHTML=r2GridHTML(state.patients[idx],idx);bindR2();}updateR2Dot(idx);};});
+}
+function renderReliability(){const m=document.getElementById("main"),r=ensureRely();
+  r.subset=r.subset.filter(i=>i>=0&&i<state.patients.length);
+  const elig=relyEligible();
+  let html=`<div class="rely"><div class="sech">Observer reliability</div>`+
+    `<div class="panel-note">Designate a random subset of patients, then record a <b>second, blinded reading of every timepoint</b> for each — or use <b>Simulate</b> to preview the analysis on synthetic re-reads. The tool pools read 1 vs read 2 across all timepoints in the subset and computes <b>ICC</b> for continuous measures and <b>quadratic-weighted κ</b> for ordinal grades.</div>`+
+    `<div class="rctl"><div class="rf"><label>Subset size</label><input type="number" id="ssSize" min="1" max="${Math.max(1,elig.length)}" value="${Math.min(r.size,elig.length)||1}"></div>`+
+    `<button class="btn primary" id="ssPick">Select random subset</button>`+
+    `<button class="btn" id="ssSim">Simulate second reads</button>`+
+    (r.subset.length?`<button class="btn" id="ssClear">Clear</button>`:``)+`</div>`;
+  if(!elig.length){html+=`<div class="blank" style="min-height:26vh"><div><h3>No measurements yet</h3>Enter some patient measurements in the Data tab first.</div></div></div>`;m.innerHTML=html;bindRelyCtl(elig);return;}
+  if(!r.subset.length){html+=`<div class="blank" style="min-height:26vh"><div><h3>No subset selected</h3>Pick a size, then tap “Select random subset”.</div></div></div>`;m.innerHTML=html;bindRelyCtl(elig);return;}
+  html+=`<div class="subsetlist">`;
+  r.subset.forEach(idx=>{const p=state.patients[idx],done=r2complete(p,r.reads[idx]);
+    const meta=[(p.age?p.age+"y":""),p.sex,(p.levels||[]).join("/")].filter(Boolean).join(" · ");
+    html+=`<div class="ssitem" data-ss="${idx}"><div class="ssh"><span class="chev">▸</span><span class="ssid">${esc(p.initials)||"····"}</span><span class="ssm">${esc(meta)}</span><span class="ssr"><span class="rdot ${done?"done":""}" id="rdot_${idx}"></span></span></div><div class="ssbody">${r2GridHTML(p,idx)}</div></div>`;});
+  html+=`</div><div class="chartcard" style="margin-top:14px"><div class="ct">Agreement — read 1 vs read 2</div><div id="relyStats">${buildStatsHTML()}</div></div></div>`;
+  m.innerHTML=html;bindRelyCtl(elig);
+  document.querySelectorAll(".ssitem .ssh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
+  bindR2();
+}
+function bindRelyCtl(elig){const r=ensureRely();
+  const sz=document.getElementById("ssSize");if(sz)sz.oninput=e=>{r.size=Math.max(1,Math.min(elig.length,+e.target.value||1));};
+  const pk=document.getElementById("ssPick");if(pk)pk.onclick=()=>{const v=+document.getElementById("ssSize").value||1;r.size=Math.max(1,Math.min(elig.length,v));selectSubset();};
+  const sm=document.getElementById("ssSim");if(sm)sm.onclick=simulateReads;
+  const cl=document.getElementById("ssClear");if(cl)cl.onclick=()=>{if(readsHaveData(r)&&!confirm("Clear the subset and second readings?\n\nThis discards everything entered in this tab."))return;r.subset=[];r.reads={};persist();renderReliability();};
+}
+
+restore();histCurrent=snapState();updateUndoBtns();renderAll();fileTryReconnect();cloudInit();
+</script>
+</body>
+</html>
