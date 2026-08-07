@@ -519,7 +519,7 @@
   <button class="seg on" data-view="entry"><span class="si">✎</span>Data</button>
   <button class="seg" data-view="dash"><span class="si">▤</span>Analysis</button>
   <button class="seg" data-view="rely"><span class="si">◷</span>Reliability</button>
-  <button class="seg" data-view="excel"><span class="si">▦</span>Export</button>
+  <button class="seg" data-view="excel"><span class="si">▦</span>Files</button>
 </div>
 
 <div class="shell" id="shell">
@@ -810,7 +810,7 @@ function markSaveError(){
   if(e){e.classList.add("dirty","error");const t=document.getElementById("saveText");if(t)t.textContent="Not saved";}
   if(firstTime)toast(fileLinked
     ? "⚠ Browser storage is full — but your linked file is still being saved to disk."
-    : "⚠ Couldn’t save to this browser (storage full / private mode). Link a file in Export to keep your data safe.");
+    : "⚠ Couldn’t save to this browser (storage full / private mode). Link a file in the Files tab to keep your data safe.");
 }
 let saveTimer=null;
 function scheduleSave(){markDirty();clearTimeout(saveTimer);
@@ -1954,9 +1954,9 @@ function renderCloudMini(){
   const el=document.getElementById("cloudMini"); if(!el)return;
   if(!cloud.on){el.innerHTML="";return;}
   const map={ok:["fsmini-on","☁","Synced to the cloud"],syncing:["fsmini-sync","☁","Syncing…"],
-    err:["fsmini-err","☁","Sync problem — open the Export tab"],
-    conflict:["fsmini-err","☁","Needs your decision — open the Export tab"],
-    choose:["fsmini-warn","☁","Cloud has newer data — open the Export tab"],
+    err:["fsmini-err","☁","Sync problem — open the Files tab"],
+    conflict:["fsmini-err","☁","Needs your decision — open the Files tab"],
+    choose:["fsmini-warn","☁","Cloud has newer data — open the Files tab"],
     behind:["fsmini-warn","☁","Cloud has newer data"],off:["","",""]};
   const m=map[cloudState]||map.ok;
   el.innerHTML=m[1]?`<span class="${m[0]}" title="${esc(m[2])}">${m[1]}</span>`:"";
