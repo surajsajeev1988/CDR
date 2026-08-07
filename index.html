@@ -1740,9 +1740,11 @@ function renderSessionBar(){
       : exportedAt
         ? `<div class="sessnote ok">● Saved to a file at ${esc(exportedAt.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}))}${n?" · "+n+" patient"+(n===1?"":"s"):""}</div>`
         : `<div class="sessnote">${n?n+" patient"+(n===1?"":"s")+" loaded. ":""}Not saved to a file yet this session.</div>`;
-    const gasNote=(GASMODE&&gasFileLink)
+    const gasNote=(GASMODE&&gasFileLink
       ? `<div class="sessnote ok">● File ready — <a href="${esc(gasFileLink.url)}" target="_blank" rel="noopener" style="color:var(--green)">open ${esc(gasFileLink.name||"your file")}</a></div>`
-      : "";
+      : "")+(GASMODE&&state.vault
+      ? `<div class="sessnote warn">⚠ Drive files hold research data only — patient names &amp; ICs are never sent to Drive. For a full backup incl. identities, use “Show the data to copy manually” below and save it as .json on this computer.</div>`
+      : "");
     bar.innerHTML=
       `<div class="sessgrid">
         <div class="sesscard">
