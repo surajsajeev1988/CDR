@@ -81,7 +81,7 @@
   .field{display:flex;flex-direction:column;gap:6px;min-width:0}
   .field label{font-size:10px;color:var(--muted);letter-spacing:.03em;font-weight:500;text-transform:uppercase}
   .field .hint{font-size:10px;color:var(--faint);text-transform:none;letter-spacing:0}
-  input[type=text],input[type=number]{
+  input[type=text],input[type=number],input[type=password]{
     background:var(--panel2);border:1px solid var(--border2);color:var(--text);
     border-radius:8px;padding:9px 10px;font-size:15px;transition:.12s;width:100%}
   input[type=number]{font-family:var(--mono);text-align:right}
@@ -545,8 +545,8 @@
 "use strict";
 const LEVELS=["C2/3","C3/4","C4/5","C5/6","C6/7","C7/T1"];
 const TPS=[
-  {key:"PreOp",label:"Pre-op",short:"PO"},{key:"2w",label:"2 wk",short:"2W"},{key:"6m",label:"6 mo",short:"6M"},
-  {key:"1y",label:"1 yr",short:"1Y"},{key:"2y",label:"2 yr",short:"2Y"}];
+  {key:"PreOp",label:"Pre-op",short:"PO"},{key:"2w",label:"2 wk / imm.",short:"2W"},{key:"3m",label:"3 mo",short:"3M"},
+  {key:"6m",label:"6 mo",short:"6M"},{key:"1y",label:"1 yr",short:"1Y"},{key:"2y",label:"2 yr",short:"2Y"}];
 const IMPLANTS=["ProDisc","Mobi-C","Prestige"];
 const STORE="cdr_study_v3";
 const OLD="cdr_study_v2";
@@ -570,12 +570,15 @@ function blankTP(){
   LEVELS.forEach(l=>{o.static[l]="";o.flex[l]="";o.ext[l]="";o.romLegacy[l]="";});
   return o;
 }
+function newUid(){let s="";const a="abcdefghijklmnopqrstuvwxyz0123456789";
+  const r=crypto.getRandomValues(new Uint8Array(12));for(let i=0;i<12;i++)s+=a[r[i]%36];return s;}
 function blankPatient(){
   const d={}; TPS.forEach(t=>d[t.key]=blankTP());
-  return {initials:"",ic4:"",opdate:"",sex:"",age:"",levels:[],implant:"ProDisc",
+  return {uid:newUid(),initials:"",ic4:"",opdate:"",sex:"",age:"",levels:[],implant:"ProDisc",
           fused:null,fusedLevels:[],isize:{},data:d,notes:"",locked:false};
 }
 function migrate(p){
+  if(!p.uid)p.uid=newUid();
   if(p.initials===undefined)p.initials="";
   if(p.locked===undefined)p.locked=false;
   if(p.ic4===undefined)p.ic4=p.id||p.ic||"";
@@ -629,6 +632,110 @@ function gromOf(d){
   if(d.gromLegacy!==""&&d.gromLegacy!=null){const v=parseFloat(d.gromLegacy);
     return{val:isNaN(v)?d.gromLegacy:v,src:"legacy"};}
   return{val:"",src:"none"};
+}
+
+/* ============================================================
+   IDENTITY VAULT — full patient names & IC numbers are held only
+   in memory (ID, keyed by patient uid) and at rest as an AES-GCM
+   blob (state.idEnc) encrypted with a key wrapped by the study
+   password (state.vault). They are stripped from every cloud sync,
+   so identities exist only in this browser and in exported JSON
+   files — never online.
+   ============================================================ */
+let ID={};            // uid -> {name, ic} — decrypted identities, memory only
+let vaultKey=null;    // unwrapped master key (CryptoKey) after unlock
+const _te=new TextEncoder(),_td=new TextDecoder();
+function b64e(buf){let s="";new Uint8Array(buf).forEach(b=>s+=String.fromCharCode(b));return btoa(s);}
+function b64d(s){const a=atob(s),u=new Uint8Array(a.length);for(let i=0;i<a.length;i++)u[i]=a.charCodeAt(i);return u;}
+async function kdfKey(pw,salt,iter){
+  const km=await crypto.subtle.importKey("raw",_te.encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64d(salt),iterations:iter,hash:"SHA-256"},
+    km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function importMK(raw){return crypto.subtle.importKey("raw",raw,{name:"AES-GCM"},true,["encrypt","decrypt"]);}
+async function aesEncObj(key,obj){const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,_te.encode(JSON.stringify(obj)));
+  return{iv:b64e(iv),ct:b64e(ct)};}
+async function aesDecObj(key,box){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(box.iv)},key,b64d(box.ct));
+  return JSON.parse(_td.decode(pt));}
+async function vaultCreate(pw){
+  const salt=b64e(crypto.getRandomValues(new Uint8Array(16))),iter=250000;
+  const kek=await kdfKey(pw,salt,iter);
+  const mkRaw=crypto.getRandomValues(new Uint8Array(32));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const wrapped=await crypto.subtle.encrypt({name:"AES-GCM",iv},kek,mkRaw);
+  state.vault={v:1,salt,iter,iv:b64e(iv),mk:b64e(wrapped)};
+  vaultKey=await importMK(mkRaw);
+  await idEncrypt();
+}
+async function vaultUnlock(pw){
+  const v=state.vault;if(!v)return false;
+  try{
+    const kek=await kdfKey(pw,v.salt,v.iter);
+    const mkRaw=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(v.iv)},kek,b64d(v.mk));
+    vaultKey=await importMK(mkRaw);
+    ID=state.idEnc?await aesDecObj(vaultKey,state.idEnc):{};
+    return true;
+  }catch(e){return false;}
+}
+async function vaultChange(newPw){                       // rewrap the master key; idEnc stays valid
+  const mkRaw=new Uint8Array(await crypto.subtle.exportKey("raw",vaultKey));
+  const salt=b64e(crypto.getRandomValues(new Uint8Array(16))),iter=250000;
+  const kek=await kdfKey(newPw,salt,iter);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const wrapped=await crypto.subtle.encrypt({name:"AES-GCM",iv},kek,mkRaw);
+  state.vault={v:1,salt,iter,iv:b64e(iv),mk:b64e(wrapped)};
+  persist();
+}
+async function idEncrypt(){if(!vaultKey)return;state.idEnc=await aesEncObj(vaultKey,ID);}
+async function ensureVault(){
+  if(vaultKey)return true;
+  const pw=prompt("Set a password to protect patient names & IC numbers.\nThey are stored encrypted in this browser and in exported JSON files, and are never sent to the cloud.\n\nNew password:");
+  if(!pw){toast("Name & IC not saved — no password set");return false;}
+  await vaultCreate(pw);persist();
+  toast("Password set — identities are now encrypted");
+  return true;
+}
+let idTimer=null;
+function idSave(){clearTimeout(idTimer);idTimer=setTimeout(async()=>{
+  if(!(await ensureVault()))return;
+  await idEncrypt();scheduleSave();},400);}
+function idOf(p){return ID[p.uid]||{};}
+async function idRehydrate(){                            // after loading a state from file/import
+  if(!state.vault){ID={};vaultKey=null;return;}
+  if(vaultKey){
+    try{ID=state.idEnc?await aesDecObj(vaultKey,state.idEnc):{};return;}
+    catch(e){vaultKey=null;ID={};}                       // different study password — ask again
+  }
+  showGate(()=>renderAll());
+}
+function showGate(cb){
+  if(document.getElementById("gateOv"))return;
+  const ov=document.createElement("div");ov.id="gateOv";
+  ov.style.cssText="position:fixed;inset:0;z-index:10000;background:#0e1216;display:flex;align-items:center;justify-content:center;padding:20px";
+  ov.innerHTML=`<div style="max-width:340px;width:100%;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center;box-shadow:0 12px 44px rgba(0,0,0,.5)">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px"><span style="color:var(--cyan)">◆</span> CDR Study</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5">This study is password-protected.<br>Patient identities stay encrypted until unlocked.</div>
+    <input type="password" id="gatePw" placeholder="Password" style="text-align:center;margin-bottom:9px" autocomplete="current-password">
+    <button class="btn primary" id="gateGo" style="width:100%;padding:10px">Unlock</button>
+    <div id="gateErr" style="color:var(--red);font-size:11.5px;margin-top:8px;min-height:14px"></div></div>`;
+  document.body.appendChild(ov);
+  const inp=document.getElementById("gatePw");
+  const go=async()=>{
+    const b=document.getElementById("gateGo");b.disabled=true;
+    const ok=await vaultUnlock(inp.value);b.disabled=false;
+    if(ok){ov.remove();if(cb)cb();}
+    else{document.getElementById("gateErr").textContent="Wrong password — try again";inp.select();}
+  };
+  document.getElementById("gateGo").onclick=go;
+  inp.onkeydown=e=>{if(e.key==="Enter")go();};
+  setTimeout(()=>inp.focus(),60);
+}
+/* cloud copies must never carry identities or the vault */
+function cloudScrub(s){
+  const c=JSON.parse(JSON.stringify(s));
+  delete c.vault;delete c.idEnc;
+  return c;
 }
 
 /* ---- persistence ---- */
@@ -880,6 +987,7 @@ function deletePatient(){
 function demoCard(p){
   const known=IMPLANTS.includes(p.implant);
   const showOther=!known&&p.implant!==""&&p.implant!=null;
+  const idn=idOf(p);
   return `<div class="card">
     <div class="cardhead"><span class="label">Patient <span class="pserial">#${state.current+1}</span></span>
       <div class="chead-r">
@@ -887,10 +995,12 @@ function demoCard(p){
         <button class="btn danger sm" id="deleteBtn" data-nolock title="Delete this patient">🗑 Delete</button></div></div>
 
     <div class="idblock">
-      <div class="f name"><label>Name</label>
+      <div class="f fname" style="grid-column:span 2"><label>Full name <span class="hint">🔒 encrypted · offline only</span></label>
+        <input type="text" id="f_name" class="caps" value="${esc(idn.name||"")}" placeholder="—" autocomplete="off"></div>
+      <div class="f ic"><label>IC <span class="hint">🔒</span></label>
+        <input type="text" id="f_ic" class="caps" maxlength="12" value="${esc(idn.ic||"")}" placeholder="S1234567A" autocomplete="off"></div>
+      <div class="f name"><label>Initials</label>
         <input type="text" id="f_initials" class="caps" maxlength="6" value="${esc(p.initials)}" placeholder="ABC" autocomplete="off"></div>
-      <div class="f ic"><label>IC</label>
-        <input type="text" id="f_ic4" class="caps" maxlength="4" value="${esc(p.ic4)}" placeholder="123A" autocomplete="off"></div>
       <div class="f age"><label>Age</label>
         <input type="number" id="f_age" min="0" max="120" value="${esc(p.age)}" placeholder="—"></div>
       <div class="f sex"><label>Sex</label>
@@ -1298,13 +1408,24 @@ function bindDemo(p){
   fi.oninput=e=>{const c=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();
     try{e.target.setSelectionRange(c,c);}catch(_){}
     p.initials=e.target.value;scheduleSave();refreshActiveRosterItem();};
-  const fic=document.getElementById("f_ic4");
+  const fn=document.getElementById("f_name");
+  fn.oninput=e=>{const c=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();
+    try{e.target.setSelectionRange(c,c);}catch(_){}
+    if(!ID[p.uid])ID[p.uid]={name:"",ic:""};
+    ID[p.uid].name=e.target.value;idSave();};
+  fn.onchange=()=>{                                       // derive initials once, if still empty
+    if(!p.initials&&ID[p.uid]&&ID[p.uid].name){
+      p.initials=ID[p.uid].name.trim().split(/\s+/).map(w=>w[0]||"").join("").toUpperCase().slice(0,6);
+      const fi2=document.getElementById("f_initials");if(fi2)fi2.value=p.initials;
+      scheduleSave();refreshActiveRosterItem();}};
+  const fic=document.getElementById("f_ic");
   fic.oninput=e=>{
-    const raw=e.target.value.toUpperCase();
-    const digits=raw.replace(/[^0-9]/g,"").slice(0,3);
-    const letter=raw.replace(/[^A-Z]/g,"").slice(0,1);
-    const v=digits+letter;
-    e.target.value=v;p.ic4=v;scheduleSave();};
+    const v=e.target.value.toUpperCase().replace(/[^0-9A-Z]/g,"").slice(0,12);
+    e.target.value=v;
+    if(!ID[p.uid])ID[p.uid]={name:"",ic:""};
+    ID[p.uid].ic=v;
+    p.ic4=v.slice(-4);                                    // de-identified last-4 stays in the research data
+    idSave();scheduleSave();};
   document.getElementById("f_age").oninput=e=>{p.age=e.target.value;scheduleSave();refreshActiveRosterItem();};
   const fop=document.getElementById("f_opdate");
   fop.oninput=e=>{const digits=e.target.value.replace(/[^0-9]/g,"").slice(0,6);
@@ -1430,8 +1551,10 @@ document.getElementById("prevBtn").onclick=()=>{if(state.current>0){state.curren
 document.getElementById("nextBtn").onclick=()=>{if(state.current<state.patients.length-1){state.current++;activeTP="PreOp";persist();renderAll();}};
 
 /* ---- export ---- */
-function buildHeader(){
-  const h=["No","Initials","IC_last4","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels"];
+function buildHeader(withId){
+  const h=["No","Initials"];
+  if(withId)h.push("Name","IC");                          // local exports only — never sent to the cloud
+  h.push("IC_last4","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels");
   LEVELS.forEach(l=>{h.push(`Type_${l.replace("/","")}`);});            // CDR / ACDF / blank per level
   h.push("Implant","ASD_UpperLevel","ASD_LowerLevel");
   LEVELS.forEach(l=>{const L=l.replace("/","");h.push(`ImplantH_${L}`,`DiscH_preop_${L}`);});
@@ -1445,10 +1568,12 @@ function buildHeader(){
   });
   return h;
 }
-function patientRow(p,idx){
+function patientRow(p,idx,withId){
   const adj=adjacentLevels(p);
-  const r=[idx+1,p.initials,p.ic4,p.opdate,p.sex,p.age,p.levels.length,p.levels.join(" / "),
-    (p.fused?p.fusedLevels.join(" / "):"")];
+  const r=[idx+1,p.initials];
+  if(withId){const idn=idOf(p);r.push(idn.name||"",idn.ic||"");}
+  r.push(p.ic4,p.opdate,p.sex,p.age,p.levels.length,p.levels.join(" / "),
+    (p.fused?p.fusedLevels.join(" / "):""));
   LEVELS.forEach(l=>{r.push(p.levels.includes(l)?(isFused(p,l)?"ACDF":"CDR"):"");});
   r.push(p.implant,adj.upper||"",adj.lower||"");
   LEVELS.forEach(l=>{const s=(p.isize&&p.isize[l])||{};r.push(s.h||"",s.disc||"");});
@@ -1465,7 +1590,7 @@ function csvCell(v){v=(v==null?"":String(v));
   if(/^[=@]/.test(v))v="'"+v;                    // stop spreadsheet formula injection from free-text fields
   return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 function exportCSV(){if(!state.patients.length){toast("No patients to export");return;}
-  const rows=[buildHeader(),...state.patients.map((p,i)=>patientRow(p,i))];
+  const rows=[buildHeader(true),...state.patients.map((p,i)=>patientRow(p,i,true))];
   download(rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"CDR_data.csv","text/csv");
   toast(`Exported ${state.patients.length} patient${state.patients.length>1?"s":""}`);}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,"0");
@@ -1509,7 +1634,8 @@ function loadStateObj(o){
 }
 function resetHistoryBaseline(){histCurrent=snapState();undoStack=[];redoStack=[];updateUndoBtns();}
 function importJSON(file){const rd=new FileReader();
-  rd.onload=()=>{try{loadStateObj(JSON.parse(rd.result));resetHistoryBaseline();persist();exportedSnap=snapState();renderAll();toast(`Loaded ${state.patients.length} patient${state.patients.length===1?"":"s"} — carry on`);}
+  rd.onload=async()=>{try{loadStateObj(JSON.parse(rd.result));resetHistoryBaseline();persist();exportedSnap=snapState();
+      await idRehydrate();renderAll();toast(`Loaded ${state.patients.length} patient${state.patients.length===1?"":"s"} — carry on`);}
     catch(e){toast("Couldn’t read that file");}};
   rd.readAsText(file);}
 
@@ -1561,7 +1687,7 @@ async function fileOpen(){
     const arr=await window.showOpenFilePicker({types:[{description:"CDR study data",accept:{"application/json":[".json"]}}]});
     const h=arr[0]; const file=await h.getFile(); loadStateObj(JSON.parse(await file.text()));
     fileHandle=h; fileName=h.name; fileLinked=true; await fsIdb("set",h);
-    resetHistoryBaseline(); persist(); renderAll(); renderFsBar();
+    resetHistoryBaseline(); await idRehydrate(); persist(); renderAll(); renderFsBar();
     toast("Opened & linked "+fileName);
   }catch(e){ if(e&&e.name!=="AbortError")toast("Couldn’t open that file"); }
 }
@@ -1569,7 +1695,7 @@ async function fileReconnect(){
   if(!fileHandle){fileLink();return;}
   if(await fsHasPerm(fileHandle,true)){
     fileLinked=true;
-    try{const file=await fileHandle.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline();}catch(e){}
+    try{const file=await fileHandle.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline(); await idRehydrate();}catch(e){}
     persist(); renderAll(); renderFsBar(); toast("Reconnected — loaded "+fileName);
   } else toast("Permission denied");
 }
@@ -1578,7 +1704,7 @@ async function fileTryReconnect(){
   const h=await fsIdb("get"); if(!h){renderFsBar();return;}
   fileHandle=h; fileName=h.name||"cdr_study.json";
   if(await fsHasPerm(h,false)){ fileLinked=true;
-    try{const file=await h.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline(); renderAll();}catch(e){} }
+    try{const file=await h.getFile(); loadStateObj(JSON.parse(await file.text())); resetHistoryBaseline(); await idRehydrate(); renderAll();}catch(e){} }
   renderFsBar();
 }
 function fileUnlink(){ fileLinked=false; fileHandle=null; fileName=""; fsIdb("del"); renderFsBar(); toast("Unlinked — back to browser storage"); }
@@ -1735,8 +1861,8 @@ async function cloudPush(force,withRows){
   cloudBusy=true; cloudSet("syncing");
   try{
     const rows=(withRows||Date.now()-cloudRowsAt>120000)&&state.patients.length
-      ? [buildHeader(),...state.patients.map((p,i)=>patientRow(p,i))] : null;
-    const j=await cloudCall("push",{state:state,baseRev:cloud.rev,force:!!force,rows:rows});
+      ? [buildHeader(false),...state.patients.map((p,i)=>patientRow(p,i,false))] : null;
+    const j=await cloudCall("push",{state:cloudScrub(state),baseRev:cloud.rev,force:!!force,rows:rows});
     if(j.conflict){cloudBusy=false;cloudSet("conflict");cloudConflict(j);return;}
     cloud.rev=j.rev; cloudCfgSave(); cloudBehind=null;
     if(rows)cloudRowsAt=Date.now();
@@ -1748,8 +1874,10 @@ async function cloudPush(force,withRows){
 
 function cloudAdopt(j){
   cloudSuppress=true;
+  const keepV=state.vault,keepI=state.idEnc;    // cloud copies are scrubbed — keep local identities
   try{
     loadStateObj(j.state); cloud.rev=j.rev; cloudCfgSave(); resetHistoryBaseline();
+    if(keepV&&!state.vault){state.vault=keepV;state.idEnc=keepI;}
     try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}
   }finally{cloudSuppress=false;}
   cloudBehind=null; cloudAt=new Date(); renderAll(); cloudSet("ok");
@@ -1907,7 +2035,7 @@ function numv(x){const n=parseFloat(x);return isNaN(n)?null:n;}
 function hoNum(t){const i=HOTOK.indexOf(String(t));return i<0?null:i;}
 function asdNum(v){const n=parseInt(v,10);return(isNaN(n)||n<0||n>4)?null:n;}
 function cdrLevels(p){return (p.levels||[]).filter(l=>!isFused(p,l));}
-const TLAB={PreOp:"Pre","2w":"2w","6m":"6m","1y":"1y","2y":"2y"};
+const TLAB={PreOp:"Pre","2w":"2w","3m":"3m","6m":"6m","1y":"1y","2y":"2y"};
 const CC={cyan:"#4cc9e6",green:"#46c98b",amber:"#f0a93b",red:"#e8645f",orange:"#e8894f"};
 function fmtN(v,d){if(v==null||isNaN(v))return"–";const f=Math.pow(10,d||0);return(Math.round(v*f)/f).toFixed(d||0);}
 function niceMax(v){if(!(v>0))return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;
@@ -2084,7 +2212,7 @@ function renderDashboard(){
     sMP=`Index segmental ROM goes from ${_n(_po)}\u00b0 before surgery to ${_n(_ty)}\u00b0 at the last visit${romRetain!=null?`, about ${romRetain}% of the pre-op arc`:""}.${_tw!=null?` It passes through a 2-week dip near ${_n(_tw)}\u00b0.`:""} Global C2\u2013C7 motion ${_dg==null?"is tracked alongside":_dir(_dg,"rises","falls","holds steady")} (${_n(_gpo)}\u00b0 \u2192 ${_n(_gty)}\u00b0). Holding most of the index arc is the core arthroplasty claim; how that recovery unfolds early is the part worth modelling.`;}}
 
   let sRec="";
-  {const _po=_at(idxROM,0),_tw=_at(idxROM,1),_ty=_lst(idxROM),_rtw=_at(recPct,1),_r2=(_at(recPct,4)!=null?_at(recPct,4):_lst(recPct));
+  {const _po=_at(idxROM,0),_tw=_at(idxROM,1),_ty=_lst(idxROM),_rtw=_at(recPct,1),_r2=_lst(recPct);
    if(_po!=null&&_ty!=null){const _drop=(_tw!=null)?_po-_tw:null,_dpc=(_drop!=null&&_po>0)?Math.round(100*_drop/_po):null;
     sRec=`Index motion ${_tw!=null?`dips to ${_n(_tw)}\u00b0 at 2 weeks${_drop!=null?`, a fall of ${_n(_drop)}\u00b0${_dpc!=null?` (${_dpc}%)`:""} from baseline`:""}, then `:""}recovers toward ${_n(_ty)}\u00b0 by the last visit. By 2 weeks ${_rtw!=null?_p(_rtw):"\u2013"} of operated levels are back to pre-op ROM, ${_r2!=null?_p(_r2):"\u2013"} by 2 years. This early nadir-and-recovery is the genuine gap in the literature \u2014 published curves start around 2 months \u2014 so if it holds across more patients it is a strong primary endpoint. Confirm the shape with a per-patient random-slope mixed model, not these means.`;}}
 
@@ -2257,8 +2385,8 @@ function renderDashboard(){
    ============================================================ */
 function renderExcel(){
   const m=document.getElementById("main"),ps=state.patients;
-  const head=ps.length?buildHeader():[];
-  const rows=ps.map((p,i)=>patientRow(p,i));
+  const head=ps.length?buildHeader(true):[];
+  const rows=ps.map((p,i)=>patientRow(p,i,true));
   const thead="<tr>"+head.map(h=>`<th>${esc(h).replace(/([a-z0-9])([A-Z])/g,"$1<wbr>$2").replace(/_/g,"_<wbr>")}</th>`).join("")+"</tr>";
   const tbody=rows.map(r=>"<tr>"+r.map(c=>{const v=(c==null?"":String(c));return `<td class="${v===""?"miss":""}">${v===""?"·":esc(v)}</td>`;}).join("")+"</tr>").join("");
   const sub=ps.length
@@ -2269,12 +2397,36 @@ function renderExcel(){
     : `<div class="blank" style="min-height:30vh"><div><h3>No data to preview</h3>Restore a backup or add patients first.</div></div>`;
   m.innerHTML=`<div class="xls">
     <div id="sessionBar" class="sessbox"></div>
+    <div id="privacyBar" class="fsbar"></div>
 
     <div class="xlsbar"><div><div class="ct">Data preview</div>
       <div class="cs">${sub}</div></div></div>
     ${body}
   </div>`;
-  renderSessionBar(); renderFsBar(); renderCloudBar();
+  renderSessionBar(); renderFsBar(); renderCloudBar(); renderPrivacyBar();
+}
+
+/* ---- identity-protection panel: password status + set / change ---- */
+function renderPrivacyBar(){
+  const bar=document.getElementById("privacyBar");if(!bar)return;
+  const on=!!state.vault;
+  bar.innerHTML=`<div class="fsrow"><b>Identity protection</b>${on
+    ?`<span class="fsstat on">● Password set — names &amp; ICs encrypted, kept out of cloud sync</span>`
+    :`<span class="fsstat off">○ No password yet — set one before entering full names / ICs</span>`}</div>
+    <div class="fsbtns">${on
+      ?`<button class="btn" id="pvChange">Change password</button>`
+      :`<button class="btn primary" id="pvSet">Set password</button>`}</div>
+    <div class="cs" style="margin-top:8px;opacity:.8">Full names and IC numbers live only in this browser and in exported JSON files, encrypted with this password. They are stripped from everything sent to Google Sheets / Drive.</div>`;
+  const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
+  w("pvSet",async()=>{
+    const pw=prompt("New password for patient identities:");if(!pw)return;
+    await vaultCreate(pw);persist();renderPrivacyBar();
+    toast("Password set — identities now encrypted");});
+  w("pvChange",async()=>{
+    const old=prompt("Current password:");if(old==null)return;
+    if(!(await vaultUnlock(old))){toast("Wrong password");return;}
+    const nw=prompt("New password:");if(!nw)return;
+    await vaultChange(nw);renderPrivacyBar();toast("Password changed");});
 }
 
 /* ============================================================
@@ -2526,7 +2678,9 @@ function bindRelyCtl(elig){const r=ensureRely();
   const cl=document.getElementById("ssClear");if(cl)cl.onclick=()=>{if(readsHaveData(r)&&!confirm("Clear the subset and second readings?\n\nThis discards everything entered in this tab."))return;r.subset=[];r.reads={};persist();renderReliability();};
 }
 
-restore();histCurrent=snapState();updateUndoBtns();renderAll();fileTryReconnect();cloudInit();
+restore();histCurrent=snapState();updateUndoBtns();
+if(state.vault){renderAll();showGate(()=>{renderAll();fileTryReconnect();cloudInit();});}
+else{renderAll();fileTryReconnect();cloudInit();}
 </script>
 </body>
 </html>
