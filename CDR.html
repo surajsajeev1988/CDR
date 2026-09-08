@@ -41,8 +41,8 @@
   .btn.primary:hover{filter:brightness(1.08);color:#06222b}
 
   /* ---- layout ---- */
-  .shell{display:grid;grid-template-columns:76px 1fr;min-height:calc(100vh - 51px)}
-  @media(min-width:680px){.shell{grid-template-columns:152px 1fr}}
+  .shell{display:grid;grid-template-columns:104px 1fr;min-height:calc(100vh - 51px)}
+  @media(min-width:680px){.shell{grid-template-columns:186px 1fr}}
   .roster{border-right:1px solid var(--border);background:var(--panel);
     padding:8px 5px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;
     max-height:calc(100vh - 51px);position:sticky;top:51px}
@@ -56,7 +56,7 @@
   .rosteritem .serial{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--faint);
     flex:0 0 auto;letter-spacing:0}
   .rosteritem.active .serial{color:var(--cyan)}
-  .rosteritem .pid{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.02em;
+  .rosteritem .pid{font-weight:600;font-size:12.5px;letter-spacing:.01em;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
   .rosteritem .pmeta{color:var(--muted);font-size:10.5px;font-family:var(--mono);
     padding-left:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -96,8 +96,10 @@
   .idblock .f.age input{text-align:center}
   .idblock .sexwrap{display:grid;grid-template-columns:1fr 1fr;gap:5px}
   .idblock .sexwrap .tg{padding:8px 2px;font-size:14px;text-align:center}
+  .idblock .f.name{grid-column:span 2}
+  .idblock .f.ic{grid-column:span 2}
   .idblock .f.date{grid-column:span 2}
-  .idblock .f.imp{grid-column:span 2}
+  .idblock .f.imp{grid-column:span 4}
   .idblock .f.imp .isel{padding:9px 26px 9px 10px;font-size:14px;width:100%}
   .idblock .f.imp #f_impother{margin-top:5px;width:100%}
   .isel{width:100%;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;
@@ -361,7 +363,8 @@
   .ssitem{border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden}
   .ssitem .ssh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
   .ssitem .ssh:hover{background:var(--panel2)}
-  .ssitem .ssid{font-family:var(--mono);font-weight:600;font-size:13px;min-width:46px}
+  .ssitem .ssid{font-weight:600;font-size:13px;min-width:46px;max-width:46%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ssitem .ssm{font-size:11px;color:var(--muted);font-family:var(--mono)}
   .ssitem .ssr{margin-left:auto;display:flex;align-items:center;gap:9px}
   .rdot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
@@ -553,13 +556,15 @@ function blankTP(){
 }
 function blankPatient(){
   const d={}; TPS.forEach(t=>d[t.key]=blankTP());
-  return {initials:"",ic4:"",opdate:"",sex:"",age:"",levels:[],implant:"ProDisc",
+  return {name:"",ic:"",opdate:"",sex:"",age:"",levels:[],implant:"ProDisc",
           fused:null,fusedLevels:[],isize:{},data:d,notes:"",locked:false};
 }
 function migrate(p){
-  if(p.initials===undefined)p.initials="";
+  // v2 identity: full name + full IC replace the old initials / IC-last-4 fields
+  if(p.name===undefined)p.name=p.initials||"";
+  if(p.ic===undefined||p.ic==="")p.ic=p.ic4||p.id||"";
+  delete p.initials; delete p.ic4;
   if(p.locked===undefined)p.locked=false;
-  if(p.ic4===undefined)p.ic4=p.id||p.ic||"";
   if(p.opdate===undefined)p.opdate="";
   if(p.fused===undefined)p.fused=null;
   if(!p.fusedLevels)p.fusedLevels=[];
@@ -641,9 +646,9 @@ function buildSampleData(){
       data[t.key]=d;
     });
     let inits="";const n=ri(2,3);for(let k=0;k<n;k++)inits+=A[ri(0,25)];
-    const ic=""+ri(0,9)+ri(0,9)+ri(0,9)+A[ri(0,25)];
+    const ic="S"+ri(1,9)+ri(0,9)+ri(0,9)+ri(0,9)+ri(0,9)+ri(0,9)+ri(0,9)+A[ri(0,25)];
     const dd=String(ri(1,28)).padStart(2,"0"),mm=String(ri(1,12)).padStart(2,"0"),yy=String(ri(18,24)).padStart(2,"0");
-    patients.push({initials:inits,ic4:ic,opdate:dd+mm+yy,sex:chance(0.55)?"M":"F",age:String(ri(34,73)),levels,implant:chance(0.92)?wpick([["ProDisc",.5],["Mobi-C",.3],["Prestige",.2]]):pick(["Bryan","Discover","Secure-C","M6-C","Baguera-C"]),fused,fusedLevels,isize,data,notes:"",locked:false});
+    patients.push({name:inits,ic:ic,opdate:dd+mm+yy,sex:chance(0.55)?"M":"F",age:String(ri(34,73)),levels,implant:chance(0.92)?wpick([["ProDisc",.5],["Mobi-C",.3],["Prestige",.2]]):pick(["Bryan","Discover","Secure-C","M6-C","Baguera-C"]),fused,fusedLevels,isize,data,notes:"",locked:false});
   }
   return patients;
 }
@@ -793,6 +798,10 @@ function patientStatus(p){
   if(!any)return"empty";return full===TPS.length?"full":"part";
 }
 
+/* roster subtitle: IC · age/sex */
+function rosterMeta(p){
+  return [p.ic||"",[p.age||"",p.sex].filter(Boolean).join("/")].filter(Boolean).join(" \u00b7 ");
+}
 /* roster status dot: red incomplete · blue complete · green locked (confirmed) */
 function rosterDot(p){if(p&&p.locked)return "green";return patientStatus(p)==="full"?"blue":"red";}
 function isHybrid(p){return !!(p&&p.fused&&p.fusedLevels&&p.fusedLevels.filter(l=>p.levels.includes(l)).length);}
@@ -803,13 +812,14 @@ function renderRoster(){
   if(!state.patients.length){el.innerHTML='<div class="empty">No patients yet.<br>Tap “+ New”.</div>';return;}
   el.innerHTML="";
   state.patients.forEach((p,i)=>{
-    const meta=[esc(p.age||""),p.sex].filter(Boolean).join(" / ");
+    const nm=p.name||"····";
+    const meta=rosterMeta(p);
     const div=document.createElement("div");
     div.className="rosteritem"+(i===state.current?" active":"");
     div.innerHTML=`<div class="ri-top"><span class="dot ${rosterDot(p)}"></span>
       <span class="serial">${i+1}</span>
-      <span class="pid">${esc(p.initials)||"····"}</span></div>
-      <div class="pmeta">${meta||"&nbsp;"}</div>`;
+      <span class="pid" title="${esc(nm)}">${esc(nm)}</span></div>
+      <div class="pmeta" title="${esc(meta)}">${esc(meta)||"&nbsp;"}</div>`;
     div.onclick=()=>{state.current=i;activeTP="PreOp";persist();renderAll();};
     el.appendChild(div);
   });
@@ -818,8 +828,8 @@ function renderRoster(){
 function refreshActiveRosterItem(){
   if(state.current<0)return;const p=state.patients[state.current];
   const item=document.querySelector(".rosteritem.active");if(!item)return;
-  const pid=item.querySelector(".pid");if(pid)pid.textContent=p.initials||"····";
-  const pm=item.querySelector(".pmeta");if(pm)pm.textContent=[p.age||"",p.sex].filter(Boolean).join(" / ")||"\u00a0";
+  const pid=item.querySelector(".pid");if(pid){pid.textContent=p.name||"····";pid.title=p.name||"";}
+  const pm=item.querySelector(".pmeta");if(pm){const mt=rosterMeta(p);pm.textContent=mt||"\u00a0";pm.title=mt;}
   const dot=item.querySelector(".dot");if(dot)dot.className="dot "+rosterDot(p);
 }
 function renderCounters(){
@@ -888,13 +898,13 @@ function toggleLock(){
     if(confirm("This record is locked.\n\nUnlock it to make changes?")){
       p.locked=false;persist();renderAll();toast("Record unlocked — you can edit");}
   }else{
-    if(confirm(`Save ${p.initials||"this patient"}?\n\nThe record will be locked read-only (your entries are already auto-saved). You’ll be asked to unlock before any further change.`)){
+    if(confirm(`Save ${p.name||"this patient"}?\n\nThe record will be locked read-only (your entries are already auto-saved). You’ll be asked to unlock before any further change.`)){
       p.locked=true;persist();renderAll();toast("Saved & locked");}
   }
 }
 function deletePatient(){
   const di=state.current,p=state.patients[di];if(!p)return;
-  const name=p.initials||"this patient";
+  const name=p.name||"this patient";
   if(!confirm(`Delete ${name}?\n\nThis permanently removes the patient and all their measurements.`))return;
   if(!confirm(`Are you absolutely sure?\n\nThis cannot be undone.`))return;
   state.patients.splice(di,1);
@@ -917,10 +927,12 @@ function demoCard(p){
         <button class="btn danger sm" id="deleteBtn" data-nolock title="Delete this patient">🗑 Delete</button></div></div>
 
     <div class="idblock">
-      <div class="f name"><label>Name</label>
-        <input type="text" id="f_initials" class="caps" maxlength="6" value="${esc(p.initials)}" placeholder="ABC" autocomplete="off"></div>
-      <div class="f ic"><label>IC</label>
-        <input type="text" id="f_ic4" class="caps" maxlength="4" value="${esc(p.ic4)}" placeholder="123A" autocomplete="off"></div>
+      <div class="f name"><label>Name <span class="hint">full name</span></label>
+        <input type="text" id="f_name" class="caps" maxlength="80" value="${esc(p.name)}"
+          placeholder="TAN AH KOW" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+      <div class="f ic"><label>IC <span class="hint">full</span></label>
+        <input type="text" id="f_ic" class="caps" maxlength="14" value="${esc(p.ic)}"
+          placeholder="S1234567A" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
       <div class="f age"><label>Age</label>
         <input type="number" id="f_age" value="${esc(p.age)}" placeholder="—"></div>
       <div class="f sex"><label>Sex</label>
@@ -1319,17 +1331,18 @@ function refreshGrom(p,tk){
 
 /* ---- bindings ---- */
 function bindDemo(p){
-  const fi=document.getElementById("f_initials");
+  const fi=document.getElementById("f_name");
   fi.oninput=e=>{const c=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();
     try{e.target.setSelectionRange(c,c);}catch(_){}
-    p.initials=e.target.value;scheduleSave();refreshActiveRosterItem();};
-  const fic=document.getElementById("f_ic4");
+    p.name=e.target.value;scheduleSave();refreshActiveRosterItem();};
+  const fic=document.getElementById("f_ic");
   fic.oninput=e=>{
-    const raw=e.target.value.toUpperCase();
-    const digits=raw.replace(/[^0-9]/g,"").slice(0,3);
-    const letter=raw.replace(/[^A-Z]/g,"").slice(0,1);
-    const v=digits+letter;
-    e.target.value=v;p.ic4=v;scheduleSave();};
+    const c=e.target.selectionStart;
+    // full IC / NRIC: letters, digits and dashes, e.g. S1234567A or 880101-14-5678
+    const v=e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,14);
+    e.target.value=v;
+    try{e.target.setSelectionRange(c,c);}catch(_){}
+    p.ic=v;scheduleSave();refreshActiveRosterItem();};
   document.getElementById("f_age").oninput=e=>{p.age=e.target.value;scheduleSave();refreshActiveRosterItem();};
   const fop=document.getElementById("f_opdate");
   fop.oninput=e=>{const digits=e.target.value.replace(/[^0-9]/g,"").slice(0,6);
@@ -1423,7 +1436,7 @@ function bindNotes(p){document.getElementById("f_notes").oninput=e=>{p.notes=e.t
 /* ---- nav ---- */
 function newPatient(){const p=blankPatient();state.patients.push(p);
   state.current=state.patients.length-1;activeTP="PreOp";persist();renderAll();
-  setTimeout(()=>{const e=document.getElementById("f_initials");if(e)e.focus();},40);}
+  setTimeout(()=>{const e=document.getElementById("f_name");if(e)e.focus();},40);}
 document.getElementById("newBtn").onclick=newPatient;
 {const ub=document.getElementById("undoBtn");if(ub)ub.onclick=undo;
  const rb=document.getElementById("redoBtn");if(rb)rb.onclick=redo;}
@@ -1432,7 +1445,7 @@ document.getElementById("nextBtn").onclick=()=>{if(state.current<state.patients.
 
 /* ---- export ---- */
 function buildHeader(){
-  const h=["No","Initials","IC_last4","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels"];
+  const h=["No","Name","IC","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels"];
   LEVELS.forEach(l=>{h.push(`Type_${l.replace("/","")}`);});            // CDR / ACDF / blank per level
   h.push("Implant","ASD_UpperLevel","ASD_LowerLevel");
   LEVELS.forEach(l=>{const L=l.replace("/","");h.push(`ImplantH_${L}`,`DiscH_preop_${L}`);});
@@ -1448,7 +1461,7 @@ function buildHeader(){
 }
 function patientRow(p,idx){
   const adj=adjacentLevels(p);
-  const r=[idx+1,p.initials,p.ic4,fmtDate(p.opdate),p.sex,p.age,p.levels.length,p.levels.join(" / "),
+  const r=[idx+1,p.name,p.ic,fmtDate(p.opdate),p.sex,p.age,p.levels.length,p.levels.join(" / "),
     (p.fused?p.fusedLevels.join(" / "):"")];
   LEVELS.forEach(l=>{r.push(p.levels.includes(l)?(isFused(p,l)?"ACDF":"CDR"):"");});
   r.push(p.implant,adj.upper||"",adj.lower||"");
@@ -2404,8 +2417,8 @@ function renderReliability(){const m=document.getElementById("main"),r=ensureRel
   if(!r.subset.length){html+=`<div class="blank" style="min-height:26vh"><div><h3>No subset selected</h3>Pick a size, then tap “Select random subset”.</div></div></div>`;m.innerHTML=html;bindRelyCtl(elig);return;}
   html+=`<div class="subsetlist">`;
   r.subset.forEach(idx=>{const p=state.patients[idx],done=r2complete(p,r.reads[idx]);
-    const meta=[(p.age?p.age+"y":""),p.sex,(p.levels||[]).join("/")].filter(Boolean).join(" · ");
-    html+=`<div class="ssitem" data-ss="${idx}"><div class="ssh"><span class="chev">▸</span><span class="ssid">${esc(p.initials)||"····"}</span><span class="ssm">${esc(meta)}</span><span class="ssr"><span class="rdot ${done?"done":""}" id="rdot_${idx}"></span></span></div><div class="ssbody">${r2GridHTML(p,idx)}</div></div>`;});
+    const meta=[(p.ic||""),(p.age?p.age+"y":""),p.sex,(p.levels||[]).join("/")].filter(Boolean).join(" · ");
+    html+=`<div class="ssitem" data-ss="${idx}"><div class="ssh"><span class="chev">▸</span><span class="ssid" title="${esc(p.name)}">${esc(p.name)||"····"}</span><span class="ssm">${esc(meta)}</span><span class="ssr"><span class="rdot ${done?"done":""}" id="rdot_${idx}"></span></span></div><div class="ssbody">${r2GridHTML(p,idx)}</div></div>`;});
   html+=`</div><div class="chartcard" style="margin-top:14px"><div class="ct">Agreement — read 1 vs read 2</div><div id="relyStats">${buildStatsHTML()}</div></div></div>`;
   m.innerHTML=html;bindRelyCtl(elig);
   document.querySelectorAll(".ssitem .ssh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
