@@ -82,7 +82,7 @@
   input[type=text],input[type=number]{
     background:var(--panel2);border:1px solid var(--border2);color:var(--text);
     border-radius:8px;padding:9px 10px;font-size:15px;transition:.12s;width:100%}
-  input[type=number]{font-family:var(--mono);text-align:right}
+  input[type=number],input.numf{font-family:var(--mono);text-align:right}
   input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
   input.caps{text-transform:uppercase}
 
@@ -239,7 +239,7 @@
     font-weight:600;margin:0;flex:0 0 auto;min-width:82px}
   .gsubf .fallback{color:var(--cyan);font-size:8px;border:1px solid var(--cyan-dim);border-radius:3px;padding:0 3px;margin-left:4px;letter-spacing:.04em}
   .gsubf .ufield{flex:0 0 auto;width:104px}
-  .gsubf input[type=number]{background:var(--panel);border:1px solid var(--border2);width:100%}
+  .gsubf input[type=number],.gsubf input.numf{background:var(--panel);border:1px solid var(--border2);width:100%}
   .gsubf .t1nv{display:flex;align-items:center;gap:6px;margin:0 0 0 auto;font-size:11px;color:var(--muted);
     text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;flex:0 0 auto}
   .gsubf .t1nv input{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer;margin:0}
@@ -346,6 +346,70 @@
   .interp{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px;
     padding:11px 13px;background:var(--panel2);border:1px solid var(--border);border-radius:10px}
   .interp b{color:var(--text)}
+
+  /* ---- phone entry: progress, focus mode, bigger targets ---- */
+  .entrybar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 10px}
+  .entrybar .prog{flex:1;min-width:96px;display:flex;flex-direction:column;gap:4px}
+  .progtxt{font-size:10.5px;font-family:var(--mono);color:var(--muted);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .progtxt b{color:var(--cyan);font-weight:700}
+  .progtxt.done,.progtxt.done b{color:var(--green)}
+  .pbar{height:5px;border-radius:3px;background:var(--panel2);border:1px solid var(--border);overflow:hidden}
+  .pbar i{display:block;height:100%;background:var(--cyan);transition:width .18s}
+  .pbar.done i{background:var(--green)}
+  .etgl{font-size:10.5px;font-family:var(--mono);border:1px solid var(--border2);background:var(--panel2);
+    color:var(--faint);border-radius:8px;padding:7px 11px;letter-spacing:.02em;white-space:nowrap}
+  .etgl.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+  #f_isize input.numf{max-width:170px}
+  .cell input.kpsel{box-shadow:inset 0 0 0 2px var(--cyan);background:var(--cyan-dim)}
+  input.numf.kpsel{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+  @media(max-width:560px){
+    /* every pixel here buys digits: the unit lives in the column head, not in the cell */
+    .shell{grid-template-columns:66px 1fr}
+    .mgrid .ghead,.mrow{grid-template-columns:36px 1fr 1fr 1fr 1fr}
+    .ggrid.g4 .ghead,.ggrid.g4 .grow{grid-template-columns:36px 1fr 1fr 1fr 1fr}
+    .ggrid.gasd .ghead,.ggrid.gasd .grow{grid-template-columns:36px 1fr 96px}
+    .horow{grid-template-columns:36px 1fr}
+    .lvl .tpt{display:none}
+    .lvl .lvname{font-size:10.5px}
+    .cell input{padding:15px 3px;font-size:15px;letter-spacing:-.02em}
+    .cell.unitcell input{padding-right:3px}
+    .cell.unitcell .cunit{display:none!important}
+    .cell select{font-size:12.5px;padding:14px 15px 14px 4px}
+    .romcell{font-size:14px} .gromcell{font-size:18px}
+    .mgrid .ghead div,.ggrid .ghead div{font-size:8px;letter-spacing:.02em;padding:8px 2px}
+    .hobtn{min-width:42px;padding:11px 5px;font-size:14px}
+    .holvl{font-size:10px;padding:9px 1px}
+    .gsubf > label{min-width:62px;font-size:9.5px}
+    .gsubf .ufield{width:92px}
+    .entrybar{gap:6px}
+    .etgl{padding:7px 9px;font-size:10px}
+  }
+
+  /* ---- on-screen number pad ---- */
+  body.kpopen .main{padding-bottom:330px}
+  .keypad{position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:linear-gradient(180deg,#141b23,#0d1217);border-top:1px solid var(--border2);
+    box-shadow:0 -12px 34px rgba(0,0,0,.55);padding:8px 8px calc(10px + env(safe-area-inset-bottom))}
+  .kphead{display:flex;align-items:center;gap:10px;padding:2px 4px 8px}
+  .kpwhat{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+  .kplbl{font-size:12.5px;font-weight:700;color:var(--cyan);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kphint{font-size:9.5px;color:var(--faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpval{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
+  .kpnav{display:flex;gap:6px;flex:0 0 auto}
+  .kpnav button{width:36px;height:36px;border-radius:9px;border:1px solid var(--border2);
+    background:var(--panel2);color:var(--text);font-size:15px}
+  .kpnav button:disabled{opacity:.3}
+  .kpkeys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .kpk{height:54px;border-radius:11px;border:1px solid var(--border2);background:var(--panel2);
+    color:var(--text);font-family:var(--mono);font-size:21px;font-weight:600;transition:.08s}
+  .kpk:active{transform:translateY(1px);background:var(--raised)}
+  .kpk.alt{font-size:17px;color:var(--muted)}
+  .kpk.go{grid-column:span 2;background:var(--cyan);border-color:var(--cyan);color:#06222b;
+    font-family:var(--sans);font-size:15px;font-weight:700}
+  @media(min-width:680px){.keypad{max-width:430px;left:auto;right:16px;bottom:60px;
+    border:1px solid var(--border2);border-radius:14px}
+    body.kpopen .main{padding-bottom:120px}}
 
   /* ---- lock + delete ---- */
   .cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
@@ -488,6 +552,22 @@
   <div class="spacer"></div>
   <input type="file" id="fileInput" class="file-hidden" accept=".json">
 </div>
+<div class="keypad" id="keypad" hidden>
+  <div class="kphead">
+    <div class="kpwhat"><span class="kplbl" id="kpLabel">—</span><span class="kphint" id="kpHint"></span></div>
+    <div class="kpval" id="kpVal">—</div>
+    <div class="kpnav">
+      <button id="kpPrev" title="Previous field">◂</button>
+      <button id="kpClose" title="Hide the number pad">✕</button>
+    </div>
+  </div>
+  <div class="kpkeys">
+    <button class="kpk" data-k="1">1</button><button class="kpk" data-k="2">2</button><button class="kpk" data-k="3">3</button><button class="kpk alt" data-k="back">⌫</button>
+    <button class="kpk" data-k="4">4</button><button class="kpk" data-k="5">5</button><button class="kpk" data-k="6">6</button><button class="kpk alt" data-k="sign">±</button>
+    <button class="kpk" data-k="7">7</button><button class="kpk" data-k="8">8</button><button class="kpk" data-k="9">9</button><button class="kpk alt" data-k="clear">C</button>
+    <button class="kpk" data-k="0">0</button><button class="kpk" data-k=".">.</button><button class="kpk go" data-k="next">Next ▸</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -576,7 +656,7 @@ function buildSampleData(){
     let fused=false,fusedLevels=[];
     if(levels.length>=2&&chance(0.28)){fused=true;fusedLevels=[pick(levels)];}
     const cdr=levels.filter(l=>!fusedLevels.includes(l));
-    const isize={};cdr.forEach(l=>{const li=LEVELS.indexOf(l);const _ih=Math.min(8,5+(li>=3?1:0)+ri(0,1));isize[l]={h:String(_ih),disc:String(Math.max(3,_ih-ri(0,3)))};});
+    const isize={};cdr.forEach(l=>{const li=LEVELS.indexOf(l);const _ih=Math.min(8,5+(li>=3?1:0)+ri(0,1));isize[l]={h:String(_ih)};});
     const idxs=levels.map(l=>LEVELS.indexOf(l)).sort((a,b)=>a-b);
     const upper=idxs[0]-1>=0?LEVELS[idxs[0]-1]:null,lower=idxs[idxs.length-1]+1<LEVELS.length?LEVELS[idxs[idxs.length-1]+1]:null;
     const romScale={"C2/3":0.7,"C3/4":0.9,"C4/5":1.0,"C5/6":1.1,"C6/7":0.95,"C7/T1":0.6};
@@ -622,7 +702,7 @@ function romOf(d,l){
   const f=d.flex[l],e=d.ext[l];
   const hasF=(f!==""&&f!=null),hasE=(e!==""&&e!=null);
   if(hasF&&hasE){const fn=parseFloat(f),en=parseFloat(e);
-    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(1),src:"calc"};}
+    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(2),src:"calc"};}
   if(d.romLegacy&&d.romLegacy[l]!==""&&d.romLegacy[l]!=null){
     const v=parseFloat(d.romLegacy[l]);return{val:isNaN(v)?d.romLegacy[l]:v,src:"legacy"};}
   return{val:"",src:"none"};
@@ -630,7 +710,7 @@ function romOf(d,l){
 function gromOf(d){
   const f=d.gflex,e=d.gext;
   if(f!==""&&e!==""){const fn=parseFloat(f),en=parseFloat(e);
-    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(1),src:"calc"};}
+    if(!isNaN(fn)&&!isNaN(en))return{val:+(en-fn).toFixed(2),src:"calc"};}
   if(d.gromLegacy!==""&&d.gromLegacy!=null){const v=parseFloat(d.gromLegacy);
     return{val:isNaN(v)?d.gromLegacy:v,src:"legacy"};}
   return{val:"",src:"none"};
@@ -735,10 +815,9 @@ function anyEntered(p,tk){const d=p.data[tk];let a=false;
   if(d.ho&&Object.keys(d.ho).some(k=>d.ho[k]!==""&&d.ho[k]!=null))a=true;
   if(d.asdLegacy&&d.asdLegacy!=="")a=true;
   return a;}
-function tpStatus(p,tk){
+// how many required fields this visit has, and how many are filled (drives the progress bar)
+function tpProgress(p,tk){
   const d=p.data[tk];
-  if(!anyEntered(p,tk))return"empty";
-  if(!p.levels.length)return"part";           // not "complete" until levels are chosen
   let need=0,have=0;
   p.levels.forEach(l=>{
     need++; if(d.static[l]!=="")have++;        // Static: every operated level
@@ -755,7 +834,13 @@ function tpStatus(p,tk){
   if(state.requireHO!==false && isPostop(tk)){          // HO: each CDR level at post-op timepoints
     p.levels.forEach(l=>{if(!isFused(p,l)){need++; if(hoVal(d,l)!=="")have++;}});
   }
-  return have>=need?"full":"part";
+  return{need,have};
+}
+function tpStatus(p,tk){
+  if(!anyEntered(p,tk))return"empty";
+  if(!p.levels.length)return"part";           // not "complete" until levels are chosen
+  const r=tpProgress(p,tk);
+  return r.have>=r.need?"full":"part";
 }
 function patientStatus(p){
   if(!p)return"empty";let full=0,any=false;
@@ -825,6 +910,11 @@ function renderMain(){
   bindDemo(p);bindPills(p);bindGrid(p);bindNotes(p);
   const ui=document.getElementById("unlockInline");if(ui)ui.onclick=toggleLock;
   const gb=document.getElementById("measGuideBtn");if(gb)gb.onclick=showGuide;
+  const ft=document.getElementById("focusTgl");
+  if(ft)ft.onclick=()=>{entryFocus=!entryFocus;
+    ft.classList.toggle("on",entryFocus);ft.textContent=entryFocus?"focus ✓":"all levels";
+    kpHide();rerenderGrid(p);};
+  const kt=document.getElementById("kpTgl");if(kt)kt.onclick=kpToggle;
   applyLock(p);
 }
 
@@ -980,30 +1070,32 @@ function bindLevels(p){
 
 function isizeBlock(p){
   const cdr=p.levels.filter(l=>!p.fusedLevels.includes(l));
-  if(!cdr.length)return `<label>Implant + pre-op disc height (mm)</label><div class="lvl-hint">Add an operated (CDR) level above to record implant height and pre-op disc height.</div>`;
+  if(!cdr.length)return `<label>Implant height (mm)</label><div class="lvl-hint">Add an operated (CDR) level above to record its implant height.</div>`;
   const dis=p.locked?" disabled":"";
   const row=l=>{if(!p.isize||typeof p.isize!=="object")p.isize={};if(!p.isize[l]||typeof p.isize[l]!=="object")p.isize[l]={};const s=p.isize[l];if(s.h===undefined||s.h==="")s.h="5";
-    return `<div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:6px;align-items:center;margin-top:6px">`+
+    return `<div style="display:grid;grid-template-columns:58px 1fr;gap:9px;align-items:center;margin-top:7px">`+
       `<span style="font-weight:600;color:var(--cyan);white-space:nowrap">${l}</span>`+
-      `<input type="number" step="0.5" inputmode="decimal" data-isz="disc" data-lvl="${l}" value="${esc(s.disc||"")}" placeholder="disc" style="width:100%;min-width:0;box-sizing:border-box;text-align:center"${dis}>`+
-      `<input type="number" step="0.5" inputmode="decimal" data-isz="h" data-lvl="${l}" value="${esc(s.h||"5")}" placeholder="implant" style="width:100%;min-width:0;box-sizing:border-box;text-align:center"${dis}></div>`;};
-  return `<label>Implant + pre-op disc height (mm), per operated level</label>`+
-    `<div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:6px;margin-top:3px;font-size:11px;color:var(--faint)"><span></span><span style="text-align:center">Disc H (pre-op)</span><span style="text-align:center">Implant H</span></div>`+
-    cdr.map(row).join("");
+      `<input type="text" class="numf kp" inputmode="decimal" autocomplete="off" data-isz="h" data-lvl="${l}" data-label="${l} \u00b7 implant height" data-unit=" mm" value="${esc(s.h||"5")}" placeholder="mm"${dis}></div>`;};
+  return `<label>Implant height (mm), per operated level</label>`+cdr.map(row).join("");
 }
 function bindISize(p){
   document.querySelectorAll('#f_isize input[data-isz]').forEach(inp=>{
     inp.oninput=()=>{const{isz,lvl}=inp.dataset;
+      const v=numClean(inp.value); if(v!==inp.value)inp.value=v;
       if(!p.isize||typeof p.isize!=="object")p.isize={};
       if(!p.isize[lvl]||typeof p.isize[lvl]!=="object")p.isize[lvl]={};
-      p.isize[lvl][isz]=inp.value;scheduleSave();};});
+      p.isize[lvl][isz]=v;scheduleSave();};
+    inp.onkeydown=e=>gridNav(e,inp);
+    inp.onfocus=()=>kpFocus(inp);});
+  kpApplyMode();
 }
 function renderISize(p){const box=document.getElementById("f_isize");if(box){box.innerHTML=isizeBlock(p);bindISize(p);}}
 const MEAS_GUIDE = `
 <div style="font-size:13px;line-height:1.55;color:#c7d2da">
   <div style="background:rgba(76,201,230,.08);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;padding:8px 11px;margin-bottom:12px">
     <b style="color:var(--cyan)">How this tool expects values</b><br>
-    Lateral films, patient facing the viewer's right. <b>Segmental &amp; global ROM: Flexion &minus;, Extension +</b> (ROM = Ext &minus; Flex, auto). <b>C2&ndash;C7 lordosis is entered as positive (+).</b> Use a true horizontal / true vertical reference for T1 slope and SVA.
+    Lateral films, patient facing the viewer's right. <b>Segmental &amp; global ROM: Flexion &minus;, Extension +</b> (ROM = Ext &minus; Flex, auto). <b>C2&ndash;C7 lordosis is entered as positive (+).</b> Use a true horizontal / true vertical reference for T1 slope and SVA.<br>
+    Every number takes <b>up to two decimals</b> (e.g. &minus;4.25). On a phone the built-in pad keeps the system keyboard shut &mdash; <b>Next</b> walks the whole visit field by field.
   </div>
 
   <b style="color:var(--cyan)">Segmental ROM (per level)</b><br>
@@ -1025,8 +1117,8 @@ const MEAS_GUIDE = `
   <b style="color:var(--cyan)">Heterotopic ossification &mdash; McAfee 0&ndash;IV (post-op)</b><br>
   0 none &middot; I outside the disc space &middot; II in the disc, motion preserved &middot; III bridging, motion present &middot; IV ankylosis, no motion. III vs IV is decided on the flexion&ndash;extension films.<br><br>
 
-  <b style="color:var(--cyan)">Implant &amp; pre-op disc height (mm)</b><br>
-  Pre-op disc height on the pre-op lateral; implant height from the device. Oversizing = implant &minus; pre-op disc; &ge; 2 mm is linked to adjacent degeneration / subsidence.<br><br>
+  <b style="color:var(--cyan)">Implant height (mm)</b><br>
+  Height marked on the device, recorded once per operated level.<br><br>
 
   <div style="background:rgba(240,169,59,.1);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:8px 11px;margin-top:6px">
     <b style="color:var(--amber)">Note on the SRS manual conventions</b><br>
@@ -1049,12 +1141,45 @@ function measureCard(p){
     return `<button class="pill ${full?"complete":"incomplete"} ${t.key===activeTP?"active":""}" data-tp="${t.key}">${t.short}</button>`;}).join("");
   return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="label">Radiographic measurements</div><button class="btn" id="measGuideBtn" style="padding:3px 11px;font-size:12px;white-space:nowrap">📖 Guide</button></div>
     <div class="tps">${pills}</div>
-    <div class="legend"><b class="bl">▣</b> complete &nbsp; <b class="rd">▣</b> incomplete &nbsp;|&nbsp; Flexion −, Extension +, &nbsp;ROM = Ext − Flex (auto)</div>
+    ${entryBar(p,activeTP)}
+    <div class="legend">Flex − &nbsp;·&nbsp; Ext + &nbsp;·&nbsp; ROM auto &nbsp;·&nbsp; 2 decimals</div>
     <div id="tpBody">${tpBody(p,activeTP)}</div></div>`;
+}
+function TLABEL(tk){const t=TPS.find(x=>x.key===tk);return t?t.short:tk;}
+// progress for the open visit + the two entry switches (focus / number pad)
+function entryBar(p,tk){
+  const r=tpProgress(p,tk),done=!!(p.levels.length&&r.have>=r.need);
+  const pct=r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0;
+  return `<div class="entrybar">
+    <div class="prog">
+      <div class="progtxt ${done?"done":""}" id="progTxt"><b>${r.have}</b>/${r.need} fields · ${TLABEL(tk)}${done?" ✓":""}</div>
+      <div class="pbar ${done?"done":""}" id="progBar"><i style="width:${pct}%"></i></div>
+    </div>
+    <button class="etgl ${entryFocus?"on":""}" id="focusTgl" title="Show only the operated and adjacent levels">${entryFocus?"focus ✓":"all levels"}</button>
+    <button class="etgl ${kpOn?"on":""}" id="kpTgl" title="Type on the built-in number pad instead of the phone keyboard">⌨ pad ${kpOn?"on":"off"}</button>
+  </div>`;
+}
+function updateProgress(p){
+  const r=tpProgress(p,activeTP),done=!!(p.levels.length&&r.have>=r.need);
+  const t=document.getElementById("progTxt"),b=document.getElementById("progBar");
+  if(t){t.innerHTML=`<b>${r.have}</b>/${r.need} fields · ${TLABEL(activeTP)}${done?" ✓":""}`;t.classList.toggle("done",done);}
+  if(b){b.classList.toggle("done",done);const i=b.querySelector("i");
+    if(i)i.style.width=(r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0)+"%";}
+}
+// focus mode: the levels actually worth showing — operated, adjacent, or already filled in
+function visibleLevels(p,tk){
+  if(!entryFocus||!p.levels||!p.levels.length)return LEVELS;
+  const adj=adjacentLevels(p),keep=new Set(p.levels);
+  if(adj.upper)keep.add(adj.upper);
+  if(adj.lower)keep.add(adj.lower);
+  const d=p.data[tk];
+  LEVELS.forEach(l=>{if(d.static[l]!==""||d.flex[l]!==""||d.ext[l]!==""||(d.romLegacy&&d.romLegacy[l]!==""))keep.add(l);});
+  return LEVELS.filter(l=>keep.has(l));
 }
 function tpBody(p,tk){
   const d=p.data[tk];
-  const rows=LEVELS.map(l=>rowHTML(p,tk,l)).join("");
+  const shown=visibleLevels(p,tk),hidden=LEVELS.length-shown.length;
+  const rows=shown.map(l=>rowHTML(p,tk,l)).join("");
   const grom=gromOf(d);
   const gFlag=(grom.src!=="none"&&typeof grom.val==="number")&&(grom.val<GROM_FLAG.min||grom.val>GROM_FLAG.max);
   const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
@@ -1064,6 +1189,7 @@ function tpBody(p,tk){
       <div class="mgrid">
         <div class="ghead"><div>Lvl</div><div>Static °</div><div>Flex °</div><div>Ext °</div><div>ROM °</div></div>
         ${rows}</div>
+      ${hidden?`<div class="gcap">${hidden} level${hidden>1?"s":""} hidden — tap “all levels” above to show every level.</div>`:""}
     </div>
     <div class="gsec">
       <div class="gtitle"><b>Global C2–C7</b><span class="gtp">${tpLbl}</span></div>
@@ -1098,20 +1224,20 @@ function globalSub(p,tk){
     <div class="gsubf ${(!nv&&t1flag)?"flag":""} ${nv?"disabled":""}">
       <label>T1 slope</label>
       <div class="ufield ${(!nv&&has(d.t1slope))?"hasval":""}">
-        <input type="number" step="0.1" value="${esc(d.t1slope)}" data-tp="${tk}" data-g="t1slope" placeholder="—" inputmode="decimal" ${nv?"disabled":""}>
+        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.t1slope)}" data-tp="${tk}" data-g="t1slope" data-label="T1 slope" data-range="t1slope" data-unit="°" placeholder="—" ${nv?"disabled":""}>
         <span class="usuf">°</span></div>
       <label class="t1nv"><input type="checkbox" data-tp="${tk}" data-gc="t1nv" ${nv?"checked":""}> T1 not visible</label>
     </div>
     ${nv?`<div class="gsubf ${c7flag?"flag":""}">
       <label>C7 slope <span class="fallback">fallback</span></label>
       <div class="ufield ${has(d.c7slope)?"hasval":""}">
-        <input type="number" step="0.1" value="${esc(d.c7slope)}" data-tp="${tk}" data-g="c7slope" placeholder="—" inputmode="decimal">
+        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.c7slope)}" data-tp="${tk}" data-g="c7slope" data-label="C7 slope" data-range="c7slope" data-unit="°" placeholder="—">
         <span class="usuf">°</span></div>
     </div>`:""}
     <div class="gsubf ${svaflag?"flag":""}">
       <label>C2–C7 SVA</label>
       <div class="ufield ${has(d.sva)?"hasval":""}">
-        <input type="number" step="0.1" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" placeholder="—" inputmode="decimal">
+        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" data-label="C2–C7 SVA" data-range="sva" data-unit=" mm" placeholder="—">
         <span class="usuf">mm</span></div>
     </div>
   </div>`;
@@ -1207,16 +1333,19 @@ function rowHTML(p,tk,l){
     </div>
   </div>`;
 }
+const MEASLBL={static:"Static",flex:"Flexion",ext:"Extension"};
+const GLBLBL={galign:"C2–C7 static (lordosis +)",gflex:"C2–C7 flexion",gext:"C2–C7 extension",
+  t1slope:"T1 slope",c7slope:"C7 slope",sva:"C2–C7 SVA"};
 function cellHTML(tk,meas,l,val){
   const has=(val!==""&&val!=null);
   return `<div class="cell unitcell ${isFlag(meas,val)?"flag":""} ${has?"hasval":""}">
-    <input type="number" step="0.1" value="${esc(val)}" data-tp="${tk}" data-meas="${meas}" data-lvl="${l}" inputmode="decimal"><span class="cunit">°</span></div>`;
+    <input type="text" class="kp" inputmode="decimal" autocomplete="off" value="${esc(val)}" data-tp="${tk}" data-meas="${meas}" data-lvl="${l}" data-label="${l} · ${MEASLBL[meas]||meas}" data-range="${meas}" data-unit="°"><span class="cunit">°</span></div>`;
 }
 function gcellHTML(tk,key){
   const d=state.patients[state.current].data[tk];
   const fl=isFlag(key,d[key]);
   return `<div class="cell ${fl?"flag":""}">
-    <input type="number" step="0.1" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" placeholder="—" inputmode="decimal"></div>`;
+    <input type="text" class="kp" inputmode="decimal" autocomplete="off" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" data-label="${GLBLBL[key]||key}" data-range="${key}" data-unit="°" placeholder="—"></div>`;
 }
 function notesCard(p){
   return `<div class="card"><div class="label">Notes</div>
@@ -1233,6 +1362,7 @@ function updatePills(){
     const full=tpStatus(p,t.key)==="full";
     el.classList.toggle("complete",full);el.classList.toggle("incomplete",!full);
     const ic=el.querySelector(".pc");if(ic)ic.textContent=full?"✓":"•";});
+  updateProgress(p);
   markNeeded(p);
 }
 // Highlight required-but-empty fields in red, but only once a timepoint has been started (not blank, not complete)
@@ -1322,25 +1452,31 @@ function bindDemo(p){
 function bindPills(p){
   document.querySelectorAll(".pill").forEach(t=>t.onclick=()=>{
     activeTP=t.dataset.tp;
+    kpHide();
     document.getElementById("tpBody").innerHTML=tpBody(p,activeTP);
     document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("active",x.dataset.tp===activeTP));
-    bindGrid(p);});
+    bindGrid(p);updatePills();});
 }
 function bindGrid(p){
   document.querySelectorAll('#tpBody input[data-meas]').forEach(inp=>{
     inp.oninput=()=>{const{tp,meas,lvl}=inp.dataset;
-      p.data[tp][meas][lvl]=inp.value;
-      const cl=inp.closest(".cell");cl.classList.toggle("flag",isFlag(meas,inp.value));cl.classList.toggle("hasval",inp.value!=="");
+      const v=numClean(inp.value); if(v!==inp.value)inp.value=v;
+      p.data[tp][meas][lvl]=v;
+      const cl=inp.closest(".cell");cl.classList.toggle("flag",isFlag(meas,v));cl.classList.toggle("hasval",v!=="");
       if(meas==="flex"||meas==="ext")refreshRom(p,tp,lvl);
       updatePills();updateRosterDot();scheduleSave();};
-    inp.onkeydown=e=>gridNav(e,inp);});
+    inp.onkeydown=e=>gridNav(e,inp);
+    inp.onfocus=()=>kpFocus(inp);});
   document.querySelectorAll('#tpBody input[data-g]').forEach(inp=>{
     inp.oninput=()=>{const{tp,g}=inp.dataset;
-      p.data[tp][g]=inp.value;
-      const gc=inp.closest(".cell")||inp.closest(".gsubf");if(gc)gc.classList.toggle("flag",isFlag(g,inp.value));
-      const uf=inp.closest(".ufield");if(uf)uf.classList.toggle("hasval",inp.value!=="");
+      const v=numClean(inp.value); if(v!==inp.value)inp.value=v;
+      p.data[tp][g]=v;
+      const gc=inp.closest(".cell")||inp.closest(".gsubf");if(gc)gc.classList.toggle("flag",isFlag(g,v));
+      const uf=inp.closest(".ufield");if(uf)uf.classList.toggle("hasval",v!=="");
       if(g==="gflex"||g==="gext")refreshGrom(p,tp);
-      updatePills();updateRosterDot();scheduleSave();};});
+      updatePills();updateRosterDot();scheduleSave();};
+    inp.onkeydown=e=>gridNav(e,inp);
+    inp.onfocus=()=>kpFocus(inp);});
   document.querySelectorAll('#tpBody input[data-gc="t1nv"]').forEach(cb=>{
     cb.onchange=()=>{const tp=cb.dataset.tp;
       p.data[tp].t1nv=cb.checked;
@@ -1365,22 +1501,125 @@ function bindGrid(p){
     updatePills();updateRosterDot();scheduleSave();};
   markNeeded(p);
   if(p.locked)lockBody();
+  kpApplyMode();
 }
+
+/* ============================================================
+   NUMBER ENTRY — two decimals, and a pad built for one thumb
+   Radiographs are read on a phone, so the fields never open the
+   system keyboard (it covers the grid): tapping a cell opens the
+   pad below, and Next walks the whole visit in reading order.
+   ============================================================ */
+const KP_KEY="cdr_keypad";
+let entryFocus=true;                       // show only the levels that matter
+let kpOn=(()=>{ try{const v=localStorage.getItem(KP_KEY); if(v!=null)return v==="1"; }catch(e){}
+  return !!(window.matchMedia&&window.matchMedia("(pointer:coarse)").matches); })();
+let kpTarget=null;
+
+// the one rule for every measurement: optional −, at most 3 whole digits, at most 2 decimals
+function numClean(v){
+  let s=String(v==null?"":v).replace(/[^0-9.\-]/g,"");
+  const neg=s.indexOf("-")===0;
+  s=s.replace(/-/g,"");
+  const dot=s.indexOf(".");
+  if(dot>=0)s=s.slice(0,dot+1)+s.slice(dot+1).replace(/\./g,"");
+  const parts=s.split("."),whole=(parts[0]||"").slice(0,3);
+  s=parts.length>1?whole+"."+parts[1].slice(0,2):whole;
+  return (neg?"-":"")+s;
+}
+function kpFields(){return Array.from(document.querySelectorAll("#f_isize input.kp,#tpBody input.kp")).filter(el=>!el.disabled);}
+function kpApplyMode(){
+  document.querySelectorAll("input.kp").forEach(el=>{el.readOnly=kpOn;});   // readOnly = no system keyboard
+  if(!kpOn)kpHide();
+}
+function kpToggle(){
+  kpOn=!kpOn;
+  try{localStorage.setItem(KP_KEY,kpOn?"1":"0");}catch(e){}
+  kpApplyMode();
+  const b=document.getElementById("kpTgl");
+  if(b){b.classList.toggle("on",kpOn);b.textContent="\u2328 pad "+(kpOn?"on":"off");}
+  toast(kpOn?"Number pad on — the phone keyboard stays shut":"Number pad off — using the normal keyboard");
+}
+function kpFocus(inp){ if(kpOn)kpShow(inp); }
+function kpShow(inp){
+  const k=document.getElementById("keypad"); if(!k)return;
+  k.hidden=false; document.body.classList.add("kpopen");
+  kpTarget=inp;
+  document.querySelectorAll("input.kp.kpsel").forEach(e=>e.classList.remove("kpsel"));
+  inp.classList.add("kpsel");
+  kpSync();
+  try{inp.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){}
+}
+function kpHide(){
+  const k=document.getElementById("keypad"); if(k)k.hidden=true;
+  document.body.classList.remove("kpopen");
+  document.querySelectorAll("input.kp.kpsel").forEach(e=>e.classList.remove("kpsel"));
+  kpTarget=null;
+}
+function kpSync(){
+  if(!kpTarget)return;
+  const lbl=document.getElementById("kpLabel"),hint=document.getElementById("kpHint"),
+        val=document.getElementById("kpVal"),prev=document.getElementById("kpPrev");
+  const unit=kpTarget.dataset.unit||"",rg=RANGE[kpTarget.dataset.range||""];
+  const f=kpFields(),i=f.indexOf(kpTarget);
+  if(lbl)lbl.textContent=kpTarget.dataset.label||"Value";
+  if(hint)hint.textContent=(i>=0?`${i+1}/${f.length} · `:"")+(rg?`usual ${rg[0]} to ${rg[1]}${unit} · `:"")+"2 dp";
+  if(val)val.textContent=kpTarget.value===""?"—":kpTarget.value+unit;
+  if(prev)prev.disabled=(i<=0);
+}
+function kpCommit(v){
+  if(!kpTarget)return;
+  kpTarget.value=v;
+  kpTarget.dispatchEvent(new Event("input",{bubbles:true}));   // reuses the normal field handler
+  kpSync();
+}
+function kpStep(dir){
+  const f=kpFields(); if(!f.length)return;
+  const n=f[f.indexOf(kpTarget)+dir];
+  if(n){n.focus();kpShow(n);return;}
+  if(dir>0){
+    kpHide();
+    const rest=document.querySelector("#tpBody select[data-asd-level],#tpBody [data-ho-level]");
+    if(rest){try{rest.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){}
+      toast("Numbers done — grade ASD / HO below");}
+    else toast("Every number for this visit is in");
+  }
+}
+function kpPress(k){
+  if(!kpTarget)return;
+  const v=kpTarget.value||"";
+  if(k==="next"){kpStep(1);return;}
+  if(k==="clear"){kpCommit("");return;}
+  if(k==="back"){kpCommit(v.slice(0,-1));return;}
+  if(k==="sign"){kpCommit(v.indexOf("-")===0?v.slice(1):"-"+v);return;}
+  if(k==="."){ if(v.indexOf(".")>=0)return; kpCommit((v===""||v==="-")?v+"0.":v+"."); return; }
+  const next=numClean(v+k);
+  if(next===v)return;                       // already at 3 whole digits / 2 decimals
+  kpCommit(next);
+}
+{
+  const k=document.getElementById("keypad");
+  if(k){
+    k.addEventListener("mousedown",e=>e.preventDefault());     // tapping a key must not blur the field
+    k.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>kpPress(b.dataset.k));
+    const c=document.getElementById("kpClose"); if(c)c.onclick=kpHide;
+    const pv=document.getElementById("kpPrev"); if(pv)pv.onclick=()=>kpStep(-1);
+  }
+}
+
 function rerenderGrid(p){
   const b=document.getElementById("tpBody");
   if(b){b.innerHTML=tpBody(p,activeTP);bindGrid(p);}
   updatePills();updateRosterDot();
 }
+// Enter / arrows walk the same running order the number pad's Next uses
 function gridNav(e,inp){
-  const order=["static","flex","ext"];
-  const meas=inp.dataset.meas,lvl=inp.dataset.lvl;
-  const col=order.indexOf(meas),row=LEVELS.indexOf(lvl);
-  if(col<0||row<0)return;
-  const at=(m,l)=>document.querySelector('#tpBody input[data-meas="'+m+'"][data-lvl="'+l+'"]');
-  const go=el=>{if(el){e.preventDefault();el.focus();try{el.select();}catch(_){}}};
-  if(e.key==="ArrowUp"){go(at(meas,LEVELS[row-1]));}
-  else if(e.key==="ArrowDown"){go(at(meas,LEVELS[row+1]));}
-  else if(e.key==="Enter"){go(at(meas,LEVELS[row+1])||at(order[col+1],LEVELS[0]));}  // down, then wrap to top of next column
+  if(e.key!=="Enter"&&e.key!=="ArrowDown"&&e.key!=="ArrowUp")return;
+  const f=kpFields(),i=f.indexOf(inp);
+  if(i<0)return;
+  const n=f[i+(e.key==="ArrowUp"?-1:1)];
+  if(!n)return;
+  e.preventDefault();n.focus();try{n.select();}catch(_){}
 }
 function bindNotes(p){document.getElementById("f_notes").oninput=e=>{p.notes=e.target.value;scheduleSave();};}
 
@@ -1399,7 +1638,7 @@ function buildHeader(){
   const h=["No","Initials","IC_last4","OpDate_DDMMYY","Sex","Age","NoOfLevels","OperatedLevels","ACDFLevels"];
   LEVELS.forEach(l=>{h.push(`Type_${l.replace("/","")}`);});            // CDR / ACDF / blank per level
   h.push("Implant","ASD_UpperLevel","ASD_LowerLevel");
-  LEVELS.forEach(l=>{const L=l.replace("/","");h.push(`ImplantH_${L}`,`DiscH_preop_${L}`);});
+  LEVELS.forEach(l=>{const L=l.replace("/","");h.push(`ImplantH_${L}`);});
   TPS.forEach(t=>{
     const po=isPostop(t.key);
     LEVELS.forEach(l=>{const L=l.replace("/","");
@@ -1416,7 +1655,7 @@ function patientRow(p,idx){
     (p.fused?p.fusedLevels.join(" / "):"")];
   LEVELS.forEach(l=>{r.push(p.levels.includes(l)?(isFused(p,l)?"ACDF":"CDR"):"");});
   r.push(p.implant,adj.upper||"",adj.lower||"");
-  LEVELS.forEach(l=>{const s=(p.isize&&p.isize[l])||{};r.push(s.h||"",s.disc||"");});
+  LEVELS.forEach(l=>{const s=(p.isize&&p.isize[l])||{};r.push(s.h||"");});
   TPS.forEach(t=>{const d=p.data[t.key];const po=isPostop(t.key);
     LEVELS.forEach(l=>{const rm=romOf(d,l);
       r.push(d.static[l],d.flex[l],d.ext[l],rm.val);
@@ -2136,18 +2375,7 @@ function renderDashboard(){
     return Object.keys(m2).map(k=>({label:k+" mm",value:m2[k].reduce((a,b)=>a+b,0)/m2[k].length,n:m2[k].length})).sort((a,b)=>parseFloat(a.label)-parseFloat(b.label));})();
   let sSize="";
   if(romBySize.length>=2){const _lo=romBySize[0],_hi=romBySize[romBySize.length-1],_flat=Math.abs(_lo.value-_hi.value)<1.5;
-    sSize=`Across recorded heights, mean 2-year ROM runs ${_n(_lo.value)}° at ${_lo.label} to ${_n(_hi.value)}° at ${_hi.label}. ${_flat?"No clear height-to-motion relationship shows in this sample.":(_hi.value>_lo.value?"Taller implants trend toward more motion here.":"Shorter implants trend toward more motion here.")} The oversizing chart below uses implant minus pre-op disc height to probe the review's 2 mm rule. Exploratory, and sizes are operator-entered.`;}
-  // oversizing (implant height - pre-op disc height) vs adjacent degeneration at 2y
-  const _oversz=p=>cdrLevels(p).some(L=>{const s=(p.isize&&p.isize[L])||{},h=numv(s.h),d=numv(s.disc);return h!=null&&d!=null&&(h-d)>=2;});
-  const _hasSz=p=>cdrLevels(p).some(L=>{const s=(p.isize&&p.isize[L])||{};return numv(s.h)!=null&&numv(s.disc)!=null;});
-  const _szPts=ps.filter(_hasSz),_overGrp=_szPts.filter(_oversz),_matchGrp=_szPts.filter(p=>!_oversz(p));
-  const _adjKL2=grp=>{let den=0,deg=0;grp.forEach(p=>{const a=adjacentLevels(p);[a.upper,a.lower].forEach(L=>{if(!L)return;const k=asdNum(p.data["2y"].asd[L]);if(k!=null){den++;if(k>=2)deg++;}});});return{den,pct:den?100*deg/den:null};};
-  const _ov=_adjKL2(_overGrp),_mt=_adjKL2(_matchGrp);
-  const overBars=[];
-  if(_ov.pct!=null)overBars.push({label:"Oversized 2mm+ (n="+_overGrp.length+")",value:_ov.pct});
-  if(_mt.pct!=null)overBars.push({label:"Matched (n="+_matchGrp.length+")",value:_mt.pct});
-  let sOver="";
-  if(overBars.length>=2){sOver=`At 2 years, ${_p(_ov.pct)} of segments next to an implant oversized by 2 mm or more (vs the pre-op disc) reach K-L grade 2 or higher, against ${_p(_mt.pct)} next to a matched implant (${_overGrp.length} vs ${_matchGrp.length} patients). ${_ov.pct>_mt.pct?"More adjacent degeneration alongside oversized implants fits the review's 2 mm warning.":"No excess adjacent degeneration with oversizing shows in this sample."} Oversizing is implant height minus pre-op disc height per level. Exploratory; small subgroups.`;}
+    sSize=`Across recorded heights, mean 2-year ROM runs ${_n(_lo.value)}° at ${_lo.label} to ${_n(_hi.value)}° at ${_hi.label}. ${_flat?"No clear height-to-motion relationship shows in this sample.":(_hi.value>_lo.value?"Taller implants trend toward more motion here.":"Shorter implants trend toward more motion here.")} Exploratory, and sizes are operator-entered.`;}
   m.innerHTML=`<div class="dash">
     <div class="sech">Analysis overview</div>
     <div class="metricgrid">${cards.map(c=>`<div class="metric"><div class="mv">${c.v}<small>${c.s}</small></div><div class="ml">${c.l}</div></div>`).join("")}</div>
@@ -2230,11 +2458,6 @@ function renderDashboard(){
       ${romBySize.length?barChart(romBySize,{color:CC.cyan,unit:"°"}):`<div class="cs">Record implant heights on the Entry tab to see ROM by size.</div>`}</div>
 
     ${summaryBox(sSize)}
-
-    <div class="chartcard"><div class="ct">Adjacent degeneration by implant oversizing</div><div class="cs">% of adjacent segments at K-L grade 2 or higher (2 yr), for implants oversized by 2 mm or more vs matched to the pre-op disc. Tests the review's oversizing-drives-ASD rule. Exploratory; small subgroups.</div>
-      ${overBars.length>=2?barChart(overBars,{color:CC.orange,unit:"%"}):`<div class="cs">Record implant + pre-op disc heights and adjacent K-L in both groups to compare.</div>`}</div>
-
-    ${summaryBox(sOver)}
 
     <div class="chartcard"><div class="ct">Sagittal alignment over time</div><div class="cs">Cohort mean T1 slope (°) and C2–C7 SVA (mm) across follow-up</div>
       ${hasT1?`<div class="cs" style="margin:2px 0 3px;color:${CC.cyan}">T1 slope (°)</div>`+lineChart([{name:"T1 slope",color:CC.cyan,data:t1Mean}],xl,{labelPoints:true,dec:1}):""}
