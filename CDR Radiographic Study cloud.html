@@ -335,15 +335,7 @@
   .cgl{stroke:var(--border);stroke-width:1}
   .cbl{stroke:var(--border2);stroke-width:1}
 
-  /* ---- reliability ---- */
-  .rely{max-width:760px;margin:0 auto}
-  .panel-note{background:var(--panel2);border:1px solid var(--border);border-radius:11px;
-    padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px}
-  .panel-note b{color:var(--text);font-weight:600}
-  .rctl{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:14px}
-  .rctl .rf{display:flex;flex-direction:column;gap:5px}
-  .rctl .rf label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
-  .rctl input[type=number]{width:76px}
+  /* ---- stats tables ---- */
   .stat-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
   .stat-tbl th,.stat-tbl td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
   .stat-tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600}
@@ -351,45 +343,6 @@
   .stat-tbl td.np{font-family:var(--mono);text-align:right;color:var(--muted);font-size:11px}
   .stat-tbl .ghead td{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);
     font-weight:700;padding-top:13px;border-bottom:1px solid var(--border2)}
-  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.02em}
-  .badge.exc{background:var(--green-dim);color:var(--green)}
-  .badge.good{background:var(--cyan-dim);color:var(--cyan)}
-  .badge.mod{background:var(--amber-dim);color:var(--amber)}
-  .badge.poor{background:rgba(232,100,95,.14);color:var(--red)}
-  .badge.na{background:var(--panel2);color:var(--faint)}
-  .subsetlist{display:flex;flex-direction:column;gap:7px;margin-bottom:6px}
-  .ssitem{border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden}
-  .ssitem .ssh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
-  .ssitem .ssh:hover{background:var(--panel2)}
-  .ssitem .ssid{font-family:var(--mono);font-weight:600;font-size:13px;min-width:46px}
-  .ssitem .ssm{font-size:11px;color:var(--muted);font-family:var(--mono)}
-  .ssitem .ssr{margin-left:auto;display:flex;align-items:center;gap:9px}
-  .rdot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
-  .rdot.done{background:var(--green);box-shadow:0 0 6px var(--green)}
-  .ssbody{padding:0 12px 12px;border-top:1px solid var(--border);display:none}
-  .ssitem.open .ssbody{display:block}
-  .ssitem.open .ssh .chev{transform:rotate(90deg)}
-  .chev{color:var(--faint);transition:.15s;font-size:13px}
-  .r2grid{display:grid;grid-template-columns:54px 1fr 1fr 1fr 1fr;gap:5px;align-items:center;margin-top:11px}
-  .r2grid .r2h{font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;text-align:center;padding-bottom:2px}
-  .r2grid .r2lv{font-family:var(--mono);font-size:11px;color:var(--muted)}
-  .r2grid input{background:var(--panel2);border:1px solid var(--border2);color:var(--text);
-    border-radius:7px;padding:7px 6px;font-size:14px;font-family:var(--mono);text-align:right;width:100%}
-  .r2grid input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-dim)}
-  .r2grid .r2rom{font-family:var(--mono);font-size:13px;text-align:right;color:var(--green);padding-right:4px}
-  .r2sub{font-size:9px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin:14px 0 3px}
-  .r2tphint{font-size:10.5px;color:var(--faint);margin:2px 0 8px;line-height:1.4}
-  .r2tphint b{font-weight:700}
-  .r2flex{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
-  .r2f{display:flex;flex-direction:column;gap:4px;width:104px}
-  .r2f label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-  .r2f input{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:7px;
-    padding:7px 8px;font-size:14px;font-family:var(--mono);text-align:right;width:100%}
-  .r2f input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-dim)}
-  .r2sel{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:7px;
-    padding:7px 8px;font-size:13px;width:100%}
-  .r2row{display:flex;align-items:center;gap:9px;margin:7px 0}
-  .r2row .r2lab{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:62px}
   .interp{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px;
     padding:11px 13px;background:var(--panel2);border:1px solid var(--border);border-radius:10px}
   .interp b{color:var(--text)}
@@ -444,6 +397,23 @@
   .fsmini-sync{display:inline-block;color:var(--amber);font-size:13px}
   .fsmini-warn{display:inline-block;color:var(--amber);font-size:13px}
   .fsmini-err{display:inline-block;color:var(--red);font-size:13px}
+  .sessbox{margin-bottom:14px}
+  .sessgrid{display:flex;gap:10px;flex-wrap:wrap}
+  .sesscard{flex:1;min-width:210px;background:var(--panel2);border:1px solid var(--border2);
+    border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:8px}
+  .sesscard .btn{width:100%;justify-content:center;padding:11px 12px;font-size:13.5px}
+  .sesstag{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+  .sessnote{margin-top:9px;padding:9px 11px;border-radius:9px;background:var(--panel2);
+    border:1px solid var(--border2);font-size:11.5px;font-family:var(--mono);color:var(--muted)}
+  .sessnote.ok{color:var(--green);border-color:var(--green-dim)}
+  .sessnote.warn{color:var(--amber);border-color:var(--amber-dim);background:rgba(240,169,59,.07)}
+  .mn{font-family:var(--mono);font-size:.94em}
+  #copyArea{width:100%;height:150px;background:var(--panel);border:1px solid var(--border2);
+    color:var(--muted);border-radius:9px;padding:9px;font-family:var(--mono);font-size:10.5px;resize:vertical}
+  .moresave{background:var(--panel2);border:1px solid var(--border2);border-radius:11px;
+    padding:11px 13px;margin-bottom:13px}
+  .moresave summary{cursor:pointer;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);font-weight:700}
   .cldform{display:flex;gap:7px;flex-wrap:wrap}
   .cldform input{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--border2);color:var(--text);
     border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:11.5px}
@@ -498,7 +468,6 @@
 <div class="viewbar">
   <button class="seg on" data-view="entry"><span class="si">✎</span>Data</button>
   <button class="seg" data-view="dash"><span class="si">▤</span>Analysis</button>
-  <button class="seg" data-view="rely"><span class="si">◷</span>Reliability</button>
   <button class="seg" data-view="excel"><span class="si">▦</span>Export</button>
 </div>
 
@@ -711,6 +680,7 @@ function restore(){
       state.patients=state.patients.map(migrate);loaded=true;}
   }catch(e){}
   if(!state||typeof state!=="object")state={};
+  if(state.reliability)delete state.reliability;   // legacy field from the removed Reliability tab
   if(!Array.isArray(state.patients))state.patients=[];
   if(state.requireHO===undefined)state.requireHO=true;
   // one-time purge: clear the built-in demo cohort so the study starts empty, and never re-seed
@@ -741,7 +711,7 @@ function markSaveError(){
 }
 let saveTimer=null;
 function scheduleSave(){markDirty();clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>{persist();renderRoster();},400);}
+  saveTimer=setTimeout(()=>{persist();renderRoster();renderSessionBar();},400);}
 
 /* ---- completeness ---- */
 function isFused(p,l){return p.fused&&p.fusedLevels.includes(l);}
@@ -838,7 +808,6 @@ function renderAll(){
   nav.classList.toggle("hide",full);
   if(view==="entry"){renderRoster();renderMain();}
   else if(view==="dash"){renderDashboard();}
-  else if(view==="rely"){renderReliability();}
   else if(view==="excel"){renderExcel();}
   renderLockBar();
 }
@@ -898,11 +867,6 @@ function deletePatient(){
   if(!confirm(`Delete ${name}?\n\nThis permanently removes the patient and all their measurements.`))return;
   if(!confirm(`Are you absolutely sure?\n\nThis cannot be undone.`))return;
   state.patients.splice(di,1);
-  // keep reliability subset/reads aligned to the shifted indices
-  if(state.reliability&&Array.isArray(state.reliability.subset)){
-    state.reliability.subset=state.reliability.subset.filter(i=>i!==di).map(i=>i>di?i-1:i);
-    const nr={};Object.keys(state.reliability.reads||{}).forEach(k=>{const i=+k;if(i===di)return;nr[i>di?i-1:i]=state.reliability.reads[k];});
-    state.reliability.reads=nr;}
   if(state.current>=state.patients.length)state.current=state.patients.length-1;
   activeTP="PreOp";persist();renderAll();toast(`Deleted ${name}`);
 }
@@ -1467,8 +1431,38 @@ function exportCSV(){if(!state.patients.length){toast("No patients to export");r
   const rows=[buildHeader(),...state.patients.map((p,i)=>patientRow(p,i))];
   download(rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"CDR_data.csv","text/csv");
   toast(`Exported ${state.patients.length} patient${state.patients.length>1?"s":""}`);}
-function exportJSON(){download(JSON.stringify(state,null,1),"CDR_backup.json","application/json");
-  toast("Backup saved → CDR_backup.json");}
+function stamp(){const d=new Date(),p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes());}
+function exportJSON(){
+  if(GASMODE){gasDownload();return;}
+  const name="CDR_study_"+stamp()+".json";
+  download(JSON.stringify(state,null,1),name,"application/json");
+  markExported(); toast("Saved → "+name);}
+
+// Inside Apps Script the browser blocks ordinary downloads from the frame,
+// so the server writes the file to Drive and we hand back a link.
+let gasFileLink=null;
+async function gasDownload(){
+  toast("Preparing your file…");
+  try{
+    await cloudPush(false,true);                 // make sure Drive has the latest
+    const j=await cloudCall("download",{});
+    gasFileLink={name:j.name,url:j.url};
+    markExported(); renderSessionBar();
+    toast("File ready — open it from the link");
+  }catch(e){toast(e.message||"Couldn't prepare the file");}
+}
+
+/* ---- session file tracking: has this session's work been written to a file yet? ---- */
+let exportedSnap=null, exportedAt=null;
+function markExported(){exportedSnap=snapState();exportedAt=new Date();
+  try{localStorage.setItem(STORE+"_lastexport",JSON.stringify({at:exportedAt.toISOString()}));}catch(e){}
+  renderSessionBar();}
+function unsavedToFile(){
+  if(!state.patients.length)return false;
+  if(fileLinked)return false;            // linked file is written on every change
+  return exportedSnap!==snapState();
+}
 function loadStateObj(o){
   if(!o||!o.patients)throw 0;
   o.patients=o.patients.map(migrate); state=o;
@@ -1478,7 +1472,7 @@ function loadStateObj(o){
 }
 function resetHistoryBaseline(){histCurrent=snapState();undoStack=[];redoStack=[];updateUndoBtns();}
 function importJSON(file){const rd=new FileReader();
-  rd.onload=()=>{try{loadStateObj(JSON.parse(rd.result));resetHistoryBaseline();persist();renderAll();toast(`Imported ${state.patients.length} patients`);}
+  rd.onload=()=>{try{loadStateObj(JSON.parse(rd.result));resetHistoryBaseline();persist();exportedSnap=snapState();renderAll();toast(`Loaded ${state.patients.length} patient${state.patients.length===1?"":"s"} — carry on`);}
     catch(e){toast("Couldn’t read that file");}};
   rd.readAsText(file);}
 
@@ -1557,6 +1551,107 @@ function saveToOneDrive(){
   if(fileHandle && state.patients.length===0){ fileReconnect(); return; } // empty + remembered -> load, never overwrite
   fileLink();
 }
+
+/* ============================================================
+   SESSION BAR — the two things to do each day: load the file at
+   the start, save it at the end. Everything else is optional.
+   ============================================================ */
+function showCopyBox(){
+  const box=document.getElementById("copyBox"); if(!box)return;
+  const txt=JSON.stringify(state,null,1);
+  box.innerHTML=`<div class="cs" style="margin:9px 0 6px">Select all, copy, paste into Notepad, then <b>Save as</b> <span class="mn">CDR_study_${stamp()}.json</span> — set "Save as type" to <b>All Files</b> so it doesn't become a .txt.</div>`+
+    `<textarea id="copyArea" readonly spellcheck="false">${esc(txt)}</textarea>`+
+    `<div class="fsbtns" style="margin-top:7px"><button class="btn primary" id="copyBtn">Copy everything</button><button class="btn" id="copyHide">Hide</button></div>`;
+  const a=document.getElementById("copyArea");
+  const b=document.getElementById("copyBtn");
+  if(b)b.onclick=()=>{a.select();a.setSelectionRange(0,a.value.length);
+    let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+    if(ok){markExported();toast("Copied — now paste into Notepad and save");}
+    else toast("Couldn't copy automatically — select the text and press Ctrl+C");};
+  const h=document.getElementById("copyHide");
+  if(h)h.onclick=()=>{box.innerHTML="";};
+  a.focus();
+}
+function renderSessionBar(){
+  const bar=document.getElementById("sessionBar"); if(!bar)return;
+  const n=state.patients.length;
+  const unsaved=unsavedToFile();
+  const savedTxt=exportedAt
+    ? "Saved to a file at "+exportedAt.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})
+    : "Not saved to a file yet this session";
+
+  const startNote=n
+    ? `You already have <b>${n} patient${n===1?"":"s"}</b> loaded. Only use this if you are picking up from a file — it replaces what is here.`
+    : `Nothing loaded yet. Open your latest <span class="mn">CDR_study_….json</span> to carry on where you left off.`;
+
+  {
+    const unsavedNote = unsaved
+      ? `<div class="sessnote warn">⚠ ${n} patient${n===1?"":"s"} entered, not yet saved to a file. Save before you close.</div>`
+      : exportedAt
+        ? `<div class="sessnote ok">● Saved to a file at ${esc(exportedAt.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}))}${n?" · "+n+" patient"+(n===1?"":"s"):""}</div>`
+        : `<div class="sessnote">${n?n+" patient"+(n===1?"":"s")+" loaded. ":""}Not saved to a file yet this session.</div>`;
+    bar.innerHTML=
+      `<div class="sessgrid">
+        <div class="sesscard">
+          <div class="sesstag">Start of work</div>
+          <button class="btn" id="sessLoad">Import JSON</button>
+          <div class="cs">${n?`<b>${n} patient${n===1?"":"s"}</b> loaded \u2014 importing replaces them.`:`Open your latest <span class="mn">CDR_study_\u2026.json</span> and carry on.`}</div>
+        </div>
+        <div class="sesscard">
+          <div class="sesstag">End of work</div>
+          <button class="btn primary" id="sessPC" ${n?"":"disabled"}>Export JSON</button>
+          <div class="cs">Saves <span class="mn">CDR_study_&lt;date&gt;.json</span> to Downloads. Keep the newest \u2014 that is your study.</div>
+        </div>
+        <div class="sesscard">
+          <div class="sesstag">End of study</div>
+          <button class="btn" id="sessCSV" ${n?"":"disabled"}>Export CSV</button>
+          <div class="cs">One row per patient, for analysis. Not a backup \u2014 it cannot be imported back.</div>
+        </div>
+       </div>${unsavedNote}
+       <div class="cs" style="margin-top:8px;opacity:.75">Nothing downloaded? <a href="#" id="sessCopy">Show the data to copy manually</a> \u2014 paste into Notepad and save as <span class="mn">.json</span>.</div>
+       <div id="copyBox"></div>`;
+    const cs=document.getElementById("sessCSV"); if(cs)cs.onclick=exportCSV;
+    const pc=document.getElementById("sessPC");
+    if(pc)pc.onclick=()=>{const nm="CDR_study_"+stamp()+".json";
+      download(JSON.stringify(state,null,1),nm,"application/json");
+      markExported(); toast("Saved \u2192 "+nm+" (check Downloads)");};
+    const ld=document.getElementById("sessLoad");
+    if(ld)ld.onclick=()=>{
+      if(state.patients.length&&!confirm(`Opening a file replaces the ${state.patients.length} patient${state.patients.length===1?"":"s"} currently loaded.\n\nContinue?`))return;
+      document.getElementById("fileInput").click();};
+    const cp=document.getElementById("sessCopy");
+    if(cp)cp.onclick=e=>{e.preventDefault();showCopyBox();};
+    return;
+  }
+  const status=fileLinked
+    ? `<div class="sessnote ok">● Auto-saving to <b>${esc(fileName)}</b> — you don't need to do anything at the end of the day.</div>`
+    : unsaved
+      ? `<div class="sessnote warn">⚠ ${n} patient${n===1?"":"s"} in this browser, with changes not yet written to a file. Save before you close the laptop.</div>`
+      : `<div class="sessnote">${esc(savedTxt)}${n?" · "+n+" patient"+(n===1?"":"s"):""}</div>`;
+
+  bar.innerHTML=
+    `<div class="sessgrid">
+       <div class="sesscard">
+         <div class="sesstag">Start of session</div>
+         <button class="btn" id="sessLoad">Open my study file</button>
+         <div class="cs">${startNote}</div>
+       </div>
+       <div class="sesscard">
+         <div class="sesstag">End of session</div>
+         <button class="btn primary" id="sessSave" ${n?"":"disabled"}>Save my study file</button>
+         <div class="cs">Writes <span class="mn">CDR_study_&lt;date&gt;.json</span> to Downloads. Keep the newest one — that is your study.</div>
+       </div>
+     </div>${status}`;
+
+  const l=document.getElementById("sessLoad");
+  if(l)l.onclick=()=>{
+    if(state.patients.length&&!confirm(`Opening a file replaces the ${state.patients.length} patient${state.patients.length===1?"":"s"} currently loaded.\n\nContinue?`))return;
+    document.getElementById("fileInput").click();
+  };
+  const v=document.getElementById("sessSave");
+  if(v)v.onclick=exportJSON;
+}
+
 function renderFsBar(){
   const mini=document.getElementById("fsMini");
   if(mini)mini.innerHTML=fileLinked?`<span class="fsmini-on" id="fsMiniGlow" title="Auto-saving to ${esc(fileName)}">⛁</span>`:"";
@@ -1575,6 +1670,7 @@ function renderFsBar(){
 }
 function renderLinkReminder(){
   const el=document.getElementById("linkRemind"); if(!el)return;
+  if(GASMODE){el.style.display="none";el.innerHTML="";return;}
   if(!(FS_OK&&!fileLinked&&!remindDismissed)){el.style.display="none";el.innerHTML="";return;}
   const msg=fileHandle
     ?`<b>Auto-save is paused.</b> Reconnect <code>${esc(fileName)}</code> to keep saving your work to disk this session.`
@@ -1594,6 +1690,9 @@ document.getElementById("fileInput").onchange=e=>{if(e.target.files[0])importJSO
    except a cached copy in this browser.
    ============================================================ */
 const CLOUD_KEY="cdr_cloud_cfg";
+// Running inside the Apps Script web app? Then the server is right here —
+// no URL, no key, and no cross-origin request to be blocked.
+const GASMODE=(typeof google!=="undefined"&&google.script&&google.script.run);
 let cloud={url:"",token:"",rev:0,device:"",on:false};
 let cloudSuppress=false, cloudBusy=false, cloudQueued=false, cloudTimer=null;
 let cloudState="off", cloudNote="", cloudAt=null, cloudRowsAt=0, cloudBehind=null;
@@ -1610,6 +1709,12 @@ function cloudSet(st,note){cloudState=st;cloudNote=note||"";renderCloudBar();}
 
 async function cloudCall(action,extra){
   const body=Object.assign({token:cloud.token,action:action,device:cloud.device},extra||{});
+  if(GASMODE)return new Promise((res,rej)=>{
+    google.script.run
+      .withSuccessHandler(j=>{ if(j&&j.error)rej(new Error(j.error)); else res(j); })
+      .withFailureHandler(e=>rej(new Error(e&&e.message?e.message:"Couldn't reach the server")))
+      .api(body);
+  });
   let r;
   try{
     r=await fetch(cloud.url,{method:"POST",
@@ -1703,6 +1808,7 @@ function cloudDisconnect(){
 
 async function cloudInit(){
   cloudCfgLoad();
+  if(GASMODE){cloud.on=true;cloud.url="(Apps Script)";cloud.token="-";}
   if(!cloud.on){renderCloudBar();return;}
   cloudSet("syncing");
   try{
@@ -1755,9 +1861,13 @@ function renderCloudBar(){
   else
     btns=`<button class="btn primary" id="cldPush">Sync now</button><button class="btn" id="cldPull">Load cloud copy</button><button class="btn" id="cldOff">Disconnect</button>`;
 
-  bar.innerHTML=`<div class="fsrow"><b>Cloud sync</b>${stat}</div>`+
+  if(GASMODE)btns=btns.replace(/<button class="btn" id="cldOff">Disconnect<\/button>/,"");
+  const note=GASMODE
+    ? `Saved to your Google Drive automatically, in a folder called <span style="font-family:var(--mono)">CDR Study</span>. “Sync now” also refreshes the readable Sheet.`
+    : `This PC is <span style="font-family:var(--mono)">${esc(cloud.device)}</span>. “Sync now” also refreshes the readable table in the Sheet.`;
+  bar.innerHTML=`<div class="fsrow"><b>${GASMODE?"Saved to Drive":"Cloud sync"}</b>${stat}</div>`+
     `<div class="fsbtns">${btns}</div>`+
-    `<div class="cs" style="margin-top:8px;opacity:.8">This PC is <span style="font-family:var(--mono)">${esc(cloud.device)}</span>. “Sync now” also refreshes the readable table in the Sheet.</div>`;
+    `<div class="cs" style="margin-top:8px;opacity:.8">${note}</div>`;
   const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
   w("cldPush",()=>cloudPush(cloudState==="choose"||cloudState==="behind",true));
   w("cldPull",()=>cloudPull(false));
@@ -1776,7 +1886,9 @@ function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();exportCSV();}});
 window.addEventListener("beforeunload",e=>{
   if(dirty)persist();
-  if(saveFailed&&!fileLinked){e.preventDefault();e.returnValue="";}   // warn only when data truly isn't saved anywhere
+  // warn when this session's work exists only in the browser
+  if(GASMODE){ if(unsavedToFile()){e.preventDefault();e.returnValue="";} return; }
+  if((saveFailed&&!fileLinked)||(unsavedToFile()&&!cloud.on)){e.preventDefault();e.returnValue="";}
 });
 
 /* ============================================================
@@ -2151,16 +2263,10 @@ function renderExcel(){
     ? `<div class="xlswrap"><table class="xlstbl"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`
     : `<div class="blank" style="min-height:30vh"><div><h3>No data to preview</h3>Restore a backup or add patients first.</div></div>`;
   m.innerHTML=`<div class="xls">
-    <div style="background:rgba(76,201,230,.06);border:1px solid rgba(76,201,230,.25);border-radius:10px;padding:13px 14px;margin-bottom:14px"><div class="ct" style="margin-bottom:4px">Save your data — two ways</div><div class="cs" style="margin-bottom:11px">Your work normally lives only in this browser. Keep a real copy with one of these:</div><div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:11px"><button class="btn primary" id="svCloud" style="flex:1;min-width:150px">☁ Save to OneDrive</button><button class="btn" id="svPC" style="flex:1;min-width:150px">⬇ Save a copy to this PC</button></div><div class="cs" style="line-height:1.55"><b style="color:var(--cyan)">☁ Save to OneDrive</b> — pick your OneDrive folder once; the app then saves there automatically on every change, and OneDrive syncs it to the cloud. Use this for everyday work. Next time you open the app it remembers the file — press <b>Reconnect</b> below to load it back.<br><b style="color:var(--cyan)">⬇ Save a copy to this PC</b> — drops a one-time snapshot into your Downloads folder right now. Handy for a quick backup or to move / email.<br><span style="opacity:.82">Note: "OneDrive" is just a folder on your PC that also syncs to the cloud — you choose it in the Save window, so a file there is on your PC <i>and</i> in the cloud. The PC snapshot is a separate one-off copy that does not keep updating.</span></div></div>
-    <div id="cloudBar" class="fsbar"></div>
-    <div id="fsBar" class="fsbar"></div>
-    <div class="xlsbar"><div><div class="ct">Backup, restore &amp; export</div>
-      <div class="cs">${sub}</div></div>
-      <div class="xlsbtns">
-        <button class="btn" id="xlsBackup" title="Save a JSON safety copy of all data to your device">Backup</button>
-        <button class="btn" id="xlsRestore" title="Load a previously saved backup file">Restore</button>
-        <button class="btn primary" id="xlsExport" ${ps.length?"":"disabled"}>Export CSV</button>
-      </div></div>
+    <div id="sessionBar" class="sessbox"></div>
+
+    <div class="xlsbar"><div><div class="ct">Data preview</div>
+      <div class="cs">${sub}</div></div></div>
     ${body}
   </div>`;
   const ex=document.getElementById("xlsExport");if(ex)ex.onclick=exportCSV;
@@ -2168,35 +2274,8 @@ function renderExcel(){
   const rs=document.getElementById("xlsRestore");if(rs)rs.onclick=()=>document.getElementById("fileInput").click();
   const sc=document.getElementById("svCloud");if(sc)sc.onclick=saveToOneDrive;
   const sp=document.getElementById("svPC");if(sp)sp.onclick=exportJSON;
-  renderFsBar(); renderCloudBar();
+  renderSessionBar(); renderFsBar(); renderCloudBar();
 }
-
-/* ============================================================
-   RELIABILITY — ICC + weighted kappa (validated)
-   ============================================================ */
-function icc21(rows){
-  const n=rows.length;if(n<2)return null;const k=rows[0].length;
-  let grand=0,Nn=0;rows.forEach(r=>r.forEach(v=>{grand+=v;Nn++;}));grand/=Nn;
-  const rowM=rows.map(r=>r.reduce((a,b)=>a+b,0)/k),colM=[];
-  for(let j=0;j<k;j++){let s=0;for(let i=0;i<n;i++)s+=rows[i][j];colM.push(s/n);}
-  let SSR=0;rowM.forEach(mn=>SSR+=(mn-grand)*(mn-grand));SSR*=k;
-  let SSC=0;colM.forEach(mn=>SSC+=(mn-grand)*(mn-grand));SSC*=n;
-  let SST=0;rows.forEach(r=>r.forEach(v=>SST+=(v-grand)*(v-grand)));
-  const SSE=SST-SSR-SSC,MSR=SSR/(n-1),MSC=SSC/(k-1),MSE=SSE/((n-1)*(k-1));
-  const den=MSR+(k-1)*MSE+(k/n)*(MSC-MSE);
-  return{icc:den===0?NaN:(MSR-MSE)/den,n};
-}
-function weightedKappa(pairs,R){
-  const O=Array.from({length:R},()=>Array(R).fill(0));pairs.forEach(([a,b])=>O[a][b]++);
-  const Nn=pairs.length;if(!Nn)return null;
-  const rs=Array(R).fill(0),cs=Array(R).fill(0);
-  for(let i=0;i<R;i++)for(let j=0;j<R;j++){rs[i]+=O[i][j];cs[j]+=O[i][j];}
-  const w=(i,j)=>1-((i-j)*(i-j))/((R-1)*(R-1));let obs=0,exp=0;
-  for(let i=0;i<R;i++)for(let j=0;j<R;j++){obs+=w(i,j)*O[i][j];exp+=w(i,j)*rs[i]*cs[j]/Nn;}
-  const po=obs/Nn,pe=exp/Nn;return{kappa:(1-pe)===0?NaN:(po-pe)/(1-pe),n:Nn};
-}
-function iccBadge(v){if(v==null||!isFinite(v))return["na","—"];if(v>=0.9)return["exc","Excellent"];if(v>=0.75)return["good","Good"];if(v>=0.5)return["mod","Moderate"];return["poor","Poor"];}
-function kapBadge(v){if(v==null||!isFinite(v))return["na","—"];if(v>=0.81)return["exc","Almost perfect"];if(v>=0.61)return["good","Substantial"];if(v>=0.41)return["mod","Moderate"];if(v>=0.21)return["poor","Fair"];return["poor","Slight"];}
 
 /* ============================================================
    COHORT ANALYSIS — descriptive stats + t-tests (validated)
@@ -2272,150 +2351,6 @@ function analysisSection(ps){
   });
   h+=`<div class="chartcard"><div class="interp"><b>Draft methods text — confirmatory analysis</b><br>Each radiographic outcome (adjacent-segment ROM, C2–C7 lordosis, T1 slope, C2–C7 SVA) is analysed with a linear mixed-effects model with fixed effects for time, group (CDR vs ACDF/hybrid) and their interaction and a random intercept per patient (with a random slope for time where supported); adjacent-segment models also include the adjacent level. The time×group interaction tests whether arthroplasty and fusion trajectories diverge. Models adjust for baseline value, age, sex, operated level and number of levels; effects are reported as adjusted mean differences with 95% CIs and related to published minimal clinically important differences. All available timepoints are used under a missing-at-random assumption, with one pre-specified primary outcome and Holm correction across secondary outcomes.</div></div>`;
   return h;
-}
-
-let r2tp={};
-function blankReads(){const o={};TPS.forEach(t=>o[t.key]=blankTP());return o;}
-function ensureRely(){if(!state.reliability||typeof state.reliability!=="object")state.reliability={size:18,subset:[],reads:{}};
-  const r=state.reliability;if(!Array.isArray(r.subset))r.subset=[];if(!r.reads||typeof r.reads!=="object")r.reads={};if(!r.size)r.size=18;
-  Object.keys(r.reads).forEach(k=>{const rd=r.reads[k];if(rd&&typeof rd==="object"&&!rd.PreOp&&rd.static){const m=blankReads();m["2y"]=rd;r.reads[k]=m;}});
-  return r;}
-function relyEligible(){return state.patients.map((p,i)=>i).filter(i=>patientStatus(state.patients[i])!=="empty");}
-function readsHaveData(r){return Object.keys(r.reads||{}).some(k=>{const rd=r.reads[k];if(!rd||typeof rd!=="object")return false;
-  return TPS.some(t=>{const d=rd[t.key];if(!d)return false;
-    if(LEVELS.some(L=>(d.static[L]||"")!==""||(d.flex[L]||"")!==""||(d.ext[L]||"")!==""))return true;
-    if((d.galign||"")!==""||(d.gflex||"")!==""||(d.gext||"")!==""||(d.sva||"")!==""||(d.t1slope||"")!==""||(d.c7slope||"")!=="")return true;
-    return (Object.keys(d.asd||{}).length>0)||(Object.keys(d.ho||{}).length>0);});});}
-function selectSubset(){const r=ensureRely();
-  if(readsHaveData(r)&&!confirm(`Pick a new random subset?\n\nThis discards the second readings already entered for the current subset (${r.subset.length} patient${r.subset.length>1?"s":""}).`))return;
-  const elig=relyEligible(),k=Math.max(1,Math.min(r.size|0,elig.length));
-  const a=elig.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  r.subset=a.slice(0,k).sort((x,y)=>x-y);r.reads={};persist();renderReliability();
-  toast(`Selected ${r.subset.length} patient${r.subset.length>1?"s":""}`);}
-function simulateReads(){const r=ensureRely();if(!r.subset.length){toast("Select a subset first");return;}
-  const nz=sd=>(Math.random()+Math.random()+Math.random()-1.5)*sd*2;
-  r.subset.forEach(idx=>{const p=state.patients[idx],reads=blankReads();
-    TPS.forEach(t=>{const src=p.data[t.key],d=reads[t.key];
-      LEVELS.forEach(L=>{const st=numv(src.static[L]),fl=numv(src.flex[L]),ex=numv(src.ext[L]);
-        d.static[L]=st==null?"":(st+nz(0.9)).toFixed(1);d.flex[L]=fl==null?"":(fl+nz(0.9)).toFixed(1);d.ext[L]=ex==null?"":(ex+nz(0.9)).toFixed(1);});
-      const ga=numv(src.galign),gf=numv(src.gflex),ge=numv(src.gext),sv=numv(src.sva),t1=numv(src.t1slope),c7=numv(src.c7slope);
-      d.galign=ga==null?"":(ga+nz(1.2)).toFixed(1);d.gflex=gf==null?"":(gf+nz(1.4)).toFixed(1);d.gext=ge==null?"":(ge+nz(1.4)).toFixed(1);
-      d.sva=sv==null?"":(sv+nz(1.6)).toFixed(1);d.t1nv=src.t1nv;
-      if(src.t1nv)d.c7slope=c7==null?"":(c7+nz(1.1)).toFixed(1);else d.t1slope=t1==null?"":(t1+nz(1.1)).toFixed(1);
-      const adj=adjacentLevels(p);[adj.upper,adj.lower].forEach(L=>{if(!L)return;const g=asdNum(src.asd[L]);if(g==null)return;
-        let g2=g;if(Math.random()<0.12)g2=Math.max(0,Math.min(4,g+(Math.random()<0.5?-1:1)));d.asd[L]=String(g2);});
-      cdrLevels(p).forEach(L=>{const g=hoNum(src.ho[L]);if(g==null)return;let g2=g;if(Math.random()<0.12)g2=Math.max(0,Math.min(4,g+(Math.random()<0.5?-1:1)));d.ho[L]=HOTOK[g2];});});
-    r.reads[idx]=reads;});
-  persist();renderReliability();toast(`Simulated second reads for ${r.subset.length} patients`);}
-function r2tpComplete(p,d,tk){if(!d)return false;const o=p.data[tk];
-  for(const L of LEVELS){if(numv(o.static[L])!=null&&numv(d.static[L])==null)return false;
-    if(numv(o.flex[L])!=null&&numv(d.flex[L])==null)return false;if(numv(o.ext[L])!=null&&numv(d.ext[L])==null)return false;}
-  if(numv(o.galign)!=null&&numv(d.galign)==null)return false;if(numv(o.gflex)!=null&&numv(d.gflex)==null)return false;if(numv(o.gext)!=null&&numv(d.gext)==null)return false;
-  if(numv(o.sva)!=null&&numv(d.sva)==null)return false;
-  if(o.t1nv){if(numv(o.c7slope)!=null&&numv(d.c7slope)==null)return false;}else{if(numv(o.t1slope)!=null&&numv(d.t1slope)==null)return false;}
-  const adj=adjacentLevels(p);for(const L of[adj.upper,adj.lower])if(L&&asdNum(o.asd[L])!=null&&asdNum(d.asd[L])==null)return false;
-  for(const L of cdrLevels(p))if(hoNum(o.ho[L])!=null&&hoNum(d.ho[L])==null)return false;return true;}
-function r2complete(p,reads){if(!reads)return false;
-  let any=false;for(const t of TPS){if(tpStatus(p,t.key)==="empty")continue;any=true;if(!r2tpComplete(p,reads[t.key],t.key))return false;}return any;}
-
-function computeReliability(){const r=ensureRely();
-  const A={st:[],rom:[],grom:[],sva:[],t1:[]},O={asd:[],ho:[]};
-  r.subset.forEach(idx=>{const p=state.patients[idx],reads=r.reads[idx];if(!reads)return;
-    TPS.forEach(t=>{const d1=p.data[t.key],d2=reads[t.key];if(!d2)return;
-    LEVELS.forEach(L=>{const a=numv(d1.static[L]),b=numv(d2.static[L]);if(a!=null&&b!=null)A.st.push([a,b]);
-      const r1=numv(romOf(d1,L).val),r2=numv(romOf(d2,L).val);if(r1!=null&&r2!=null)A.rom.push([r1,r2]);});
-    const g1=numv(gromOf(d1).val),g2=numv(gromOf(d2).val);if(g1!=null&&g2!=null)A.grom.push([g1,g2]);
-    const s1=numv(d1.sva),s2=numv(d2.sva);if(s1!=null&&s2!=null)A.sva.push([s1,s2]);
-    if(!d1.t1nv&&!d2.t1nv){const a=numv(d1.t1slope),b=numv(d2.t1slope);if(a!=null&&b!=null)A.t1.push([a,b]);}
-    const adj=adjacentLevels(p);[adj.upper,adj.lower].forEach(L=>{if(!L)return;const a=asdNum(d1.asd[L]),b=asdNum(d2.asd[L]);if(a!=null&&b!=null)O.asd.push([a,b]);});
-    cdrLevels(p).forEach(L=>{const a=hoNum(d1.ho[L]),b=hoNum(d2.ho[L]);if(a!=null&&b!=null)O.ho.push([a,b]);});});});
-  return{
-    cont:[{k:"Static disc angle",pairs:A.st},{k:"Segmental ROM",pairs:A.rom},{k:"Global ROM (C2–C7)",pairs:A.grom},
-      {k:"C2–C7 SVA",pairs:A.sva},{k:"T1 slope",pairs:A.t1}].map(o=>({...o,icc:o.pairs.length>=2?icc21(o.pairs):null})),
-    ord:[{k:"ASD grade (Kellgren–Lawrence)",pairs:O.asd,R:5},{k:"HO grade (McAfee)",pairs:O.ho,R:5}].map(o=>({...o,kappa:o.pairs.length>=2?weightedKappa(o.pairs,o.R):null}))
-  };
-}
-function methodsSentence(R){const r=ensureRely(),k=r.subset.length,pct=state.patients.length?Math.round(100*k/state.patients.length):0;
-  const cont=R.cont.filter(o=>o.icc&&isFinite(o.icc.icc)),ord=R.ord.filter(o=>o.kappa&&isFinite(o.kappa.kappa));
-  if(!cont.length&&!ord.length)return `<div class="interp">Enter or simulate second reads to compute agreement statistics.</div>`;
-  const cTxt=cont.map(o=>`${o.k.toLowerCase()} ${o.icc.icc.toFixed(2)}`).join("; ");
-  const oTxt=ord.map(o=>`${o.k.split(" (")[0].toLowerCase()} ${o.kappa.kappa.toFixed(2)}`).join("; ");
-  let s=`Observer reliability was assessed on a random subset of <b>${k} patients (${pct}% of the cohort)</b>, each re-measured independently and blinded to the first reading. `;
-  if(cont.length)s+=`Intraclass correlation coefficients (two-way random effects, single measures, absolute agreement) were ${cTxt}. `;
-  if(ord.length)s+=`Quadratic-weighted κ for ordinal grades was ${oTxt}.`;
-  return `<div class="interp"><b>Draft methods text</b><br>${s}</div>`;
-}
-function buildStatsHTML(){const R=computeReliability();
-  let t=`<table class="stat-tbl"><tr><th>Measurement</th><th style="text-align:right">ICC / κ</th><th style="text-align:right">Pairs</th><th>Agreement</th></tr>`;
-  t+=`<tr class="ghead"><td colspan="4">Continuous — ICC(2,1), absolute agreement</td></tr>`;
-  R.cont.forEach(o=>{const v=o.icc&&isFinite(o.icc.icc)?o.icc.icc:null,b=iccBadge(v);
-    t+=`<tr><td>${o.k}</td><td class="num">${v==null?"–":v.toFixed(3)}</td><td class="np">${o.pairs.length||"–"}</td><td><span class="badge ${b[0]}">${b[1]}</span></td></tr>`;});
-  t+=`<tr class="ghead"><td colspan="4">Ordinal — quadratic-weighted κ</td></tr>`;
-  R.ord.forEach(o=>{const v=o.kappa&&isFinite(o.kappa.kappa)?o.kappa.kappa:null,b=kapBadge(v);
-    t+=`<tr><td>${o.k}</td><td class="num">${v==null?"–":v.toFixed(3)}</td><td class="np">${o.pairs.length||"–"}</td><td><span class="badge ${b[0]}">${b[1]}</span></td></tr>`;});
-  t+=`</table>`+methodsSentence(R);return t;}
-
-function klR2(idx,L,val,tk){const opts=[["0","0 None"],["1","1 Doubtful"],["2","2 Minimal"],["3","3 Moderate"],["4","4 Severe"]];
-  return `<select class="r2sel" data-r2asd="${idx}" data-tk="${tk}" data-l="${L}"><option value="">—</option>`+opts.map(o=>`<option value="${o[0]}" ${val===o[0]?"selected":""}>${o[1]}</option>`).join("")+`</select>`;}
-function hoR2(idx,L,val,tk){return `<select class="r2sel" data-r2ho="${idx}" data-tk="${tk}" data-l="${L}"><option value="">—</option>`+HOTOK.map(t=>`<option value="${t}" ${val===t?"selected":""}>${t}</option>`).join("")+`</select>`;}
-function r2GridHTML(p,idx){const r=ensureRely();if(!r.reads[idx]||!r.reads[idx].PreOp)r.reads[idx]=blankReads();const reads=r.reads[idx];
-  const firstTk=(TPS.find(t=>tpStatus(p,t.key)!=="empty")||TPS[0]).key,tk=r2tp[idx]||firstTk,d=reads[tk];
-  const pills=TPS.map(t=>{const origHas=tpStatus(p,t.key)!=="empty",done=origHas&&r2tpComplete(p,reads[t.key],t.key);
-    return `<button class="pill ${origHas?(done?"complete":"incomplete"):""} ${t.key===tk?"active":""}" data-r2tp="${idx}" data-tk="${t.key}" ${origHas?"":'style="opacity:.4"'}>${t.short}</button>`;}).join("");
-  let h=`<div class="r2tphint">Re-read every timepoint the first observer recorded · editing <b style="color:var(--cyan)">${(TPS.find(t=>t.key===tk)||{}).label||tk}</b></div><div class="tps">${pills}</div>`+
-    `<div class="r2grid"><div class="r2h">Level</div><div class="r2h">Static</div><div class="r2h">Flex</div><div class="r2h">Ext</div><div class="r2h">ROM</div>`;
-  LEVELS.forEach(L=>{const rom=romOf(d,L);
-    h+=`<div class="r2lv">${L}</div>`+["static","flex","ext"].map(meas=>`<input data-r2="${idx}" data-tk="${tk}" data-m="${meas}" data-l="${L}" inputmode="decimal" value="${esc(d[meas][L])}">`).join("")+
-      `<div class="r2rom" id="r2rom_${idx}_${L.replace("/","")}">${rom.val===""?"–":rom.val}</div>`;});
-  h+=`</div><div class="r2sub">Global C2–C7</div><div class="r2flex">`+
-    [["galign","Static"],["gflex","Flex"],["gext","Ext"]].map(a=>`<div class="r2f"><label>${a[1]}</label><input data-r2="${idx}" data-tk="${tk}" data-g="${a[0]}" inputmode="decimal" value="${esc(d[a[0]])}"></div>`).join("")+
-    `<div class="r2f"><label>ROM</label><input id="r2grom_${idx}" value="${gromOf(d).val===""?"":gromOf(d).val}" readonly style="color:var(--green)"></div></div>`+
-    `<div class="r2flex"><div class="r2f"><label>C2–C7 SVA</label><input data-r2="${idx}" data-tk="${tk}" data-g="sva" inputmode="decimal" value="${esc(d.sva)}"></div>`+
-    (d.t1nv?`<div class="r2f"><label>C7 slope</label><input data-r2="${idx}" data-tk="${tk}" data-g="c7slope" inputmode="decimal" value="${esc(d.c7slope)}"></div>`
-           :`<div class="r2f"><label>T1 slope</label><input data-r2="${idx}" data-tk="${tk}" data-g="t1slope" inputmode="decimal" value="${esc(d.t1slope)}"></div>`)+`</div>`;
-  const adj=adjacentLevels(p),adjL=[adj.upper,adj.lower].filter(Boolean);
-  if(adjL.length){h+=`<div class="r2sub">Adjacent-segment grade (K–L)</div>`;adjL.forEach(L=>h+=`<div class="r2row"><span class="r2lab">${L}</span>${klR2(idx,L,asdVal(d,L),tk)}</div>`);}
-  const cl=cdrLevels(p);
-  if(cl.length){h+=`<div class="r2sub">HO grade (McAfee)</div>`;cl.forEach(L=>h+=`<div class="r2row"><span class="r2lab">${L}</span>${hoR2(idx,L,hoVal(d,L),tk)}</div>`);}
-  return h;}
-function relySave(idx){markDirty();clearTimeout(saveTimer);saveTimer=setTimeout(()=>{persist();updateR2Dot(idx);updateRelyStats();},350);}
-function updateR2Dot(idx){const el=document.getElementById("rdot_"+idx);if(el)el.classList.toggle("done",r2complete(state.patients[idx],ensureRely().reads[idx]));}
-function updateRelyStats(){const el=document.getElementById("relyStats");if(el)el.innerHTML=buildStatsHTML();}
-function bindR2(){
-  document.querySelectorAll("input[data-r2]").forEach(inp=>{inp.oninput=()=>{const idx=+inp.dataset.r2,tk=inp.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];
-    if(inp.dataset.m){d[inp.dataset.m][inp.dataset.l]=inp.value;const L=inp.dataset.l,rc=document.getElementById("r2rom_"+idx+"_"+L.replace("/",""));if(rc){const rv=romOf(d,L).val;rc.textContent=rv===""?"–":rv;}}
-    else if(inp.dataset.g){d[inp.dataset.g]=inp.value;if(inp.dataset.g==="gflex"||inp.dataset.g==="gext"){const gc=document.getElementById("r2grom_"+idx);if(gc){const gv=gromOf(d).val;gc.value=gv===""?"":gv;}}}
-    relySave(idx);};});
-  document.querySelectorAll("select[data-r2asd]").forEach(s=>{s.onchange=()=>{const idx=+s.dataset.r2asd,tk=s.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];if(s.value==="")delete d.asd[s.dataset.l];else d.asd[s.dataset.l]=s.value;relySave(idx);};});
-  document.querySelectorAll("select[data-r2ho]").forEach(s=>{s.onchange=()=>{const idx=+s.dataset.r2ho,tk=s.dataset.tk,reads=ensureRely().reads[idx];if(!reads||!reads[tk])return;const d=reads[tk];if(s.value==="")delete d.ho[s.dataset.l];else d.ho[s.dataset.l]=s.value;relySave(idx);};});
-  document.querySelectorAll("[data-r2tp]").forEach(b=>{b.onclick=()=>{const idx=+b.dataset.r2tp;r2tp[idx]=b.dataset.tk;
-    const card=b.closest(".ssitem"),body=card?card.querySelector(".ssbody"):null;if(body){body.innerHTML=r2GridHTML(state.patients[idx],idx);bindR2();}updateR2Dot(idx);};});
-}
-function renderReliability(){const m=document.getElementById("main"),r=ensureRely();
-  r.subset=r.subset.filter(i=>i>=0&&i<state.patients.length);
-  const elig=relyEligible();
-  let html=`<div class="rely"><div class="sech">Observer reliability</div>`+
-    `<div class="panel-note">Designate a random subset of patients, then record a <b>second, blinded reading of every timepoint</b> for each — or use <b>Simulate</b> to preview the analysis on synthetic re-reads. The tool pools read 1 vs read 2 across all timepoints in the subset and computes <b>ICC</b> for continuous measures and <b>quadratic-weighted κ</b> for ordinal grades.</div>`+
-    `<div class="rctl"><div class="rf"><label>Subset size</label><input type="number" id="ssSize" min="1" max="${Math.max(1,elig.length)}" value="${Math.min(r.size,elig.length)||1}"></div>`+
-    `<button class="btn primary" id="ssPick">Select random subset</button>`+
-    `<button class="btn" id="ssSim">Simulate second reads</button>`+
-    (r.subset.length?`<button class="btn" id="ssClear">Clear</button>`:``)+`</div>`;
-  if(!elig.length){html+=`<div class="blank" style="min-height:26vh"><div><h3>No measurements yet</h3>Enter some patient measurements in the Data tab first.</div></div></div>`;m.innerHTML=html;bindRelyCtl(elig);return;}
-  if(!r.subset.length){html+=`<div class="blank" style="min-height:26vh"><div><h3>No subset selected</h3>Pick a size, then tap “Select random subset”.</div></div></div>`;m.innerHTML=html;bindRelyCtl(elig);return;}
-  html+=`<div class="subsetlist">`;
-  r.subset.forEach(idx=>{const p=state.patients[idx],done=r2complete(p,r.reads[idx]);
-    const meta=[(p.age?p.age+"y":""),p.sex,(p.levels||[]).join("/")].filter(Boolean).join(" · ");
-    html+=`<div class="ssitem" data-ss="${idx}"><div class="ssh"><span class="chev">▸</span><span class="ssid">${esc(p.initials)||"····"}</span><span class="ssm">${esc(meta)}</span><span class="ssr"><span class="rdot ${done?"done":""}" id="rdot_${idx}"></span></span></div><div class="ssbody">${r2GridHTML(p,idx)}</div></div>`;});
-  html+=`</div><div class="chartcard" style="margin-top:14px"><div class="ct">Agreement — read 1 vs read 2</div><div id="relyStats">${buildStatsHTML()}</div></div></div>`;
-  m.innerHTML=html;bindRelyCtl(elig);
-  document.querySelectorAll(".ssitem .ssh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
-  bindR2();
-}
-function bindRelyCtl(elig){const r=ensureRely();
-  const sz=document.getElementById("ssSize");if(sz)sz.oninput=e=>{r.size=Math.max(1,Math.min(elig.length,+e.target.value||1));};
-  const pk=document.getElementById("ssPick");if(pk)pk.onclick=()=>{const v=+document.getElementById("ssSize").value||1;r.size=Math.max(1,Math.min(elig.length,v));selectSubset();};
-  const sm=document.getElementById("ssSim");if(sm)sm.onclick=simulateReads;
-  const cl=document.getElementById("ssClear");if(cl)cl.onclick=()=>{if(readsHaveData(r)&&!confirm("Clear the subset and second readings?\n\nThis discards everything entered in this tab."))return;r.subset=[];r.reads={};persist();renderReliability();};
 }
 
 restore();histCurrent=snapState();updateUndoBtns();renderAll();fileTryReconnect();cloudInit();
