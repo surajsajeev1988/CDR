@@ -387,29 +387,35 @@
   }
 
   /* ---- on-screen number pad ---- */
-  body.kpopen .main{padding-bottom:330px}
+  /* the runway is reserved for as long as pad mode is on, so opening and
+     closing the pad never shifts what you are looking at */
+  body.kpmode .main{padding-bottom:264px}
+  body.kpopen .toast{top:88px;bottom:auto}
   .keypad{position:fixed;left:0;right:0;bottom:0;z-index:60;
     background:linear-gradient(180deg,#141b23,#0d1217);border-top:1px solid var(--border2);
-    box-shadow:0 -12px 34px rgba(0,0,0,.55);padding:8px 8px calc(10px + env(safe-area-inset-bottom))}
-  .kphead{display:flex;align-items:center;gap:10px;padding:2px 4px 8px}
-  .kpwhat{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-  .kplbl{font-size:12.5px;font-weight:700;color:var(--cyan);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .kphint{font-size:9.5px;color:var(--faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .kpval{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
-  .kpnav{display:flex;gap:6px;flex:0 0 auto}
-  .kpnav button{width:36px;height:36px;border-radius:9px;border:1px solid var(--border2);
-    background:var(--panel2);color:var(--text);font-size:15px}
-  .kpnav button:disabled{opacity:.3}
-  .kpkeys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-  .kpk{height:54px;border-radius:11px;border:1px solid var(--border2);background:var(--panel2);
-    color:var(--text);font-family:var(--mono);font-size:21px;font-weight:600;transition:.08s}
+    box-shadow:0 -12px 34px rgba(0,0,0,.55);padding:6px 7px calc(7px + env(safe-area-inset-bottom))}
+  .kphead{display:flex;align-items:center;gap:9px;padding:1px 3px 6px}
+  .kpwhat{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+  .kplbl{font-size:11.5px;font-weight:700;color:var(--cyan);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kphint{font-size:9px;color:var(--faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpval{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
+  .kpx{width:32px;height:32px;flex:0 0 auto;border-radius:8px;border:1px solid var(--border2);
+    background:var(--panel2);color:var(--muted);font-size:14px}
+  .kpkeys{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .kpk{height:42px;border-radius:9px;border:1px solid var(--border2);background:var(--panel2);
+    color:var(--text);font-family:var(--mono);font-size:18px;font-weight:600;transition:.07s}
   .kpk:active{transform:translateY(1px);background:var(--raised)}
-  .kpk.alt{font-size:17px;color:var(--muted)}
-  .kpk.go{grid-column:span 2;background:var(--cyan);border-color:var(--cyan);color:#06222b;
-    font-family:var(--sans);font-size:15px;font-weight:700}
-  @media(min-width:680px){.keypad{max-width:430px;left:auto;right:16px;bottom:60px;
+  .kpk.kpalt{font-size:17px;color:var(--muted)}
+  .kpk.kpdot{font-size:30px;line-height:.4;padding-bottom:6px}
+  .kpk.kpdir{font-size:17px;color:var(--cyan);background:var(--panel);border-color:var(--border2)}
+  .kpk.kpwide{grid-column:span 2}
+  .kpk.kpgo{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:700}
+  .kpk.kpdot.auto{color:var(--faint)}
+  .kpk.kptgl{font-size:11px;font-weight:700;letter-spacing:.02em}
+  .kpk.kptgl.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+  @media(min-width:680px){.keypad{max-width:400px;left:auto;right:16px;bottom:60px;
     border:1px solid var(--border2);border-radius:14px}
-    body.kpopen .main{padding-bottom:120px}}
+    body.kpmode .main{padding-bottom:120px}}
 
   /* ---- lock + delete ---- */
   .cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
@@ -556,16 +562,13 @@
   <div class="kphead">
     <div class="kpwhat"><span class="kplbl" id="kpLabel">—</span><span class="kphint" id="kpHint"></span></div>
     <div class="kpval" id="kpVal">—</div>
-    <div class="kpnav">
-      <button id="kpPrev" title="Previous field">◂</button>
-      <button id="kpClose" title="Hide the number pad">✕</button>
-    </div>
+    <button class="kpx" id="kpClose" title="Hide the number pad">✕</button>
   </div>
   <div class="kpkeys">
-    <button class="kpk" data-k="1">1</button><button class="kpk" data-k="2">2</button><button class="kpk" data-k="3">3</button><button class="kpk alt" data-k="back">⌫</button>
-    <button class="kpk" data-k="4">4</button><button class="kpk" data-k="5">5</button><button class="kpk" data-k="6">6</button><button class="kpk alt" data-k="sign">±</button>
-    <button class="kpk" data-k="7">7</button><button class="kpk" data-k="8">8</button><button class="kpk" data-k="9">9</button><button class="kpk alt" data-k="clear">C</button>
-    <button class="kpk" data-k="0">0</button><button class="kpk" data-k=".">.</button><button class="kpk go" data-k="next">Next ▸</button>
+    <button class="kpk" data-k="7">7</button><button class="kpk" data-k="8">8</button><button class="kpk" data-k="9">9</button><button class="kpk kpalt" data-k="back">⌫</button><button class="kpk kpdir" data-k="up" title="Same measure, level above">↑</button>
+    <button class="kpk" data-k="4">4</button><button class="kpk" data-k="5">5</button><button class="kpk" data-k="6">6</button><button class="kpk kpalt" data-k="sign">±</button><button class="kpk kpdir" data-k="down" title="Same measure, level below">↓</button>
+    <button class="kpk" data-k="1">1</button><button class="kpk" data-k="2">2</button><button class="kpk" data-k="3">3</button><button class="kpk kpalt" data-k="clear">C</button><button class="kpk kpdir" data-k="left" title="Previous field">←</button>
+    <button class="kpk kpwide" data-k="0">0</button><button class="kpk kpdot" id="kpDot" data-k=".">.</button><button class="kpk kptgl" id="kpAutoTgl" data-k="auto" title="Auto decimal: the last two digits are the decimals">.00</button><button class="kpk kpdir kpgo" data-k="right" title="Next field">→</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1095,7 +1098,7 @@ const MEAS_GUIDE = `
   <div style="background:rgba(76,201,230,.08);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;padding:8px 11px;margin-bottom:12px">
     <b style="color:var(--cyan)">How this tool expects values</b><br>
     Lateral films, patient facing the viewer's right. <b>Segmental &amp; global ROM: Flexion &minus;, Extension +</b> (ROM = Ext &minus; Flex, auto). <b>C2&ndash;C7 lordosis is entered as positive (+).</b> Use a true horizontal / true vertical reference for T1 slope and SVA.<br>
-    Every number takes <b>up to two decimals</b> (e.g. &minus;4.25). On a phone the built-in pad keeps the system keyboard shut &mdash; <b>Next</b> walks the whole visit field by field.
+    Every number takes <b>up to two decimals</b> (e.g. &minus;4.25). On a phone the built-in pad keeps the system keyboard shut, and with <b>auto decimal</b> on you just type the digits &mdash; <b>1234</b> becomes <b>12.34</b>, <b>425</b> becomes <b>4.25</b>. The arrow keys move between fields: <b>&uarr;&darr;</b> down a column, <b>&larr;&rarr;</b> through the visit in order.
   </div>
 
   <b style="color:var(--cyan)">Segmental ROM (per level)</b><br>
@@ -1142,7 +1145,7 @@ function measureCard(p){
   return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="label">Radiographic measurements</div><button class="btn" id="measGuideBtn" style="padding:3px 11px;font-size:12px;white-space:nowrap">📖 Guide</button></div>
     <div class="tps">${pills}</div>
     ${entryBar(p,activeTP)}
-    <div class="legend">Flex − &nbsp;·&nbsp; Ext + &nbsp;·&nbsp; ROM auto &nbsp;·&nbsp; 2 decimals</div>
+    <div class="legend">Flex − &nbsp;·&nbsp; Ext + &nbsp;·&nbsp; ROM auto &nbsp;·&nbsp; type 1234 → 12.34</div>
     <div id="tpBody">${tpBody(p,activeTP)}</div></div>`;
 }
 function TLABEL(tk){const t=TPS.find(x=>x.key===tk);return t?t.short:tk;}
@@ -1510,11 +1513,15 @@ function bindGrid(p){
    system keyboard (it covers the grid): tapping a cell opens the
    pad below, and Next walks the whole visit in reading order.
    ============================================================ */
-const KP_KEY="cdr_keypad";
+const KP_KEY="cdr_keypad", KPAUTO_KEY="cdr_keypad_auto";
 let entryFocus=true;                       // show only the levels that matter
 let kpOn=(()=>{ try{const v=localStorage.getItem(KP_KEY); if(v!=null)return v==="1"; }catch(e){}
   return !!(window.matchMedia&&window.matchMedia("(pointer:coarse)").matches); })();
+// auto decimal: type the digits, the pad keeps the point two from the right
+let kpAuto=(()=>{ try{const v=localStorage.getItem(KPAUTO_KEY); if(v!=null)return v==="1"; }catch(e){} return true; })();
 let kpTarget=null;
+let kpManual=false;    // this entry has its own decimal point (the . key was used)
+let kpFresh=true;      // first digit on a field that already holds a value replaces it
 
 // the one rule for every measurement: optional −, at most 3 whole digits, at most 2 decimals
 function numClean(v){
@@ -1527,10 +1534,31 @@ function numClean(v){
   s=parts.length>1?whole+"."+parts[1].slice(0,2):whole;
   return (neg?"-":"")+s;
 }
+// digits only, as typed — the running number behind an auto-decimal entry
+function kpDigits(v){return String(v==null?"":v).replace(/[^0-9]/g,"").replace(/^0+(?=\d)/,"");}
+// 4 -> 0.04 · 42 -> 0.42 · 425 -> 4.25 · 1234 -> 12.34 · 42500 -> 425.00
+function kpAutoFmt(digits,neg){
+  digits=digits.slice(0,5);
+  if(!digits)return "";
+  const s=digits.padStart(3,"0"),whole=s.slice(0,-2).replace(/^0+(?=\d)/,""),dec=s.slice(-2);
+  return (neg?"-":"")+whole+"."+dec;
+}
 function kpFields(){return Array.from(document.querySelectorAll("#f_isize input.kp,#tpBody input.kp")).filter(el=>!el.disabled);}
 function kpApplyMode(){
   document.querySelectorAll("input.kp").forEach(el=>{el.readOnly=kpOn;});   // readOnly = no system keyboard
+  document.body.classList.toggle("kpmode",kpOn);
   if(!kpOn)kpHide();
+}
+// scroll only when the field is genuinely out of sight, and only as far as needed
+function kpEnsureVisible(inp){
+  const k=document.getElementById("keypad");
+  const pad=(k&&!k.hidden)?k.getBoundingClientRect().height:0;
+  const r=inp.getBoundingClientRect();
+  const top=104, bottom=window.innerHeight-pad-10;
+  let dy=0;
+  if(r.bottom>bottom)dy=r.bottom-bottom;
+  else if(r.top<top)dy=r.top-top;
+  if(Math.abs(dy)>2){try{window.scrollBy({top:dy,behavior:"smooth"});}catch(e){window.scrollBy(0,dy);}}
 }
 function kpToggle(){
   kpOn=!kpOn;
@@ -1544,11 +1572,12 @@ function kpFocus(inp){ if(kpOn)kpShow(inp); }
 function kpShow(inp){
   const k=document.getElementById("keypad"); if(!k)return;
   k.hidden=false; document.body.classList.add("kpopen");
+  if(kpTarget!==inp){kpManual=false;kpFresh=true;}     // each field starts clean
   kpTarget=inp;
   document.querySelectorAll("input.kp.kpsel").forEach(e=>e.classList.remove("kpsel"));
   inp.classList.add("kpsel");
   kpSync();
-  try{inp.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){}
+  kpEnsureVisible(inp);
 }
 function kpHide(){
   const k=document.getElementById("keypad"); if(k)k.hidden=true;
@@ -1557,15 +1586,18 @@ function kpHide(){
   kpTarget=null;
 }
 function kpSync(){
+  const dot=document.getElementById("kpDot"),tgl=document.getElementById("kpAutoTgl");
+  const autoNow=kpAuto&&!kpManual;
+  if(dot)dot.classList.toggle("auto",autoNow);
+  if(tgl)tgl.classList.toggle("on",kpAuto);
   if(!kpTarget)return;
   const lbl=document.getElementById("kpLabel"),hint=document.getElementById("kpHint"),
-        val=document.getElementById("kpVal"),prev=document.getElementById("kpPrev");
+        val=document.getElementById("kpVal");
   const unit=kpTarget.dataset.unit||"",rg=RANGE[kpTarget.dataset.range||""];
   const f=kpFields(),i=f.indexOf(kpTarget);
   if(lbl)lbl.textContent=kpTarget.dataset.label||"Value";
-  if(hint)hint.textContent=(i>=0?`${i+1}/${f.length} · `:"")+(rg?`usual ${rg[0]} to ${rg[1]}${unit} · `:"")+"2 dp";
+  if(hint)hint.textContent=(i>=0?`${i+1}/${f.length} · `:"")+(rg?`${rg[0]} to ${rg[1]}${unit} · `:"")+(autoNow?"auto .00":"type the point");
   if(val)val.textContent=kpTarget.value===""?"—":kpTarget.value+unit;
-  if(prev)prev.disabled=(i<=0);
 }
 function kpCommit(v){
   if(!kpTarget)return;
@@ -1573,28 +1605,66 @@ function kpCommit(v){
   kpTarget.dispatchEvent(new Event("input",{bubbles:true}));   // reuses the normal field handler
   kpSync();
 }
+function kpGo(el){ if(!el)return false; el.focus(); kpShow(el); return true; }
 function kpStep(dir){
   const f=kpFields(); if(!f.length)return;
-  const n=f[f.indexOf(kpTarget)+dir];
-  if(n){n.focus();kpShow(n);return;}
+  if(kpGo(f[f.indexOf(kpTarget)+dir]))return;
   if(dir>0){
     kpHide();
     const rest=document.querySelector("#tpBody select[data-asd-level],#tpBody [data-ho-level]");
-    if(rest){try{rest.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){}
-      toast("Numbers done — grade ASD / HO below");}
+    if(rest){kpEnsureVisible(rest);toast("Numbers done — grade ASD / HO below");}
     else toast("Every number for this visit is in");
   }
 }
+// ↑ / ↓ stay in the same column — Static all the way down the levels, then Flex
+function kpColumn(inp,dir){
+  if(!inp)return null;
+  const m=inp.dataset.meas;
+  if(!m)return null;
+  const col=Array.from(document.querySelectorAll(`#tpBody input[data-meas="${m}"]`)).filter(el=>!el.disabled);
+  return col[col.indexOf(inp)+dir]||null;
+}
+function kpVert(dir){ if(!kpGo(kpColumn(kpTarget,dir)))kpStep(dir); }
+function kpAutoToggle(){
+  kpAuto=!kpAuto; kpManual=false;
+  try{localStorage.setItem(KPAUTO_KEY,kpAuto?"1":"0");}catch(e){}
+  kpSync();
+  toast(kpAuto?"Auto decimal on — 1234 becomes 12.34":"Auto decimal off — tap the point yourself");
+}
 function kpPress(k){
+  if(k==="auto"){kpAutoToggle();return;}
   if(!kpTarget)return;
-  const v=kpTarget.value||"";
-  if(k==="next"){kpStep(1);return;}
-  if(k==="clear"){kpCommit("");return;}
-  if(k==="back"){kpCommit(v.slice(0,-1));return;}
-  if(k==="sign"){kpCommit(v.indexOf("-")===0?v.slice(1):"-"+v);return;}
-  if(k==="."){ if(v.indexOf(".")>=0)return; kpCommit((v===""||v==="-")?v+"0.":v+"."); return; }
-  const next=numClean(v+k);
-  if(next===v)return;                       // already at 3 whole digits / 2 decimals
+  const v=kpTarget.value||"",neg=v.indexOf("-")===0,auto=kpAuto&&!kpManual;
+  if(k==="right"||k==="next"){kpStep(1);return;}
+  if(k==="left"){kpStep(-1);return;}
+  if(k==="up"){kpVert(-1);return;}
+  if(k==="down"){kpVert(1);return;}
+  if(k==="clear"){kpManual=false;kpFresh=false;kpCommit("");return;}
+  if(k==="back"){
+    kpFresh=false;
+    if(auto){const d=kpDigits(v).slice(0,-1);kpCommit(kpAutoFmt(d,neg&&d!==""));}
+    else kpCommit(v.slice(0,-1));
+    return;}
+  if(k==="sign"){kpFresh=false;kpCommit(neg?v.slice(1):"-"+v);return;}
+  if(k==="."){
+    kpFresh=false;
+    if(auto){                                   // the digits so far become whole numbers
+      kpManual=true;
+      const d=kpDigits(v).slice(0,3);
+      kpCommit((neg?"-":"")+(d||"0")+".");
+      return;}
+    if(v.indexOf(".")>=0)return;
+    kpCommit((v===""||v==="-")?v+"0.":v+".");
+    return;}
+  // a digit
+  const startFrom=kpFresh?"":v; kpFresh=false;
+  if(auto){
+    const d=kpDigits(startFrom)+k;
+    if(kpDigits(startFrom).length>=5)return;
+    kpCommit(kpAutoFmt(d,neg&&startFrom!==""));
+    return;}
+  const next=numClean(startFrom+k);
+  if(next===startFrom)return;                   // already at 3 whole digits / 2 decimals
   kpCommit(next);
 }
 {
@@ -1603,7 +1673,6 @@ function kpPress(k){
     k.addEventListener("mousedown",e=>e.preventDefault());     // tapping a key must not blur the field
     k.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>kpPress(b.dataset.k));
     const c=document.getElementById("kpClose"); if(c)c.onclick=kpHide;
-    const pv=document.getElementById("kpPrev"); if(pv)pv.onclick=()=>kpStep(-1);
   }
 }
 
@@ -1612,12 +1681,15 @@ function rerenderGrid(p){
   if(b){b.innerHTML=tpBody(p,activeTP);bindGrid(p);}
   updatePills();updateRosterDot();
 }
-// Enter / arrows walk the same running order the number pad's Next uses
+// a hardware keyboard gets the same moves as the pad's arrows
 function gridNav(e,inp){
-  if(e.key!=="Enter"&&e.key!=="ArrowDown"&&e.key!=="ArrowUp")return;
   const f=kpFields(),i=f.indexOf(inp);
   if(i<0)return;
-  const n=f[i+(e.key==="ArrowUp"?-1:1)];
+  let n=null;
+  if(e.key==="Enter")n=f[i+1];
+  else if(e.key==="ArrowDown")n=kpColumn(inp,1)||f[i+1];
+  else if(e.key==="ArrowUp")n=kpColumn(inp,-1)||f[i-1];
+  else return;
   if(!n)return;
   e.preventDefault();n.focus();try{n.select();}catch(_){}
 }
