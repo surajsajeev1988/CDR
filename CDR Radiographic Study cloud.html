@@ -466,9 +466,9 @@
 <div class="linkremind" id="linkRemind" style="display:none"></div>
 
 <div class="viewbar">
-  <button class="seg on" data-view="entry"><span class="si">✎</span>Data</button>
+  <button class="seg on" data-view="entry"><span class="si">✎</span>Entry</button>
   <button class="seg" data-view="dash"><span class="si">▤</span>Analysis</button>
-  <button class="seg" data-view="excel"><span class="si">▦</span>Export</button>
+  <button class="seg" data-view="excel"><span class="si">▦</span>Data</button>
 </div>
 
 <div class="shell" id="shell">
@@ -707,7 +707,7 @@ function markSaveError(){
   if(e){e.classList.add("dirty","error");const t=document.getElementById("saveText");if(t)t.textContent="Not saved";}
   if(firstTime)toast(fileLinked
     ? "⚠ Browser storage is full — but your linked file is still being saved to disk."
-    : "⚠ Couldn’t save to this browser (storage full / private mode). Link a file in Export to keep your data safe.");
+    : "⚠ Couldn’t save to this browser (storage full / private mode). Link a file in the Data tab to keep your data safe.");
 }
 let saveTimer=null;
 function scheduleSave(){markDirty();clearTimeout(saveTimer);
@@ -1824,9 +1824,9 @@ function renderCloudMini(){
   const el=document.getElementById("cloudMini"); if(!el)return;
   if(!cloud.on){el.innerHTML="";return;}
   const map={ok:["fsmini-on","☁","Synced to the cloud"],syncing:["fsmini-sync","☁","Syncing…"],
-    err:["fsmini-err","☁","Sync problem — open the Export tab"],
-    conflict:["fsmini-err","☁","Needs your decision — open the Export tab"],
-    choose:["fsmini-warn","☁","Cloud has newer data — open the Export tab"],
+    err:["fsmini-err","☁","Sync problem — open the Data tab"],
+    conflict:["fsmini-err","☁","Needs your decision — open the Data tab"],
+    choose:["fsmini-warn","☁","Cloud has newer data — open the Data tab"],
     behind:["fsmini-warn","☁","Cloud has newer data"],off:["","",""]};
   const m=map[cloudState]||map.ok;
   el.innerHTML=m[1]?`<span class="${m[0]}" title="${esc(m[2])}">${m[1]}</span>`:"";
@@ -2197,7 +2197,7 @@ function renderDashboard(){
       <div class="cs" style="margin:0">of pre-op index ROM still present at 2 yr — motion preserved (cohort mean)</div></div>`:""}
 
     <div class="chartcard"><div class="ct">CDR vs ACDF — index-level ROM</div><div class="cs">Mean flexion–extension ROM (°) at operated levels over time: arthroplasty vs fused</div>
-      ${hasACDF?lineChart([{name:"CDR",color:CC.cyan,data:idxROM},{name:"ACDF",color:CC.orange,data:acdfROM}],xl)+legendHTML([{name:"CDR (arthroplasty)",color:CC.cyan},{name:"ACDF (fused)",color:CC.orange}]):`<div class="cs">No fused (ACDF) levels in this cohort yet — nothing to compare. Mark levels fused on the Data tab to populate this.</div>`}</div>
+      ${hasACDF?lineChart([{name:"CDR",color:CC.cyan,data:idxROM},{name:"ACDF",color:CC.orange,data:acdfROM}],xl)+legendHTML([{name:"CDR (arthroplasty)",color:CC.cyan},{name:"ACDF (fused)",color:CC.orange}]):`<div class="cs">No fused (ACDF) levels in this cohort yet — nothing to compare. Mark levels fused on the Entry tab to populate this.</div>`}</div>
 
     ${summaryBox(sCvA)}
 
@@ -2227,7 +2227,7 @@ function renderDashboard(){
     ${summaryBox(sHOrom)}
 
     <div class="chartcard"><div class="ct">Segmental ROM by implant height</div><div class="cs">Mean 2-yr segmental ROM (°) grouped by recorded implant height - does a taller or shorter implant move differently? Exploratory.</div>
-      ${romBySize.length?barChart(romBySize,{color:CC.cyan,unit:"°"}):`<div class="cs">Record implant heights on the Data tab to see ROM by size.</div>`}</div>
+      ${romBySize.length?barChart(romBySize,{color:CC.cyan,unit:"°"}):`<div class="cs">Record implant heights on the Entry tab to see ROM by size.</div>`}</div>
 
     ${summaryBox(sSize)}
 
@@ -2258,7 +2258,7 @@ function renderExcel(){
   const tbody=rows.map(r=>"<tr>"+r.map(c=>{const v=(c==null?"":String(c));return `<td class="${v===""?"miss":""}">${v===""?"·":esc(v)}</td>`;}).join("")+"</tr>").join("");
   const sub=ps.length
     ? `${head.length} columns × ${ps.length} ${ps.length>1?"rows":"row"}. Scroll sideways to see every field; this is exactly what “Export CSV” writes.`
-    : `No patients yet — use Restore to load a backup, or add patients in the Data tab.`;
+    : `No patients yet — use Restore to load a backup, or add patients in the Entry tab.`;
   const body=ps.length
     ? `<div class="xlswrap"><table class="xlstbl"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`
     : `<div class="blank" style="min-height:30vh"><div><h3>No data to preview</h3>Restore a backup or add patients first.</div></div>`;
