@@ -113,7 +113,6 @@
     background:var(--panel2);color:var(--muted);transition:.1s;font-weight:500}
   .tg:hover{border-color:var(--border2);color:var(--text)}
   .tg.on{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:600}
-  [data-fused="yes"].on{background:var(--amber);border-color:var(--amber);color:#2a1c06}
 
   .chip{font-family:var(--mono);font-size:13px;padding:8px 12px;border-radius:7px;
     border:1px solid var(--border2);background:var(--panel2);color:var(--muted);transition:.1s}
@@ -372,7 +371,7 @@
     .horow{grid-template-columns:36px 1fr}
     .lvl .tpt{display:none}
     .lvl .lvname{font-size:10.5px}
-    .cell input{padding:15px 3px;font-size:15px;letter-spacing:-.02em}
+    .cell input{padding:15px 2px;font-size:14px;letter-spacing:-.03em}
     .cell.unitcell input{padding-right:3px}
     .cell.unitcell .cunit{display:none!important}
     .cell select{font-size:12.5px;padding:14px 15px 14px 4px}
@@ -407,6 +406,9 @@
   .kpk:active{transform:translateY(1px);background:var(--raised)}
   .kpk.kpalt{font-size:17px;color:var(--muted)}
   .kpk.kpdot{font-size:30px;line-height:.4;padding-bottom:6px}
+  /* the sign key shows the sign the next digits will take, not an action */
+  .kpk.kpsign{font-size:20px;font-weight:700;color:var(--muted)}
+  .kpk.kpsign.neg{background:var(--cyan);border-color:var(--cyan);color:#06222b}
   .kpk.kpdir{font-size:17px;color:var(--cyan);background:var(--panel);border-color:var(--border2)}
   .kpk.kpwide{grid-column:span 2}
   .kpk.kpgo{background:var(--cyan);border-color:var(--cyan);color:#06222b;font-weight:700}
@@ -565,10 +567,10 @@
     <button class="kpx" id="kpClose" title="Hide the number pad">✕</button>
   </div>
   <div class="kpkeys">
-    <button class="kpk" data-k="7">7</button><button class="kpk" data-k="8">8</button><button class="kpk" data-k="9">9</button><button class="kpk kpalt" data-k="back">⌫</button><button class="kpk kpdir" data-k="up" title="Same measure, level above">↑</button>
-    <button class="kpk" data-k="4">4</button><button class="kpk" data-k="5">5</button><button class="kpk" data-k="6">6</button><button class="kpk kpalt" data-k="sign">±</button><button class="kpk kpdir" data-k="down" title="Same measure, level below">↓</button>
-    <button class="kpk" data-k="1">1</button><button class="kpk" data-k="2">2</button><button class="kpk" data-k="3">3</button><button class="kpk kpalt" data-k="clear">C</button><button class="kpk kpdir" data-k="left" title="Previous field">←</button>
-    <button class="kpk kpwide" data-k="0">0</button><button class="kpk kpdot" id="kpDot" data-k=".">.</button><button class="kpk kptgl" id="kpAutoTgl" data-k="auto" title="Auto decimal: the last two digits are the decimals">.00</button><button class="kpk kpdir kpgo" data-k="right" title="Next field">→</button>
+    <button class="kpk" data-k="7">7</button><button class="kpk" data-k="8">8</button><button class="kpk" data-k="9">9</button><button class="kpk kpalt" data-k="back">⌫</button><button class="kpk kpdir" data-k="left" title="Previous field">←</button>
+    <button class="kpk" data-k="4">4</button><button class="kpk" data-k="5">5</button><button class="kpk" data-k="6">6</button><button class="kpk kpsign" id="kpSignKey" data-k="sign" title="Sign of this measurement">+</button><button class="kpk kpdir kpgo" data-k="right" title="Next field">→</button>
+    <button class="kpk" data-k="1">1</button><button class="kpk" data-k="2">2</button><button class="kpk" data-k="3">3</button><button class="kpk kpalt" data-k="clear">C</button><button class="kpk kpdir" data-k="up" title="Same measure, level above">↑</button>
+    <button class="kpk kpwide" data-k="0">0</button><button class="kpk kpdot" id="kpDot" data-k=".">.</button><button class="kpk kptgl" id="kpAutoTgl" data-k="auto" title="Auto decimal: the last two digits are the decimals">.00</button><button class="kpk kpdir" data-k="down" title="Same measure, level below">↓</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -613,8 +615,8 @@ function migrate(p){
   if(p.locked===undefined)p.locked=false;
   if(p.ic4===undefined)p.ic4=p.id||p.ic||"";
   if(p.opdate===undefined)p.opdate="";
-  if(p.fused===undefined)p.fused=null;
   if(!p.fusedLevels)p.fusedLevels=[];
+  p.fused=p.fusedLevels.length>0;          // derived from the level chips, not a separate answer
   if(p.implant===undefined||p.implant===null)p.implant="";
   if(!p.levels)p.levels=[];
   if(!p.isize||typeof p.isize!=="object")p.isize={};
@@ -996,13 +998,8 @@ function demoCard(p){
     <div class="field" style="margin-top:16px"><label>Operated level(s)</label>
       <div class="tg-row" id="f_levels">${levelChips(p)}</div>
       <div class="lvl-legend"><span class="lk cdr">●</span> CDR &nbsp; <span class="lk acdf">●</span> ACDF (fused)</div>
+      <div class="lvl-hint">Tap a level once for <b style="color:var(--cyan)">CDR</b>, again for <b style="color:#c98f5a">ACDF</b>, a third time to clear it.</div>
       <div class="levelcount" id="lvlcount"></div>
-      <div class="field" style="margin-top:12px"><label>Any levels fused (ACDF)?</label>
-        <div class="tg-row">
-          <button class="tg ${p.fused===false?"on":""}" data-fused="no">No</button>
-          <button class="tg ${p.fused===true?"on":""}" data-fused="yes">Yes</button></div>
-        <div class="lvl-hint ${p.fused?"":"hidden"}" id="fusedHint">↑ Tap an operated (blue) level again to mark it fused — it turns brown.</div>
-      </div>
     </div>
     <div class="field" style="margin-top:16px" id="f_isize">${isizeBlock(p)}</div>
   </div>`;
@@ -1051,18 +1048,18 @@ function reRenderLevels(p){
   box.innerHTML=levelChips(p);
   bindLevels(p);
 }
+// one chip, three states: off → CDR (blue) → ACDF (brown) → off
 function cycleLevel(p,l){
   const inLevels=p.levels.includes(l),inFused=p.fusedLevels.includes(l);
   if(!inLevels){p.levels.push(l);}                                  // off → CDR
-  else if(!inFused){
-    if(p.fused)p.fusedLevels.push(l);                              // CDR → ACDF (only when fused mode on)
-    else p.levels=p.levels.filter(x=>x!==l);                       // CDR → off
-  }else{                                                            // ACDF → off
+  else if(!inFused){p.fusedLevels.push(l);}                         // CDR → ACDF
+  else{                                                             // ACDF → off
     p.fusedLevels=p.fusedLevels.filter(x=>x!==l);
     p.levels=p.levels.filter(x=>x!==l);
   }
   p.levels.sort((a,b)=>LEVELS.indexOf(a)-LEVELS.indexOf(b));
   p.fusedLevels.sort((a,b)=>LEVELS.indexOf(a)-LEVELS.indexOf(b));
+  p.fused=p.fusedLevels.length>0;                                   // derived, not a separate question
 }
 function bindLevels(p){
   document.querySelectorAll("#f_levels [data-lvl]").forEach(c=>c.onclick=()=>{
@@ -1119,6 +1116,9 @@ const MEAS_GUIDE = `
 
   <b style="color:var(--cyan)">Heterotopic ossification &mdash; McAfee 0&ndash;IV (post-op)</b><br>
   0 none &middot; I outside the disc space &middot; II in the disc, motion preserved &middot; III bridging, motion present &middot; IV ankylosis, no motion. III vs IV is decided on the flexion&ndash;extension films.<br><br>
+
+  <b style="color:var(--cyan)">Sign convention</b><br>
+  Measurements are entered <b>positive</b> unless the film says otherwise; the pad's <b>+ / &minus;</b> key shows which sign the next digits will take and lights up for minus. <b>Global C2&ndash;C7 flexion</b> starts on minus, since the neutral-to-flexion arc reads negative.<br><br>
 
   <b style="color:var(--cyan)">Implant height (mm)</b><br>
   Height marked on the device, recorded once per operated level.<br><br>
@@ -1347,8 +1347,9 @@ function cellHTML(tk,meas,l,val){
 function gcellHTML(tk,key){
   const d=state.patients[state.current].data[tk];
   const fl=isFlag(key,d[key]);
+  const defneg=(key==="gflex")?' data-defneg="1"':"";   // C2–C7 in flexion reads negative
   return `<div class="cell ${fl?"flag":""}">
-    <input type="text" class="kp" inputmode="decimal" autocomplete="off" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" data-label="${GLBLBL[key]||key}" data-range="${key}" data-unit="°" placeholder="—"></div>`;
+    <input type="text" class="kp" inputmode="decimal" autocomplete="off" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" data-label="${GLBLBL[key]||key}" data-range="${key}" data-unit="°"${defneg} placeholder="—"></div>`;
 }
 function notesCard(p){
   return `<div class="card"><div class="label">Notes</div>
@@ -1443,12 +1444,6 @@ function bindDemo(p){
   document.getElementById("f_impother").oninput=e=>{p.implant=e.target.value;scheduleSave();};
   bindLevels(p);
   bindISize(p);
-  document.querySelectorAll("[data-fused]").forEach(b=>b.onclick=()=>{
-    p.fused=(b.dataset.fused==="yes");
-    document.querySelectorAll("[data-fused]").forEach(x=>x.classList.toggle("on",(x.dataset.fused==="yes")===p.fused));
-    if(!p.fused)p.fusedLevels=[];
-    const fh=document.getElementById("fusedHint");if(fh)fh.classList.toggle("hidden",!p.fused);
-    reRenderLevels(p);renderLevelCount(p);rerenderGrid(p);renderISize(p);scheduleSave();});
   const del=document.getElementById("deleteBtn");if(del)del.onclick=deletePatient;
   renderLevelCount(p);
 }
@@ -1522,6 +1517,7 @@ let kpAuto=(()=>{ try{const v=localStorage.getItem(KPAUTO_KEY); if(v!=null)retur
 let kpTarget=null;
 let kpManual=false;    // this entry has its own decimal point (the . key was used)
 let kpFresh=true;      // first digit on a field that already holds a value replaces it
+let kpNeg=false;       // the sign the next digits will take — shown on the +/− key
 
 // the one rule for every measurement: optional −, at most 3 whole digits, at most 2 decimals
 function numClean(v){
@@ -1572,7 +1568,7 @@ function kpFocus(inp){ if(kpOn)kpShow(inp); }
 function kpShow(inp){
   const k=document.getElementById("keypad"); if(!k)return;
   k.hidden=false; document.body.classList.add("kpopen");
-  if(kpTarget!==inp){kpManual=false;kpFresh=true;}     // each field starts clean
+  if(kpTarget!==inp){kpManual=false;kpFresh=true;kpNeg=kpDefNeg(inp);}   // each field starts clean
   kpTarget=inp;
   document.querySelectorAll("input.kp.kpsel").forEach(e=>e.classList.remove("kpsel"));
   inp.classList.add("kpsel");
@@ -1585,11 +1581,20 @@ function kpHide(){
   document.querySelectorAll("input.kp.kpsel").forEach(e=>e.classList.remove("kpsel"));
   kpTarget=null;
 }
+// measurements are positive unless stated otherwise; global flexion is the exception
+function kpDefNeg(inp){
+  if(!inp)return false;
+  if((inp.value||"").indexOf("-")===0)return true;
+  if(inp.value)return false;
+  return inp.dataset.defneg==="1";
+}
 function kpSync(){
-  const dot=document.getElementById("kpDot"),tgl=document.getElementById("kpAutoTgl");
+  const dot=document.getElementById("kpDot"),tgl=document.getElementById("kpAutoTgl"),
+        sgn=document.getElementById("kpSignKey");
   const autoNow=kpAuto&&!kpManual;
   if(dot)dot.classList.toggle("auto",autoNow);
   if(tgl)tgl.classList.toggle("on",kpAuto);
+  if(sgn){sgn.classList.toggle("neg",kpNeg);sgn.textContent=kpNeg?"−":"+";}
   if(!kpTarget)return;
   const lbl=document.getElementById("kpLabel"),hint=document.getElementById("kpHint"),
         val=document.getElementById("kpVal");
@@ -1634,38 +1639,41 @@ function kpAutoToggle(){
 function kpPress(k){
   if(k==="auto"){kpAutoToggle();return;}
   if(!kpTarget)return;
-  const v=kpTarget.value||"",neg=v.indexOf("-")===0,auto=kpAuto&&!kpManual;
+  const v=kpTarget.value||"",auto=kpAuto&&!kpManual;
+  const sign=s=>(kpNeg&&s!==""&&s!=="-")?"-"+s.replace(/^-/,""):s.replace(/^-/,"");
   if(k==="right"||k==="next"){kpStep(1);return;}
   if(k==="left"){kpStep(-1);return;}
   if(k==="up"){kpVert(-1);return;}
   if(k==="down"){kpVert(1);return;}
-  if(k==="clear"){kpManual=false;kpFresh=false;kpCommit("");return;}
+  if(k==="clear"){kpManual=false;kpFresh=false;kpNeg=kpTarget.dataset.defneg==="1";kpCommit("");return;}
+  if(k==="sign"){                               // a state, not an action: what the digits will be
+    kpNeg=!kpNeg;
+    if(v!==""&&v!=="-")kpCommit(sign(v)); else kpSync();
+    return;}
   if(k==="back"){
     kpFresh=false;
-    if(auto){const d=kpDigits(v).slice(0,-1);kpCommit(kpAutoFmt(d,neg&&d!==""));}
-    else kpCommit(v.slice(0,-1));
+    if(auto){const d=kpDigits(v).slice(0,-1);kpCommit(kpAutoFmt(d,kpNeg));}
+    else kpCommit(sign(v.replace(/^-/,"").slice(0,-1)));
     return;}
-  if(k==="sign"){kpFresh=false;kpCommit(neg?v.slice(1):"-"+v);return;}
   if(k==="."){
     kpFresh=false;
     if(auto){                                   // the digits so far become whole numbers
       kpManual=true;
       const d=kpDigits(v).slice(0,3);
-      kpCommit((neg?"-":"")+(d||"0")+".");
+      kpCommit(sign((d||"0")+"."));
       return;}
     if(v.indexOf(".")>=0)return;
-    kpCommit((v===""||v==="-")?v+"0.":v+".");
+    kpCommit(sign((v.replace(/^-/,"")||"0")+"."));
     return;}
   // a digit
-  const startFrom=kpFresh?"":v; kpFresh=false;
+  const startFrom=(kpFresh?"":v).replace(/^-/,""); kpFresh=false;
   if(auto){
-    const d=kpDigits(startFrom)+k;
     if(kpDigits(startFrom).length>=5)return;
-    kpCommit(kpAutoFmt(d,neg&&startFrom!==""));
+    kpCommit(kpAutoFmt(kpDigits(startFrom)+k,kpNeg));
     return;}
   const next=numClean(startFrom+k);
   if(next===startFrom)return;                   // already at 3 whole digits / 2 decimals
-  kpCommit(next);
+  kpCommit(sign(next));
 }
 {
   const k=document.getElementById("keypad");
