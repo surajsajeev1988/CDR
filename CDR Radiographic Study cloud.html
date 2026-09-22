@@ -360,6 +360,11 @@
     color:var(--faint);border-radius:8px;padding:7px 11px;letter-spacing:.02em;white-space:nowrap}
   .etgl.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
   #f_isize input.numf{max-width:170px}
+  /* whole-cervical row, sitting at the top of the level grid */
+  .mrow.globrow{background:rgba(76,201,230,.055);border-bottom:1px solid var(--border2)}
+  .mrow.globrow .lvl{color:var(--cyan);background:rgba(76,201,230,.05)}
+  .mrow.globrow .lvl .lvname{font-size:10.5px;letter-spacing:-.02em}
+  .mrow.globrow .gromcell{font-size:15px;border-right:none}
   .cell input.kpsel{box-shadow:inset 0 0 0 2px var(--cyan);background:var(--cyan-dim)}
   input.numf.kpsel{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
   @media(max-width:560px){
@@ -376,6 +381,8 @@
     .cell.unitcell .cunit{display:none!important}
     .cell select{font-size:12.5px;padding:14px 15px 14px 4px}
     .romcell{font-size:14px} .gromcell{font-size:18px}
+    .mrow.globrow .gromcell{font-size:14px}
+    .mrow.globrow .lvl .lvname{font-size:9.5px}
     .mgrid .ghead div,.ggrid .ghead div{font-size:8px;letter-spacing:.02em;padding:8px 2px}
     .hobtn{min-width:42px;padding:11px 5px;font-size:14px}
     .holvl{font-size:10px;padding:9px 1px}
@@ -1188,35 +1195,31 @@ function tpBody(p,tk){
   const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
   return `<div class="grid-wrap">
     <div class="gsec">
-      <div class="gtitle"><b>Global C2–C7</b><span class="gtp">${tpLbl}</span></div>
-      <div class="ggrid g4">
-        <div class="ghead">
-          <div></div>
-          <div title="Static (neutral) C2–C7 alignment, lordosis +">Static °</div>
-          <div title="Global flexion">Flex °</div>
-          <div title="Global extension">Ext °</div>
-          <div>ROM °</div>
-        </div>
-        <div class="grow">
-          <div class="glvl">C2–C7</div>
-          ${gcellHTML(tk,"galign")}
-          ${gcellHTML(tk,"gflex")}
-          ${gcellHTML(tk,"gext")}
-          <div class="gromcell ${grom.src==='legacy'?'legacy':''} ${gFlag?'flag':''}" data-tp="${tk}">
-            <span class="gromval">${grom.val===""?'—':grom.val}</span></div>
-        </div>
-      </div>
+      <div class="gtitle"><b>Sagittal alignment</b><span class="gtp">${tpLbl}</span></div>
       ${globalSub(p,tk)}
-    <div class="gcap">Static, T1 slope &amp; SVA = neutral-alignment measures · Flex / Ext dynamic · ROM = Ext − Flex (auto)</div>
+      <div class="gcap">C2–C7 SVA and T1 slope are read on the neutral film · C7 slope stands in when T1 can’t be seen</div>
     </div>
     <div class="gsec">
-      <div class="gtitle"><b>Segmental</b><span class="gtp">${tpLbl}</span></div>
+      <div class="gtitle"><b>Angles &amp; ROM</b><span class="gtp">${tpLbl}</span></div>
       <div class="mgrid">
         <div class="ghead"><div>Lvl</div><div>Static °</div><div>Flex °</div><div>Ext °</div><div>ROM °</div></div>
+        ${globalRow(tk,grom,gFlag)}
         ${rows}</div>
       ${hidden?`<div class="gcap">${hidden} level${hidden>1?"s":""} hidden — tap “all levels” above to show every level.</div>`:""}
+      <div class="gcap">Top row = whole cervical spine (C2–C7) · rows below are per level · ROM = Ext − Flex (auto)</div>
     </div>
     ${asdSection(p,tk)}${hoSection(p,tk)}</div>`;
+}
+// the whole-cervical angles sit in the same grid as the levels, as its first row
+function globalRow(tk,grom,gFlag){
+  return `<div class="mrow globrow">
+    <div class="lvl glob"><span class="lvname">C2–C7</span></div>
+    ${gcellHTML(tk,"galign")}
+    ${gcellHTML(tk,"gflex")}
+    ${gcellHTML(tk,"gext")}
+    <div class="gromcell ${grom.src==='legacy'?'legacy':''} ${gFlag?'flag':''}" data-tp="${tk}">
+      <span class="gromval">${grom.val===""?'—':grom.val}</span></div>
+  </div>`;
 }
 function globalSub(p,tk){
   const d=p.data[tk];
@@ -1621,12 +1624,15 @@ function kpStep(dir){
     else toast("Every number for this visit is in");
   }
 }
-// ↑ / ↓ stay in the same column — Static all the way down the levels, then Flex
+// ↑ / ↓ stay in the same column — the C2–C7 row, then Static all the way down
+const GCOL={galign:"static",gflex:"flex",gext:"ext"};
 function kpColumn(inp,dir){
   if(!inp)return null;
-  const m=inp.dataset.meas;
+  const m=inp.dataset.meas||GCOL[inp.dataset.g||""];
   if(!m)return null;
-  const col=Array.from(document.querySelectorAll(`#tpBody input[data-meas="${m}"]`)).filter(el=>!el.disabled);
+  const g=Object.keys(GCOL).find(k=>GCOL[k]===m);
+  const col=Array.from(document.querySelectorAll(
+    `#tpBody .globrow input[data-g="${g}"],#tpBody input[data-meas="${m}"]`)).filter(el=>!el.disabled);
   return col[col.indexOf(inp)+dir]||null;
 }
 function kpVert(dir){ if(!kpGo(kpColumn(kpTarget,dir)))kpStep(dir); }
