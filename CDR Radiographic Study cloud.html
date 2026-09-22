@@ -385,6 +385,14 @@
   .mrow.globrow .lvl{color:var(--cyan);background:rgba(76,201,230,.05)}
   .mrow.globrow .lvl .lvname{font-size:10.5px;letter-spacing:-.02em}
   .mrow.globrow .gromcell{font-size:15px;border-right:none}
+  /* a level the film can't show */
+  .lvl[data-lvlna]{cursor:pointer;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+  .mrow.lvlna{background:rgba(255,255,255,.012)}
+  .mrow.lvlna .lvl{color:var(--faint)}
+  .mrow.lvlna .lvl .lvname{text-decoration:line-through;text-decoration-thickness:1.5px}
+  .cell.naxc,.romcell.naxc{display:flex;align-items:center;justify-content:center;background:transparent;
+    min-height:47px;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;font-weight:400}
+  .hona{padding:12px 11px;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.04em}
   .cell input.kpsel{box-shadow:inset 0 0 0 2px var(--cyan);background:var(--cyan-dim)}
   input.numf.kpsel{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
   @media(max-width:560px){
@@ -629,7 +637,7 @@ let saveFailed=false;
 
 /* ---- model ---- */
 function blankTP(){
-  const o={static:{},flex:{},ext:{},romLegacy:{},galign:"",gflex:"",gext:"",gromLegacy:"",asd:{},asdLegacy:"",ho:{},t1slope:"",t1nv:false,sva:"",c7slope:"",na:false};
+  const o={static:{},flex:{},ext:{},romLegacy:{},galign:"",gflex:"",gext:"",gromLegacy:"",asd:{},asdLegacy:"",ho:{},t1slope:"",t1nv:false,sva:"",c7slope:"",na:false,naLvl:{}};
   LEVELS.forEach(l=>{o.static[l]="";o.flex[l]="";o.ext[l]="";o.romLegacy[l]="";});
   return o;
 }
@@ -671,6 +679,7 @@ function migrate(p){
     if(d.sva===undefined)d.sva="";
     if(d.c7slope===undefined)d.c7slope="";
     if(d.na===undefined)d.na=false;                 // visit marked "films not available"
+    if(!d.naLvl||typeof d.naLvl!=="object")d.naLvl={};   // levels not assessable on this film
     delete d.segrom; delete d.grom;
   });
   return p;
@@ -840,6 +849,14 @@ function adjacentLevels(p){
     lower:bi+1<LEVELS.length?LEVELS[bi+1]:null
   };
 }
+// a level the film doesn't show — C7/T1 hides under the shoulders more often than not
+function lvlNA(d,l){return !!(d&&d.naLvl&&d.naLvl[l]);}
+function lvlHasData(d,l){
+  if((d.static[l]||"")!==""||(d.flex[l]||"")!==""||(d.ext[l]||"")!=="")return true;
+  if(d.romLegacy&&(d.romLegacy[l]||"")!=="")return true;
+  if(d.asd&&d.asd[l]!=null&&d.asd[l]!=="")return true;
+  return !!(d.ho&&d.ho[l]!=null&&d.ho[l]!=="");
+}
 function asdVal(d,l){return (d.asd&&d.asd[l]!=null)?d.asd[l]:"";}
 function hoVal(d,l){return (d.ho&&d.ho[l]!=null)?d.ho[l]:"";}
 function anyEntered(p,tk){const d=p.data[tk];let a=false;
@@ -854,6 +871,7 @@ function tpProgress(p,tk){
   const d=p.data[tk];
   let need=0,have=0;
   p.levels.forEach(l=>{
+    if(lvlNA(d,l))return;                      // can't be read on this film
     need++; if(d.static[l]!=="")have++;        // Static: every operated level
     if(!isFused(p,l)){                         // Flex/Ext: CDR (non-fused) levels only
       need++; if(d.flex[l]!=="")have++;
@@ -864,9 +882,9 @@ function tpProgress(p,tk){
   need++; if(d.sva!=="")have++;                          // C2–C7 SVA: required every timepoint
   need++; if((d.t1nv?d.c7slope:d.t1slope)!=="")have++;   // whichever slope the row is showing
   const adj=adjacentLevels(p);                  // ASD: each adjacent segment that exists
-  [adj.upper,adj.lower].forEach(al=>{if(al){need++; if(asdVal(d,al)!=="")have++;}});
+  [adj.upper,adj.lower].forEach(al=>{if(al&&!lvlNA(d,al)){need++; if(asdVal(d,al)!=="")have++;}});
   if(state.requireHO!==false && isPostop(tk)){          // HO: each CDR level at post-op timepoints
-    p.levels.forEach(l=>{if(!isFused(p,l)){need++; if(hoVal(d,l)!=="")have++;}});
+    p.levels.forEach(l=>{if(!isFused(p,l)&&!lvlNA(d,l)){need++; if(hoVal(d,l)!=="")have++;}});
   }
   return{need,have};
 }
@@ -1151,6 +1169,9 @@ const MEAS_GUIDE = `
   <b style="color:var(--cyan)">Heterotopic ossification &mdash; McAfee 0&ndash;IV (post-op)</b><br>
   0 none &middot; I outside the disc space &middot; II in the disc, motion preserved &middot; III bridging, motion present &middot; IV ankylosis, no motion. III vs IV is decided on the flexion&ndash;extension films.<br><br>
 
+  <b style="color:var(--cyan)">Levels the film can't show</b><br>
+  Press and hold a level's name in the grid &mdash; <b>C7/T1</b> most often, buried under the shoulders &mdash; to mark it <b>not assessable on this film</b>. The row is crossed out for that visit only, stops being counted as outstanding (including its ASD and HO grades), and exports as <b>NA</b> rather than as a blank that reads like a measurement someone forgot. Hold it again to bring the level back.<br><br>
+
   <b style="color:var(--cyan)">Visits that never happened</b><br>
   Press and hold a visit tab (PO, 2W, 6M, 1Y, 2Y) to cross it out as <b>films not available</b> &mdash; a follow-up the patient missed, or an X-ray that was never taken. It stops counting as outstanding, so the patient can still read as complete, and the CSV carries a <b>NotAvailable</b> column so missing-by-design is never confused with not-yet-measured. Hold it again to bring the visit back.<br><br>
 
@@ -1243,7 +1264,7 @@ function tpBody(p,tk){
         ${globalRow(tk,grom,gFlag)}
         ${rows}</div>
       ${hidden?`<div class="gcap">${hidden} level${hidden>1?"s":""} hidden — tap “all levels” above to show every level.</div>`:""}
-      <div class="gcap">Top row = whole cervical spine (C2–C7) · rows below are per level · ROM = Ext − Flex (auto)</div>
+      <div class="gcap">Top row = whole cervical spine (C2–C7) · rows below are per level · ROM = Ext − Flex (auto)<br>Hold a level name (C7/T1 and friends) if that level isn’t visible on this film</div>
     </div>
     ${asdSection(p,tk)}${hoSection(p,tk)}</div>`;
 }
@@ -1295,7 +1316,9 @@ function hoSection(p,tk){
   } else if(!cdr.length){
     body=`<div class="asd-msg">No CDR (arthroplasty) levels in this construct — HO applies to motion-preserving levels only, so there is nothing to grade here.</div>`;
   } else {
-    const rows=cdr.map(l=>hoRow(tk,l,hoVal(d,l))).join("");
+    const rows=cdr.map(l=>lvlNA(d,l)
+      ? `<div class="horow"><div class="holvl">${l}</div><div class="hona">not assessable on this film</div></div>`
+      : hoRow(tk,l,hoVal(d,l))).join("");
     body=`<div class="hogrid">${rows}</div>
       <div class="gcap">McAfee: 0 none · I outside disc space · II in disc, motion preserved · III bridging, motion present · IV ankylosis, no motion — III vs IV is decided on the flexion–extension films.</div>`;
   }
@@ -1322,8 +1345,10 @@ function asdSection(p,tk){
     </div>`;
   }
   const adj=adjacentLevels(p);
-  const rowU=adj.upper?asdRow(tk,adj.upper,"up",adj.top,asdVal(d,adj.upper)):asdNoneRow("up",adj.top);
-  const rowL=adj.lower?asdRow(tk,adj.lower,"down",adj.bot,asdVal(d,adj.lower)):asdNoneRow("down",adj.bot);
+  const adjRow=(L,dir,ref)=>!L?asdNoneRow(dir,ref)
+    :lvlNA(d,L)?asdNARow(L,dir,ref):asdRow(tk,L,dir,ref,asdVal(d,L));
+  const rowU=adjRow(adj.upper,"up",adj.top);
+  const rowL=adjRow(adj.lower,"down",adj.bot);
   return `<div class="gsec">
     <div class="gtitle"><b>ASD</b><span class="gclass">Kellgren–Lawrence</span><span class="gtp">${tpLbl}</span></div>
     <div class="ggrid gasd">
@@ -1349,6 +1374,14 @@ function klSelect(tk,lvl,val){
   const inner=opts.map(o=>`<option value="${esc(o[0])}" ${o[0]===v?"selected":""}>${o[1]}</option>`).join("");
   return `<div class="cell klcell"><select data-tp="${tk}" data-asd-level="${lvl}">${inner}</select></div>`;
 }
+function asdNARow(lvl,dir,ref){
+  const arrow=dir==="up"?"↑":"↓",word=dir==="up"?"above":"below";
+  return `<div class="grow asd-skip">
+    <div class="glvl alvl">${lvl}</div>
+    <div class="apos"><span class="ar">${arrow}</span> ${word} <span class="ref">${esc(ref)}</span></div>
+    <div class="cell na">not assessable</div>
+  </div>`;
+}
 function asdNoneRow(dir,ref){
   const arrow=dir==="up"?"↑":"↓",word=dir==="up"?"above":"below";
   return `<div class="grow asd-skip">
@@ -1361,10 +1394,13 @@ function rowHTML(p,tk,l){
   const d=p.data[tk];
   const op=p.levels.includes(l),fu=isFused(p,l);
   const lvlCls="lvl "+(fu?"fused":(op?"cdr":"none"));
+  const na=lvlNA(d,l);
+  const name=`<div class="${lvlCls}" data-lvlna="${l}" title="${na?`${l} marked not assessable — hold to bring it back`:`Hold if ${l} isn’t visible on this film`}"><span class="lvname">${l}</span>${fu?'<span class="tag">ACDF</span>':''}<span class="tpt">${(TPS.find(t=>t.key===tk)||{}).short||""}</span></div>`;
+  if(na)return `<div class="mrow lvlna">${name}<div class="cell naxc">n/a</div><div class="cell naxc">n/a</div><div class="cell naxc">n/a</div><div class="romcell naxc">n/a</div></div>`;
   const r=romOf(d,l);
   const romFlag=(r.src!=="none"&&typeof r.val==="number")&&(r.val<ROM_FLAG.min||r.val>ROM_FLAG.max);
   return `<div class="mrow">
-    <div class="${lvlCls}"><span class="lvname">${l}</span>${fu?'<span class="tag">ACDF</span>':''}<span class="tpt">${(TPS.find(t=>t.key===tk)||{}).short||""}</span></div>
+    ${name}
     ${cellHTML(tk,"static",l,d.static[l])}
     ${cellHTML(tk,"flex",l,d.flex[l])}
     ${cellHTML(tk,"ext",l,d.ext[l])}
@@ -1372,6 +1408,25 @@ function rowHTML(p,tk,l){
       ${r.val===""?'<span class="rom-empty">—</span>':r.val}${r.src==='legacy'?'<span class="rtag" title="imported from previous data">i</span>':''}
     </div>
   </div>`;
+}
+function toggleLvlNA(p,tk,l){
+  const d=p&&p.data&&p.data[tk]; if(!d)return;
+  if(p.locked){toast("This record is locked — unlock it first");return;}
+  if(!d.naLvl||typeof d.naLvl!=="object")d.naLvl={};
+  const on=lvlNA(d,l);
+  if(!on&&lvlHasData(d,l)&&
+     !confirm(`Mark ${l} as not assessable on this film?\n\nWhat has been entered for ${l} at this visit is cleared.`))return;
+  if(on)delete d.naLvl[l];
+  else{
+    d.naLvl[l]=true;                       // NA means no reading, so the cells are emptied
+    d.static[l]="";d.flex[l]="";d.ext[l]="";
+    if(d.romLegacy)d.romLegacy[l]="";
+    if(d.asd)delete d.asd[l];
+    if(d.ho)delete d.ho[l];
+  }
+  if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
+  kpHide();persist();rerenderGrid(p);updatePills();updateRosterDot();
+  toast(on?`${l} back in this visit`:`${l}: not assessable on this film`);
 }
 const MEASLBL={static:"Static",flex:"Flexion",ext:"Extension"};
 const GLBLBL={galign:"C2–C7 static (lordosis +)",gflex:"C2–C7 flexion",gext:"C2–C7 extension",
@@ -1559,6 +1614,14 @@ function bindGrid(p){
     hoTgl.classList.toggle("on",state.requireHO!==false);
     hoTgl.textContent=state.requireHO!==false?"required ✓":"optional";
     updatePills();updateRosterDot();scheduleSave();};
+  document.querySelectorAll('#tpBody [data-lvlna]').forEach(el=>{
+    let timer=null,held=false;                   // same press-and-hold as the visit tabs
+    const start=()=>{held=false;clearTimeout(timer);
+      timer=setTimeout(()=>{held=true;toggleLvlNA(p,activeTP,el.dataset.lvlna);},550);};
+    const stop=()=>clearTimeout(timer);
+    el.addEventListener("pointerdown",start);
+    ["pointerup","pointerleave","pointercancel"].forEach(ev=>el.addEventListener(ev,stop));
+    el.oncontextmenu=e=>{e.preventDefault();stop();if(!held)toggleLvlNA(p,activeTP,el.dataset.lvlna);};});
   markNeeded(p);
   if(p.locked)lockBody();
   kpApplyMode();
@@ -1803,12 +1866,15 @@ function patientRow(p,idx){
   r.push(p.implant,adj.upper||"",adj.lower||"");
   LEVELS.forEach(l=>{const s=(p.isize&&p.isize[l])||{};r.push(s.h||"");});
   TPS.forEach(t=>{const d=p.data[t.key];const po=isPostop(t.key);
-    LEVELS.forEach(l=>{const rm=romOf(d,l);
-      r.push(d.static[l],d.flex[l],d.ext[l],rm.val);
-      if(po){const cdr=p.levels.includes(l)&&!isFused(p,l);r.push(cdr?hoVal(d,l):"");}});
+    LEVELS.forEach(l=>{const rm=romOf(d,l),lna=lvlNA(d,l);
+      if(lna)r.push("NA","NA","NA","NA");        // NA: the film couldn't show this level
+      else r.push(d.static[l],d.flex[l],d.ext[l],rm.val);
+      if(po){const cdr=p.levels.includes(l)&&!isFused(p,l);r.push(cdr?(lna?"NA":hoVal(d,l)):"");}});
     const g=gromOf(d);
     r.push(d.galign,d.t1slope,d.sva,(d.t1nv?"Y":""),d.c7slope,
-           d.gflex,d.gext,g.val,adj.upper?asdVal(d,adj.upper):"",adj.lower?asdVal(d,adj.lower):"",
+           d.gflex,d.gext,g.val,
+           adj.upper?(lvlNA(d,adj.upper)?"NA":asdVal(d,adj.upper)):"",
+           adj.lower?(lvlNA(d,adj.lower)?"NA":asdVal(d,adj.lower)):"",
            d.na?"Y":"");});
   return r;
 }
