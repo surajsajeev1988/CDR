@@ -146,7 +146,21 @@
   .pill.active{transform:translateY(-1px)}
   .pill.active::after{content:"";position:absolute;left:8px;right:8px;bottom:-6px;height:3px;
     border-radius:3px;background:currentColor;opacity:.9}
-  .legend{font-size:10.5px;color:var(--faint);margin-bottom:15px;font-family:var(--mono)}
+  .legend{font-size:10.5px;color:var(--faint);margin-bottom:15px;font-family:var(--mono);line-height:1.5}
+  /* a visit whose films were never taken: crossed out, and out of the count */
+  .pill{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+  .pill.na{color:var(--faint);border-color:var(--border2);background:var(--panel);box-shadow:none;opacity:.75}
+  .pill.na::before{content:"";position:absolute;left:7px;right:7px;top:calc(50% - 1px);height:2px;
+    border-radius:2px;background:var(--faint);transform:rotate(-13deg)}
+  .pill.na.active{opacity:1;color:var(--muted)}
+  .nabanner{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.45;
+    background:var(--panel2);border:1px solid var(--border2);border-left:3px solid var(--faint);
+    border-radius:9px;padding:10px 12px;margin-bottom:12px;color:var(--muted)}
+  .nabanner b{color:var(--text);font-weight:600}
+  .naico{flex:0 0 auto;font-size:15px;line-height:1.2;color:var(--faint)}
+  .grid-wrap.naoff{opacity:.45}
+  .progtxt.off,.progtxt.off b{color:var(--faint)}
+  .pbar.off i{background:var(--faint)}
   .legend b.bl{color:var(--cyan)} .legend b.rd{color:var(--red)}
 
   /* ---- measurement grid ---- */
@@ -608,7 +622,7 @@ let saveFailed=false;
 
 /* ---- model ---- */
 function blankTP(){
-  const o={static:{},flex:{},ext:{},romLegacy:{},galign:"",gflex:"",gext:"",gromLegacy:"",asd:{},asdLegacy:"",ho:{},t1slope:"",t1nv:false,sva:"",c7slope:""};
+  const o={static:{},flex:{},ext:{},romLegacy:{},galign:"",gflex:"",gext:"",gromLegacy:"",asd:{},asdLegacy:"",ho:{},t1slope:"",t1nv:false,sva:"",c7slope:"",na:false};
   LEVELS.forEach(l=>{o.static[l]="";o.flex[l]="";o.ext[l]="";o.romLegacy[l]="";});
   return o;
 }
@@ -649,6 +663,7 @@ function migrate(p){
     if(d.t1nv===undefined)d.t1nv=false;
     if(d.sva===undefined)d.sva="";
     if(d.c7slope===undefined)d.c7slope="";
+    if(d.na===undefined)d.na=false;                 // visit marked "films not available"
     delete d.segrom; delete d.grom;
   });
   return p;
@@ -848,16 +863,21 @@ function tpProgress(p,tk){
   }
   return{need,have};
 }
+function tpNA(p,tk){return !!(p&&p.data&&p.data[tk]&&p.data[tk].na);}
 function tpStatus(p,tk){
+  if(tpNA(p,tk))return"na";                   // nothing to chase: the films were never taken
   if(!anyEntered(p,tk))return"empty";
   if(!p.levels.length)return"part";           // not "complete" until levels are chosen
   const r=tpProgress(p,tk);
   return r.have>=r.need?"full":"part";
 }
 function patientStatus(p){
-  if(!p)return"empty";let full=0,any=false;
-  TPS.forEach(t=>{const s=tpStatus(p,t.key);if(s!=="empty")any=true;if(s==="full")full++;});
-  if(!any)return"empty";return full===TPS.length?"full":"part";
+  if(!p)return"empty";let done=0,any=false;
+  TPS.forEach(t=>{const s=tpStatus(p,t.key);
+    if(s==="na"){done++;return;}                 // an unavailable visit can't hold the patient back
+    if(s!=="empty")any=true;
+    if(s==="full")done++;});
+  if(!any)return"empty";return done===TPS.length?"full":"part";
 }
 
 /* roster status dot: red incomplete · blue complete · green locked (confirmed) */
@@ -1124,6 +1144,9 @@ const MEAS_GUIDE = `
   <b style="color:var(--cyan)">Heterotopic ossification &mdash; McAfee 0&ndash;IV (post-op)</b><br>
   0 none &middot; I outside the disc space &middot; II in the disc, motion preserved &middot; III bridging, motion present &middot; IV ankylosis, no motion. III vs IV is decided on the flexion&ndash;extension films.<br><br>
 
+  <b style="color:var(--cyan)">Visits that never happened</b><br>
+  Press and hold a visit tab (PO, 2W, 6M, 1Y, 2Y) to cross it out as <b>films not available</b> &mdash; a follow-up the patient missed, or an X-ray that was never taken. It stops counting as outstanding, so the patient can still read as complete, and the CSV carries a <b>NotAvailable</b> column so missing-by-design is never confused with not-yet-measured. Hold it again to bring the visit back.<br><br>
+
   <b style="color:var(--cyan)">Sign convention</b><br>
   Measurements are entered <b>positive</b> unless the film says otherwise; the pad's <b>+ / &minus;</b> key shows which sign the next digits will take and lights up for minus. <b>Global C2&ndash;C7 flexion</b> starts on minus, since the neutral-to-flexion arc reads negative.<br><br>
 
@@ -1146,35 +1169,39 @@ function showGuide(){
   ov.addEventListener("click",e=>{if(e.target===ov)ov.remove();});
   const c=document.getElementById("measGuideClose"); if(c)c.onclick=()=>ov.remove();
 }
+function pillClass(s){return s==="na"?"na":(s==="full"?"complete":"incomplete");}
 function measureCard(p){
-  const pills=TPS.map(t=>{const s=tpStatus(p,t.key);const full=(s==="full");
-    return `<button class="pill ${full?"complete":"incomplete"} ${t.key===activeTP?"active":""}" data-tp="${t.key}">${t.short}</button>`;}).join("");
+  const pills=TPS.map(t=>{const s=tpStatus(p,t.key);
+    return `<button class="pill ${pillClass(s)} ${t.key===activeTP?"active":""}" data-tp="${t.key}" title="${s==="na"?"Marked not available — long-press to bring it back":"Long-press if these films were never taken"}">${t.short}</button>`;}).join("");
   return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="label">Radiographic measurements</div><button class="btn" id="measGuideBtn" style="padding:3px 11px;font-size:12px;white-space:nowrap">📖 Guide</button></div>
     <div class="tps">${pills}</div>
     ${entryBar(p,activeTP)}
-    <div class="legend">Flex − &nbsp;·&nbsp; Ext + &nbsp;·&nbsp; ROM auto &nbsp;·&nbsp; type 1234 → 12.34</div>
+    <div class="legend">Flex − &nbsp;·&nbsp; Ext + &nbsp;·&nbsp; ROM auto &nbsp;·&nbsp; 1234 → 12.34<br>Hold a visit tab = films not available</div>
     <div id="tpBody">${tpBody(p,activeTP)}</div></div>`;
 }
 function TLABEL(tk){const t=TPS.find(x=>x.key===tk);return t?t.short:tk;}
 // progress for the open visit + the two entry switches (focus / number pad)
 function entryBar(p,tk){
-  const r=tpProgress(p,tk),done=!!(p.levels.length&&r.have>=r.need);
-  const pct=r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0;
+  const na=tpNA(p,tk),r=tpProgress(p,tk),done=!!(p.levels.length&&r.have>=r.need);
+  const pct=na?100:(r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0);
   return `<div class="entrybar">
     <div class="prog">
-      <div class="progtxt ${done?"done":""}" id="progTxt"><b>${r.have}</b>/${r.need} fields · ${TLABEL(tk)}${done?" ✓":""}</div>
-      <div class="pbar ${done?"done":""}" id="progBar"><i style="width:${pct}%"></i></div>
+      <div class="progtxt ${na?"off":(done?"done":"")}" id="progTxt">${na?`⊘ ${TLABEL(tk)} · not available`:`<b>${r.have}</b>/${r.need} fields · ${TLABEL(tk)}${done?" ✓":""}`}</div>
+      <div class="pbar ${na?"off":(done?"done":"")}" id="progBar"><i style="width:${pct}%"></i></div>
     </div>
     <button class="etgl ${entryFocus?"on":""}" id="focusTgl" title="Show only the operated and adjacent levels">${entryFocus?"focus ✓":"all levels"}</button>
     <button class="etgl ${kpOn?"on":""}" id="kpTgl" title="Type on the built-in number pad instead of the phone keyboard">⌨ pad ${kpOn?"on":"off"}</button>
   </div>`;
 }
 function updateProgress(p){
-  const r=tpProgress(p,activeTP),done=!!(p.levels.length&&r.have>=r.need);
+  const na=tpNA(p,activeTP),r=tpProgress(p,activeTP),done=!!(p.levels.length&&r.have>=r.need);
   const t=document.getElementById("progTxt"),b=document.getElementById("progBar");
-  if(t){t.innerHTML=`<b>${r.have}</b>/${r.need} fields · ${TLABEL(activeTP)}${done?" ✓":""}`;t.classList.toggle("done",done);}
-  if(b){b.classList.toggle("done",done);const i=b.querySelector("i");
-    if(i)i.style.width=(r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0)+"%";}
+  if(t){t.innerHTML=na?`⊘ ${TLABEL(activeTP)} · not available`
+                     :`<b>${r.have}</b>/${r.need} fields · ${TLABEL(activeTP)}${done?" ✓":""}`;
+    t.classList.toggle("done",!na&&done);t.classList.toggle("off",na);}
+  if(b){b.classList.toggle("done",!na&&done);b.classList.toggle("off",na);
+    const i=b.querySelector("i");
+    if(i)i.style.width=na?"100%":(r.need?Math.round(100*Math.min(r.have,r.need)/r.need):0)+"%";}
 }
 // focus mode: the levels actually worth showing — operated, adjacent, or already filled in
 function visibleLevels(p,tk){
@@ -1193,7 +1220,10 @@ function tpBody(p,tk){
   const grom=gromOf(d);
   const gFlag=(grom.src!=="none"&&typeof grom.val==="number")&&(grom.val<GROM_FLAG.min||grom.val>GROM_FLAG.max);
   const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
-  return `<div class="grid-wrap">
+  const tpShort=(TPS.find(t=>t.key===tk)||{}).short||tk;
+  const na=!!d.na;
+  const naBar=na?`<div class="nabanner"><span class="naico">⊘</span><span><b>${tpLbl}</b> — films not available. Long-press <b>${tpShort}</b> again to bring this visit back.</span></div>`:"";
+  return naBar+`<div class="grid-wrap ${na?"naoff":""}">
     <div class="gsec">
       <div class="gtitle"><b>Sagittal alignment</b><span class="gtp">${tpLbl}</span></div>
       ${globalSub(p,tk)}
@@ -1366,9 +1396,9 @@ function isFlag(meas,val){if(val===""||val==null)return false;
 function updatePills(){
   if(state.current<0)return;const p=state.patients[state.current];
   TPS.forEach(t=>{const el=document.querySelector(`.pill[data-tp="${t.key}"]`);if(!el)return;
-    const full=tpStatus(p,t.key)==="full";
-    el.classList.toggle("complete",full);el.classList.toggle("incomplete",!full);
-    const ic=el.querySelector(".pc");if(ic)ic.textContent=full?"✓":"•";});
+    const s=tpStatus(p,t.key),cls=pillClass(s);
+    ["complete","incomplete","na"].forEach(c=>el.classList.toggle(c,c===cls));
+    const ic=el.querySelector(".pc");if(ic)ic.textContent=s==="full"?"✓":"•";});
   updateProgress(p);
   markNeeded(p);
 }
@@ -1450,13 +1480,36 @@ function bindDemo(p){
   const del=document.getElementById("deleteBtn");if(del)del.onclick=deletePatient;
   renderLevelCount(p);
 }
+// tap switches visit; press and hold marks it "films not available"
 function bindPills(p){
-  document.querySelectorAll(".pill").forEach(t=>t.onclick=()=>{
-    activeTP=t.dataset.tp;
-    kpHide();
-    document.getElementById("tpBody").innerHTML=tpBody(p,activeTP);
-    document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("active",x.dataset.tp===activeTP));
-    bindGrid(p);updatePills();});
+  document.querySelectorAll(".pill").forEach(t=>{
+    let timer=null,held=false;
+    const start=()=>{held=false;clearTimeout(timer);
+      timer=setTimeout(()=>{held=true;toggleTpNA(p,t.dataset.tp);},550);};
+    const stop=()=>clearTimeout(timer);
+    t.addEventListener("pointerdown",start);
+    ["pointerup","pointerleave","pointercancel"].forEach(ev=>t.addEventListener(ev,stop));
+    t.oncontextmenu=e=>{e.preventDefault();stop();if(!held)toggleTpNA(p,t.dataset.tp);};
+    t.onclick=()=>{
+      if(held){held=false;return;}              // the hold already did its job
+      activeTP=t.dataset.tp;
+      kpHide();
+      document.getElementById("tpBody").innerHTML=tpBody(p,activeTP);
+      document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("active",x.dataset.tp===activeTP));
+      bindGrid(p);updatePills();};
+  });
+}
+function toggleTpNA(p,tk){
+  const d=p&&p.data&&p.data[tk]; if(!d)return;
+  if(p.locked){toast("This record is locked — unlock it first");return;}
+  const lbl=(TPS.find(t=>t.key===tk)||{}).label||tk;
+  if(!d.na&&anyEntered(p,tk)&&
+     !confirm(`Mark ${lbl} as not available?\n\nMeasurements already entered are kept, but the visit stops counting as outstanding.`))return;
+  d.na=!d.na;
+  if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
+  if(d.na)activeTP=tk;
+  persist();renderAll();
+  toast(d.na?`${lbl}: films not available`:`${lbl} back in the study`);
 }
 function bindGrid(p){
   document.querySelectorAll('#tpBody input[data-meas]').forEach(inp=>{
@@ -1731,7 +1784,8 @@ function buildHeader(){
       h.push(`Static_${t.key}_${L}`,`Flex_${t.key}_${L}`,`Ext_${t.key}_${L}`,`ROM_${t.key}_${L}`);
       if(po)h.push(`HO_${t.key}_${L}`);});                              // HO at post-op timepoints only
     h.push(`GlobalStatic_${t.key}`,`T1slope_${t.key}`,`C2C7_SVA_${t.key}`,`T1_not_visible_${t.key}`,`C7slope_${t.key}`,
-           `GlobalFlex_${t.key}`,`GlobalExt_${t.key}`,`GlobalROM_${t.key}`,`ASDupper_${t.key}`,`ASDlower_${t.key}`);
+           `GlobalFlex_${t.key}`,`GlobalExt_${t.key}`,`GlobalROM_${t.key}`,`ASDupper_${t.key}`,`ASDlower_${t.key}`,
+           `NotAvailable_${t.key}`);
   });
   return h;
 }
@@ -1748,7 +1802,8 @@ function patientRow(p,idx){
       if(po){const cdr=p.levels.includes(l)&&!isFused(p,l);r.push(cdr?hoVal(d,l):"");}});
     const g=gromOf(d);
     r.push(d.galign,d.t1slope,d.sva,(d.t1nv?"Y":""),d.c7slope,
-           d.gflex,d.gext,g.val,adj.upper?asdVal(d,adj.upper):"",adj.lower?asdVal(d,adj.lower):"");});
+           d.gflex,d.gext,g.val,adj.upper?asdVal(d,adj.upper):"",adj.lower?asdVal(d,adj.lower):"",
+           d.na?"Y":"");});
   return r;
 }
 function csvCell(v){v=(v==null?"":String(v));return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
