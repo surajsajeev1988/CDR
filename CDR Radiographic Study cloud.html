@@ -250,12 +250,18 @@
   .gsubf.disabled{opacity:.5}
   .gsubf > label{font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);
     font-weight:600;margin:0;flex:0 0 auto;min-width:82px}
-  .gsubf .fallback{color:var(--cyan);font-size:8px;border:1px solid var(--cyan-dim);border-radius:3px;padding:0 3px;margin-left:4px;letter-spacing:.04em}
+  .gsubf .fallback{color:var(--cyan);font-size:8px;border:1px solid var(--cyan-dim);border-radius:3px;padding:1px 4px;letter-spacing:.04em}
+  /* the slope row's name is a tab: tap it to swap T1 slope for the C7 fallback */
+  .slopetab{display:inline-flex;align-items:center;justify-content:space-between;gap:7px;flex:0 0 auto;
+    min-width:104px;background:var(--panel);border:1px solid var(--border2);color:var(--muted);
+    border-radius:8px;padding:8px 9px;font-size:10.5px;font-weight:700;letter-spacing:.03em;
+    text-transform:uppercase;transition:.12s}
+  .slopetab .stsw{font-size:11px;color:var(--cyan);opacity:.75}
+  .slopetab:hover{border-color:var(--cyan);color:var(--text)}
+  .slopetab:active{transform:translateY(1px)}
+  .slopetab.alt{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
   .gsubf .ufield{flex:0 0 auto;width:104px}
   .gsubf input[type=number],.gsubf input.numf{background:var(--panel);border:1px solid var(--border2);width:100%}
-  .gsubf .t1nv{display:flex;align-items:center;gap:6px;margin:0 0 0 auto;font-size:11px;color:var(--muted);
-    text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;flex:0 0 auto}
-  .gsubf .t1nv input{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer;margin:0}
   /* heterotopic ossification (McAfee) per CDR level */
   .hospacer{flex:1}
   .hotgl{font-size:9.5px;font-family:var(--mono);border:1px solid var(--border2);background:var(--panel2);
@@ -401,6 +407,7 @@
     .hobtn{min-width:42px;padding:11px 5px;font-size:14px}
     .holvl{font-size:10px;padding:9px 1px}
     .gsubf > label{min-width:62px;font-size:9.5px}
+    .slopetab{min-width:92px;padding:8px 7px;font-size:9.5px}
     .gsubf .ufield{width:92px}
     .entrybar{gap:6px}
     .etgl{padding:7px 9px;font-size:10px}
@@ -855,7 +862,7 @@ function tpProgress(p,tk){
   });
   ["galign","gflex","gext"].forEach(g=>{need++; if(d[g]!=="")have++;});
   need++; if(d.sva!=="")have++;                          // C2–C7 SVA: required every timepoint
-  if(!d.t1nv){need++; if(d.t1slope!=="")have++;}         // T1 slope: required unless 'T1 not visible'
+  need++; if((d.t1nv?d.c7slope:d.t1slope)!=="")have++;   // whichever slope the row is showing
   const adj=adjacentLevels(p);                  // ASD: each adjacent segment that exists
   [adj.upper,adj.lower].forEach(al=>{if(al){need++; if(asdVal(d,al)!=="")have++;}});
   if(state.requireHO!==false && isPostop(tk)){          // HO: each CDR level at post-op timepoints
@@ -1133,7 +1140,7 @@ const MEAS_GUIDE = `
   <span style="opacity:.85">The SRS manual standard is the <b>Harrison posterior tangent</b> method &mdash; lines of best fit along the posterior walls of C2 and C7, avoiding corner osteophytes. See the note at the bottom.</span><br><br>
 
   <b style="color:var(--cyan)">T1 slope</b><br>
-  Angle between the T1 superior-endplate line and a true horizontal line. Tick "T1 not visible" if the endplate can't be seen.<br><br>
+  Angle between the T1 superior-endplate line and a true horizontal line. If the endplate can't be seen, tap the <b>T1 slope</b> tab on that row &mdash; it becomes <b>C7 slope</b>, and that reading is then the one the visit expects.<br><br>
 
   <b style="color:var(--cyan)">C2&ndash;C7 SVA</b><br>
   Horizontal distance between a true-vertical plumb line from the centre of the C2 body and a vertical line from the postero-superior corner of C7.<br><br>
@@ -1253,8 +1260,9 @@ function globalRow(tk,grom,gFlag){
 }
 function globalSub(p,tk){
   const d=p.data[tk];
-  const nv=!!d.t1nv;
-  const t1flag=isFlag("t1slope",d.t1slope),svaflag=isFlag("sva",d.sva),c7flag=isFlag("c7slope",d.c7slope);
+  const nv=!!d.t1nv;                       // the row is showing C7 slope instead of T1
+  const key=nv?"c7slope":"t1slope", name=nv?"C7 slope":"T1 slope";
+  const slopeflag=isFlag(key,d[key]),svaflag=isFlag("sva",d.sva);
   const has=v=>(v!==""&&v!=null);
   return `<div class="gsub">
     <div class="gsubf ${svaflag?"flag":""}">
@@ -1263,19 +1271,15 @@ function globalSub(p,tk){
         <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" data-label="C2–C7 SVA" data-range="sva" data-unit=" mm" placeholder="—">
         <span class="usuf">mm</span></div>
     </div>
-    <div class="gsubf ${(!nv&&t1flag)?"flag":""} ${nv?"disabled":""}">
-      <label>T1 slope</label>
-      <div class="ufield ${(!nv&&has(d.t1slope))?"hasval":""}">
-        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.t1slope)}" data-tp="${tk}" data-g="t1slope" data-label="T1 slope" data-range="t1slope" data-unit="°" placeholder="—" ${nv?"disabled":""}>
+    <div class="gsubf ${slopeflag?"flag":""}">
+      <button class="slopetab ${nv?"alt":""}" data-slope="${tk}"
+        title="${nv?"Tap to go back to T1 slope":"Tap if T1 isn’t visible — the row becomes C7 slope"}">
+        <span class="stname">${name}</span><span class="stsw">⇄</span></button>
+      <div class="ufield ${has(d[key])?"hasval":""}">
+        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d[key])}" data-tp="${tk}" data-g="${key}" data-label="${name}" data-range="${key}" data-unit="°" placeholder="—">
         <span class="usuf">°</span></div>
-      <label class="t1nv"><input type="checkbox" data-tp="${tk}" data-gc="t1nv" ${nv?"checked":""}> T1 not visible</label>
+      ${nv?`<span class="fallback">T1 not visible</span>`:""}
     </div>
-    ${nv?`<div class="gsubf ${c7flag?"flag":""}">
-      <label>C7 slope <span class="fallback">fallback</span></label>
-      <div class="ufield ${has(d.c7slope)?"hasval":""}">
-        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.c7slope)}" data-tp="${tk}" data-g="c7slope" data-label="C7 slope" data-range="c7slope" data-unit="°" placeholder="—">
-        <span class="usuf">°</span></div>
-    </div>`:""}
   </div>`;
 }
 function hoSection(p,tk){
@@ -1418,6 +1422,7 @@ function markNeeded(p){
     const g=inp.dataset.g;
     let req=(g==="galign"||g==="gflex"||g==="gext"||g==="sva");
     if(g==="t1slope")req=!d.t1nv;
+    if(g==="c7slope")req=!!d.t1nv;
     const c=inp.closest(".cell")||inp.closest(".gsubf");
     if(c)c.classList.toggle("need",req&&d[g]==="");
   });
@@ -1531,10 +1536,11 @@ function bindGrid(p){
       updatePills();updateRosterDot();scheduleSave();};
     inp.onkeydown=e=>gridNav(e,inp);
     inp.onfocus=()=>kpFocus(inp);});
-  document.querySelectorAll('#tpBody input[data-gc="t1nv"]').forEach(cb=>{
-    cb.onchange=()=>{const tp=cb.dataset.tp;
-      p.data[tp].t1nv=cb.checked;
-      rerenderGrid(p);scheduleSave();};});       // re-render: disable T1 field, reveal C7 fallback, refresh glow
+  document.querySelectorAll('#tpBody [data-slope]').forEach(b=>{
+    b.onclick=()=>{const tp=b.dataset.slope,d=p.data[tp];
+      d.t1nv=!d.t1nv;                            // same row, the other measurement
+      kpHide();rerenderGrid(p);scheduleSave();
+      toast(d.t1nv?"C7 slope — T1 isn’t visible":"Back to T1 slope");};});
   document.querySelectorAll('#tpBody select[data-asd-level]').forEach(sel=>{
     sel.onchange=()=>{const tp=sel.dataset.tp,lvl=sel.dataset.asdLevel;
       if(!p.data[tp].asd||typeof p.data[tp].asd!=="object")p.data[tp].asd={};
