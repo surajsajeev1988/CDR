@@ -1224,6 +1224,12 @@ function globalSub(p,tk){
   const t1flag=isFlag("t1slope",d.t1slope),svaflag=isFlag("sva",d.sva),c7flag=isFlag("c7slope",d.c7slope);
   const has=v=>(v!==""&&v!=null);
   return `<div class="gsub">
+    <div class="gsubf ${svaflag?"flag":""}">
+      <label>C2–C7 SVA</label>
+      <div class="ufield ${has(d.sva)?"hasval":""}">
+        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" data-label="C2–C7 SVA" data-range="sva" data-unit=" mm" placeholder="—">
+        <span class="usuf">mm</span></div>
+    </div>
     <div class="gsubf ${(!nv&&t1flag)?"flag":""} ${nv?"disabled":""}">
       <label>T1 slope</label>
       <div class="ufield ${(!nv&&has(d.t1slope))?"hasval":""}">
@@ -1237,12 +1243,6 @@ function globalSub(p,tk){
         <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.c7slope)}" data-tp="${tk}" data-g="c7slope" data-label="C7 slope" data-range="c7slope" data-unit="°" placeholder="—">
         <span class="usuf">°</span></div>
     </div>`:""}
-    <div class="gsubf ${svaflag?"flag":""}">
-      <label>C2–C7 SVA</label>
-      <div class="ufield ${has(d.sva)?"hasval":""}">
-        <input type="text" class="numf kp" inputmode="decimal" autocomplete="off" value="${esc(d.sva)}" data-tp="${tk}" data-g="sva" data-label="C2–C7 SVA" data-range="sva" data-unit=" mm" placeholder="—">
-        <span class="usuf">mm</span></div>
-    </div>
   </div>`;
 }
 function hoSection(p,tk){
