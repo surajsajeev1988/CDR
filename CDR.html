@@ -1188,13 +1188,6 @@ function tpBody(p,tk){
   const tpLbl=(TPS.find(t=>t.key===tk)||{}).label||"";
   return `<div class="grid-wrap">
     <div class="gsec">
-      <div class="gtitle"><b>Segmental</b><span class="gtp">${tpLbl}</span></div>
-      <div class="mgrid">
-        <div class="ghead"><div>Lvl</div><div>Static °</div><div>Flex °</div><div>Ext °</div><div>ROM °</div></div>
-        ${rows}</div>
-      ${hidden?`<div class="gcap">${hidden} level${hidden>1?"s":""} hidden — tap “all levels” above to show every level.</div>`:""}
-    </div>
-    <div class="gsec">
       <div class="gtitle"><b>Global C2–C7</b><span class="gtp">${tpLbl}</span></div>
       <div class="ggrid g4">
         <div class="ghead">
@@ -1215,6 +1208,13 @@ function tpBody(p,tk){
       </div>
       ${globalSub(p,tk)}
     <div class="gcap">Static, T1 slope &amp; SVA = neutral-alignment measures · Flex / Ext dynamic · ROM = Ext − Flex (auto)</div>
+    </div>
+    <div class="gsec">
+      <div class="gtitle"><b>Segmental</b><span class="gtp">${tpLbl}</span></div>
+      <div class="mgrid">
+        <div class="ghead"><div>Lvl</div><div>Static °</div><div>Flex °</div><div>Ext °</div><div>ROM °</div></div>
+        ${rows}</div>
+      ${hidden?`<div class="gcap">${hidden} level${hidden>1?"s":""} hidden — tap “all levels” above to show every level.</div>`:""}
     </div>
     ${asdSection(p,tk)}${hoSection(p,tk)}</div>`;
 }
